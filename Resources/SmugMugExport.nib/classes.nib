@@ -1,0 +1,27 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {cancelLoginSheet = id; cancelUpload = id; donate = id; login = id; }; 
+            CLASS = SmugMugExport; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                acccountPopupButton = NSPopUpButton; 
+                firstView = id; 
+                lastView = id; 
+                loginPanel = NSPanel; 
+                settingsBox = NSBox; 
+                uploadPanel = NSPanel; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {CLASS = SmugMugExportBox; LANGUAGE = ObjC; SUPERCLASS = NSBox; }, 
+        {
+            CLASS = SmugmugExport; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {firstView = id; lastView = id; settingsBox = NSBox; }; 
+            SUPERCLASS = NSObject; 
+        }
+    ); 
+    IBVersion = 1; 
+}
