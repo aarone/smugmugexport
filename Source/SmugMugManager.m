@@ -17,24 +17,6 @@ kCFStreamEventHasBytesAvailable |
 kCFStreamEventEndEncountered    |
 kCFStreamEventErrorOccurred;
 
-static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType type, void *clientCallBackInfo)
-{
-	switch (type)
-	{
-		case kCFStreamEventHasBytesAvailable:
-			[(SmugMugManager *)clientCallBackInfo appendToResponse];
-			break;			
-		case kCFStreamEventEndEncountered:
-			[(SmugMugManager *)clientCallBackInfo transferComplete];
-			break;
-		case kCFStreamEventErrorOccurred:
-			[(SmugMugManager *)clientCallBackInfo errorOccurred];
-			break;
-		default:
-			break;
-	}
-}
-
 @interface SmugMugManager (Private)
 -(void)loadFramework;
 -(CURLHandle *)curlHandle;
@@ -58,7 +40,32 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 -(NSString *)contentTypeForPath:(NSString *)path;
 -(NSLock *)uploadLock;
 -(void)setUploadLock:(NSLock *)aLock;
+-(NSData *)postBodyForImageAtPath:(NSString *)path albumId:(NSString *)albumId caption:(NSString *)caption boundary:(NSString *)boundary;
+-(void)appendToResponse;
+-(void)transferComplete;
+-(void)errorOccurred;
+-(NSString *)postUploadURL;
 @end
+
+static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType type, void *clientCallBackInfo)
+{
+	switch (type)
+	{
+		case kCFStreamEventHasBytesAvailable:
+			[(SmugMugManager *)clientCallBackInfo appendToResponse];
+			break;			
+		case kCFStreamEventEndEncountered:
+			[(SmugMugManager *)clientCallBackInfo transferComplete];
+			break;
+		case kCFStreamEventErrorOccurred:
+			[(SmugMugManager *)clientCallBackInfo errorOccurred];
+			break;
+		default:
+			break;
+	}
+}
+
+
 
 @implementation SmugMugManager
 
@@ -182,17 +189,17 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 /**
  *
  */
--(void)uploadImageAtPath:(NSString *)path albumWithID:(NSString *)albumId caption:(NSString *)caption
+-(void)uploadImageAtPath:(NSString *)path albumWithID:(NSNumber *)albumId caption:(NSString *)caption
 {
 	[[self uploadLock] lock];
 
 	NSString *boundary = @"_aBoundAry_$";
 
-	NSData *postData = [self postBodyForImageAtPath:path albumId:albumId caption:caption boundary:boundary];
+	NSData *postData = [self postBodyForImageAtPath:path albumId:[albumId stringValue] caption:caption boundary:boundary];
 
 	CFHTTPMessageRef myRequest;
 	myRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, CFSTR("POST"), (CFURLRef)[NSURL URLWithString:[self postUploadURL]], kCFHTTPVersion1_1);
-	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-Type"), [NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary]);
+	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-Type"), (CFStringRef)[NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary]);
 	CFHTTPMessageSetBody(myRequest, (CFDataRef)postData);
 
 	readStream = CFReadStreamCreateForHTTPRequest(kCFAllocatorDefault, myRequest);
@@ -215,9 +222,10 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	CFReadStreamOpen(readStream);
 
 	nextProgressThreshold = 512;
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	uploadProgressTimer = [[NSTimer alloc] initWithFireDate:nil interval:1 target:self selector:@selector(trackUploadProgress:) userInfo:nil repeats:YES];
 
-	[[NSRunLoop currentRunLoop] addTimer:uploadProgressTimer forMode:NSDefaultRunLoopMode];
+//	[[NSRunLoop currentRunLoop] addTimer:uploadProgressTimer forMode:NSDefaultRunLoopMode];
 
 	BOOL isRunning;
 	do {
@@ -225,6 +233,8 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 		isRunning = [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
 											 beforeDate:next];
 	} while(isRunning && isUploading);
+	[uploadProgressTimer invalidate];
+	[pool release];
 }
 
 -(void)appendToResponse
@@ -251,6 +261,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 -(void)transferComplete
 {
 	[[self uploadLock] unlock];
+	[self destroyUploadResources];
 	isUploading = NO;
 
 	if([self delegate] != nil &&
@@ -258,7 +269,6 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 		[[self delegate] uploadDidCompleteForFile:currentPathForUpload withError:NSLocalizedString(@"Upload Failed", @"Message to display when a file cannot be properly uploaded")];
 	}
 
-	[self destroyUploadResources];
 }
 
 -(void)errorOccurred
@@ -285,7 +295,6 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(uploadMadeProgressForFile:bytesWritten:totalBytes:)])
 		[[self delegate] uploadMadeProgressForFile:currentPathForUpload bytesWritten:(long)bytesWritten totalBytes:uploadSize];
-	
 }
 
 -(NSData *)postBodyForImageAtPath:(NSString *)path albumId:(NSString *)albumId caption:(NSString *)caption boundary:(NSString *)boundary

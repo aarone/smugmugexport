@@ -17,6 +17,7 @@
 	IBOutlet NSPanel *uploadPanel;
 	IBOutlet NSPanel *loginPanel;
 	IBOutlet NSPopUpButton *acccountPopupButton;
+	IBOutlet NSArrayController *albumsArrayController;
 
 	NSString *username;  // this is the username bound to the textfield
 	NSString *password; // the password bound to the textfield

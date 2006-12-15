@@ -2,11 +2,18 @@
     IBClasses = (
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {
-            ACTIONS = {cancelLoginSheet = id; cancelUpload = id; donate = id; login = id; }; 
+            ACTIONS = {
+                cancelLoginSheet = id; 
+                cancelUpload = id; 
+                donate = id; 
+                login = id; 
+                showLoginPanel = id; 
+            }; 
             CLASS = SmugMugExport; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 acccountPopupButton = NSPopUpButton; 
+                albumsArrayController = NSArrayController; 
                 firstView = id; 
                 lastView = id; 
                 loginPanel = NSPanel; 

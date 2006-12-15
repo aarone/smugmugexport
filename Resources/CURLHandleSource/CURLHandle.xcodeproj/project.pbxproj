@@ -208,25 +208,21 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		937C481D0AD921A600A104BB /* Development */ = {
+		937C481D0AD921A600A104BB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				SDKROOT = /Developer/SDKs/MacOSX10.3.9.sdk;
 			};
-			name = Development;
+			name = Debug;
 		};
-		937C481E0AD921A600A104BB /* Deployment */ = {
+		937C481E0AD921A600A104BB /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				SDKROOT = /Developer/SDKs/MacOSX10.3.9.sdk;
 			};
-			name = Deployment;
+			name = Release;
 		};
-		937C481F0AD921A600A104BB /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-			};
-			name = Default;
-		};
-		937C48340AD9220F00A104BB /* Development */ = {
+		937C48340AD9220F00A104BB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
@@ -245,7 +241,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
-					/tmp/curl/libcurl.a,
+					/sw/lib/libcurl.a,
 					"-seg1addr",
 					0x3c000000,
 				);
@@ -261,9 +257,9 @@
 				WRAPPER_EXTENSION = framework;
 				ZERO_LINK = YES;
 			};
-			name = Development;
+			name = Debug;
 		};
-		937C48350AD9220F00A104BB /* Deployment */ = {
+		937C48350AD9220F00A104BB /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -279,7 +275,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
-					/tmp/curl/libcurl.a,
+					/sw/lib/libcurl.a,
 					"-seg1addr",
 					0x3c000000,
 				);
@@ -295,38 +291,7 @@
 				WRAPPER_EXTENSION = framework;
 				ZERO_LINK = NO;
 			};
-			name = Deployment;
-		};
-		937C48360AD9220F00A104BB /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_SEARCH_PATHS = "";
-				FRAMEWORK_VERSION = A;
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = "";
-				INFOPLIST_FILE = "Info-CURLHandle.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				LIBRARY_SEARCH_PATHS = "";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					/tmp/curl/libcurl.a,
-					"-seg1addr",
-					0x3c000000,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = CURLHandle;
-				SECTORDER_FLAGS = "";
-				SKIP_INSTALL = YES;
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-				WRAPPER_EXTENSION = framework;
-			};
-			name = Default;
+			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
@@ -334,22 +299,20 @@
 		937C481C0AD921A600A104BB /* Build configuration list for PBXProject "CURLHandle" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				937C481D0AD921A600A104BB /* Development */,
-				937C481E0AD921A600A104BB /* Deployment */,
-				937C481F0AD921A600A104BB /* Default */,
+				937C481D0AD921A600A104BB /* Debug */,
+				937C481E0AD921A600A104BB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		937C48330AD9220F00A104BB /* Build configuration list for PBXNativeTarget "CURLHandle" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				937C48340AD9220F00A104BB /* Development */,
-				937C48350AD9220F00A104BB /* Deployment */,
-				937C48360AD9220F00A104BB /* Default */,
+				937C48340AD9220F00A104BB /* Debug */,
+				937C48350AD9220F00A104BB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};

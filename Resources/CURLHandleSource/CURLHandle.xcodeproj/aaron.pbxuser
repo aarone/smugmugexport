@@ -1,7 +1,7 @@
 // !$*UTF8*$!
 {
 	0867D690FE84028FC02AAC07 /* Project object */ = {
-		activeBuildConfigurationName = Development;
+		activeBuildConfigurationName = Debug;
 		activeTarget = 937C48240AD9220F00A104BB /* CURLHandle */;
 		addToTargets = (
 			937C48240AD9220F00A104BB /* CURLHandle */,
@@ -93,7 +93,7 @@
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
 					200,
-					10,
+					37,
 					20,
 					48,
 					43,
@@ -109,8 +109,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 182726473;
-			PBXWorkspaceStateSaveDate = 182726473;
+			PBXPerProjectTemplateStateSaveDate = 187667290;
+			PBXWorkspaceStateSaveDate = 187667290;
 		};
 		sourceControlManager = 9394B85F0AD932AF0066CD67 /* Source Control */;
 		userBuildSettings = {
@@ -119,13 +119,21 @@
 	937C48240AD9220F00A104BB /* CURLHandle */ = {
 		activeExec = 0;
 	};
+	937C48370AD9220F00A104BB /* Info-CURLHandle.plist */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {974, 823}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRect = "{{0, 0}, {974, 823}}";
+			sepNavWindowFrame = "{{15, 86}, {1013, 937}}";
+		};
+	};
 	9394B85F0AD932AF0066CD67 /* Source Control */ = {
 		isa = PBXSourceControlManager;
 		fallbackIsa = XCSourceControlManager;
-		isSCMEnabled = 0;
+		isSCMEnabled = 1;
 		scmConfiguration = {
 		};
-		scmType = "";
+		scmType = scm.subversion;
 	};
 	9394B8600AD932AF0066CD67 /* Code sense */ = {
 		isa = PBXCodeSenseManager;

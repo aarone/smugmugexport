@@ -50,6 +50,7 @@
 -(void)setLoginStatusMessage:(NSString *)m;
 -(void)setSelectedAccount:(NSString *)account;
 -(NSString *)selectedAccount;
+-(NSDictionary *)selectedAlbum;
 @end
 
 // UI keys
@@ -194,8 +195,12 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 									animate:YES];
 }
 
--(IBAction)donate:(id)sender
-{
+-(NSDictionary *)selectedAlbum {
+	if([[albumsArrayController selectedObjects] count] > 0)
+		return [[albumsArrayController selectedObjects] objectAtIndex:0];
+}
+
+-(IBAction)donate:(id)sender {
 	NSLog(@"donate");
 }
 
@@ -224,6 +229,9 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 /** called from the login sheet.  takes username/password values from the textfields */
 -(IBAction)login:(id)sender
 {
+	if([[self isLoggedIn] boolValue])
+		return;
+
 	[self setLoginStatusMessage:@""];
 	[self setIsLoggingIn:[NSNumber numberWithBool:YES]];
 	[[self smugMugManager] setUsername:[self username]];
@@ -242,17 +250,11 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 	}
 
 	// attempt to login, if successful add to keychain
-	[self setIsLoggedIn:YES];
 	[[self accountManager] addAccount:[[self smugMugManager] username] withPassword:[[self smugMugManager] password]];
 	[self setSelectedAccount:[[self smugMugManager] username]];
 	[NSApp endSheet:loginPanel];
-	[self performPostLoginTasks];
-}
-
--(void)performPostLoginTasks
-{
-	// load the list of known albums
 	[[self smugMugManager] buildAlbumList];
+	[self setIsLoggedIn:YES];
 }
 
 -(void)loginDidEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo
@@ -278,9 +280,11 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 		modalDelegate:self
 	   didEndSelector:@selector(didEndSheet:returnCode:contextInfo:)
 		  contextInfo:nil];
+	
+	NSNumber *selectedAlbumId = [[self selectedAlbum] objectForKey:@"AlbumID"];
 
 	[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
-								 albumWithID:[NSString stringWithFormat:@"%d", 1976807]
+								 albumWithID:selectedAlbumId
 									 caption:@"test"];	
 }
 
@@ -294,13 +298,14 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 {
 	[self setImagesUploaded:[self imagesUploaded] + 1];
 	[self setSessionUploadProgress:[NSNumber numberWithFloat:100.0*((float)[self imagesUploaded])/((float)[[self exportManager] imageCount])]];
-
+	
+	NSNumber *selectedAlbumId = [[self selectedAlbum] objectForKey:@"AlbumID"];
 	if([self imagesUploaded] >= [[self exportManager] imageCount]) {
 		[NSApp endSheet:uploadPanel];
 	} else {
 		[self setSessionUploadStatusText:[NSString stringWithFormat:@"Uploading image %d of %d", [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
 		[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
-									 albumWithID:[NSString stringWithFormat:@"%d", 1976807]
+									 albumWithID:selectedAlbumId
 										 caption:@"test"];
 	}
 }
@@ -550,9 +555,7 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 
 -(void)startExport:(id)fp8
 {
-	[[self smugMugManager] login];
-
-	return;
+	[self startUpload];
 }
 
 -(BOOL)validateUserCreatedPath:(id)fp8
