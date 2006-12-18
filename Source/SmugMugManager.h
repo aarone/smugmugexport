@@ -12,7 +12,6 @@
 @protocol SmugMugManagerDelegate
 -(void)loginDidComplete:(BOOL)wasSuccessful;
 -(void)logoutDidComplete:(BOOL)wasSuccessful;
--(void)albumListLoadDidComplete;
 -(void)uploadDidCompleteForFile:(NSString *)aFullPathToImage withError:(NSString *)error;
 -(void)uploadMadeProgressForFile:(NSString *)pathToFile bytesWritten:(long)bytesWritten totalBytes:(long)totalBytes;
 @end
@@ -34,6 +33,8 @@
 	NSTimer *uploadProgressTimer;
 	long uploadSize;
 	BOOL isUploading;
+	BOOL isLoggingIn;
+	BOOL isLoggedIn;
 	long nextProgressThreshold;
 	NSLock *uploadLock;
 }
@@ -46,13 +47,16 @@
 
 -(void)login;
 -(void)logout;
--(void)buildAlbumList;
+
+-(BOOL)isLoggingIn;
+-(BOOL)isLoggedIn;
 
 -(NSString *)username;
 -(void)setUsername:(NSString *)n;
 -(NSString *)password;
 -(void)setPassword:(NSString *)p;
 
+-(void)uploadImageAtPath:(NSString *)path albumWithID:(NSNumber *)albumId caption:(NSString *)caption;
 
 -(NSArray *)albums;
 

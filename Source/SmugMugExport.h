@@ -22,14 +22,15 @@
 	NSString *username;  // this is the username bound to the textfield
 	NSString *password; // the password bound to the textfield
 	NSString *sessionUploadStatusText;
+	NSString *statusText;
 	NSNumber *fileUploadProgress;
 	NSNumber *sessionUploadProgress;
-	NSNumber *isLoggingIn;
-	NSString *loginStatusMessage;	
-	NSImage *currentImageThumbnail;
-	BOOL isLoggedIn;
+	NSString *loginSheetStatusMessage;
+	BOOL loginSheetIsBusy;
 	BOOL isFocused;
+	BOOL isBusy;
 	BOOL loginAttempted;
+	NSData *currentThumbnailData;
 
 	int imagesUploaded;
 	ExportMgr *exportManager;
@@ -38,9 +39,9 @@
 }
 
 -(IBAction)cancelUpload:(id)sender;
--(IBAction)login:(id)sender;
 -(IBAction)cancelLoginSheet:(id)sender;
 -(IBAction)donate:(id)sender;
 -(IBAction)showLoginPanel:(id)sender;
+-(IBAction)performLoginFromSheet:(id)sender;
 
 @end

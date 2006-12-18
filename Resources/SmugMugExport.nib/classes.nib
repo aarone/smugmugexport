@@ -6,7 +6,7 @@
                 cancelLoginSheet = id; 
                 cancelUpload = id; 
                 donate = id; 
-                login = id; 
+                performLoginFromSheet = id; 
                 showLoginPanel = id; 
             }; 
             CLASS = SmugMugExport; 

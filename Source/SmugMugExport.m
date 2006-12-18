@@ -29,28 +29,32 @@
 -(void)setFileUploadProgress:(NSNumber *)v;
 -(NSNumber *)sessionUploadProgress;
 -(void)setSessionUploadProgress:(NSNumber *)v;
--(NSImage *)currentImageThumbnail;
--(void)setCurrentImageThumbnail:(NSImage *)i;
 -(int)imagesUploaded;
 -(void)setImagesUploaded:(int)v;
 -(void)resizeWindow;
 -(AccountManager *)accountManager;
 -(void)setAccountManager:(AccountManager *)mgr;
--(BOOL)isLoggedIn;
--(void)setIsLoggedIn:(BOOL)v;
 -(void)registerDefaults;
 -(BOOL)isFocused;
 -(void)setIsFocused:(BOOL)v;
 -(BOOL)loginAttempted;
 -(void)setLoginAttempted:(BOOL)v;
 -(void)performPostLoginTasks;
--(NSNumber *)isLoggingIn;
--(void)setIsLoggingIn:(NSNumber *)v;
--(NSString *)loginStatusMessage;
--(void)setLoginStatusMessage:(NSString *)m;
+-(NSString *)loginSheetStatusMessage;
+-(void)setLoginSheetStatusMessage:(NSString *)m;
 -(void)setSelectedAccount:(NSString *)account;
 -(NSString *)selectedAccount;
 -(NSDictionary *)selectedAlbum;
+-(NSString *)statusText;
+-(void)setStatusText:(NSString *)t;
+-(BOOL)isBusy;
+-(void)setIsBusy:(BOOL)v;
+-(void)login;
+-(NSData *)currentThumbnailData;
+-(void)setCurrentThumbnailData:(NSData *)d;
+-(BOOL)loginSheetIsBusy;
+-(void)setLoginSheetIsBusy:(BOOL)v;
+
 @end
 
 // UI keys
@@ -72,14 +76,12 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 	
 	exportManager = exportMgr;	
 	[self registerDefaults];
-
 	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
 
 	[self setAccountManager:[AccountManager accountManager]];
 	[self setSmugMugManager:[SmugMugManager smugmugManager]];
 	[[self smugMugManager] setDelegate:self];
 
-	[self setIsLoggedIn:NO];
 	[self setIsFocused:NO];
 	[self setLoginAttempted:NO];
 	[self setImagesUploaded:0];
@@ -98,22 +100,20 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 	[[self sessionUploadStatusText] release];
 	[[self fileUploadProgress] release];
 	[[self sessionUploadProgress] release];
-	[[self currentImageThumbnail] release];
 	[[self accountManager] release];
-	[[self isLoggingIn] release];
-	[[self loginStatusMessage] release];
+	[[self loginSheetStatusMessage] release];
+	[[self statusText] release];
+	[[self currentThumbnailData] release];
 
 	[super dealloc];
 }
 
-+(void)initialize
-{
++(void)initialize {
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.accounts"] triggerChangeNotificationsForDependentKey:@"accounts"];
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.selectedAccount"] triggerChangeNotificationsForDependentKey:@"selectedAccount"];
 }
 
--(void)registerDefaults
-{
+-(void)registerDefaults { 
 	NSMutableDictionary *defaultsDict = [NSMutableDictionary dictionary];
 	[defaultsDict setObject:ExistingAlbumTabIdentifier forKey:SMESelectedTabIdDefaultsKey];
 	[defaultsDict setObject:[NSArray array] forKey:SMEAccountsDefaultsKey];
@@ -121,8 +121,7 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 	[[NSUserDefaults standardUserDefaults] registerDefaults:defaultsDict];
 }
 
--(void)awakeFromNib
-{
+-(void)awakeFromNib {
 	[[NSUserDefaults standardUserDefaults] addObserver:self
 											forKeyPath:SMESelectedTabIdDefaultsKey
 											   options:0
@@ -131,39 +130,55 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidBecomeKey:) name:NSWindowDidBecomeKeyNotification object:[[self exportManager] window]];
 }
 
--(void)windowDidBecomeKey:(NSNotification *)not
-{
+
+/* try to automatically show the login sheet */
+-(void)attemptLoginIfNecessary {
+
+	if([loginPanel isVisible]) // don't try to show the login sheet if it's already showing
+		return;
+
+	if(![self isFocused]) // don't show if we're not focused
+		return;
+
+	/* don't try to login if we're already logged in or attempting to login */
+	if([[self smugMugManager] isLoggedIn] ||
+	   [[self smugMugManager] isLoggingIn])
+		return;
+
 	/*
-	 * Show the login window if we're not logged in, we haven't tried to log in, the window is focused,
+	 * Show the login window if we're not logged in, we haven't tried to log in,
 	 * and there is no existing account to automatically choose.
 	 */
-	if([[not object] isEqualTo:[[self exportManager] window]] && 
-	   ![self isLoggedIn] && 
-	   [self isFocused] &&
+	if(![[self smugMugManager] isLoggedIn] && 
 	   ![self loginAttempted] &&
-	   [[[self accountManager] accounts] count] == 0)
+	   [[[self accountManager] accounts] count] == 0) {
+
 		[self showLoginPanel:self];
+		return;
+	}
 
 	/**
-	 *  If we have a saved password for the previously selected account, log in to that account.
+	*  If we have a saved password for the previously selected account, log in to that account.
 	 */
-	if([[not object] isEqualTo:[[self exportManager] window]] && 
-	   ![self isLoggedIn] && 
-	   [self isFocused] &&
+	if(![[self smugMugManager] isLoggedIn] && 
 	   [[[self accountManager] accounts] count] > 0 &&
 	   [[self accountManager] selectedAccount] != nil &&
 	   ![self loginAttempted] &&
 	   [[self accountManager] passwordExistsInKeychainForAccount:[[self accountManager] selectedAccount]]) {
+		
 		[self setLoginAttempted:YES];
+		[self setIsBusy:YES];
+		[self setStatusText:@"Logging in..."];
 		[[self smugMugManager] setUsername:[[self accountManager] selectedAccount]];
 		[[self smugMugManager] setPassword:[[self accountManager] passwordForAccount:[[self accountManager] selectedAccount]]];
 		[[self smugMugManager] login]; // gets asyncronous callback
-	}
+	}	
+}
 
-		
-	
-	
-	//	[self resizeWindow];
+-(void)windowDidBecomeKey:(NSNotification *)not {
+
+	if([[not object] isEqualTo:[[self exportManager] window]])
+		[self attemptLoginIfNecessary];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -171,41 +186,22 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 //	[self resizeWindow];
 }
 
--(void)resizeWindow
-{
-	return;
-	float x = [[[self exportManager] window] frame].origin.x;
-    float y = [[[self exportManager] window] frame].origin.y;
-    float height = [[[self exportManager] window] frame].size.height;
-	float targetWidth = 543;
-	float targetHeight = 350;
-	float yDiff = 0.0;
-	NSString *selectedTabId = [[NSUserDefaults standardUserDefaults] objectForKey:SMESelectedTabIdDefaultsKey];
-
-	if([selectedTabId isEqualToString:ExistingAlbumTabIdentifier]) {
-        yDiff = height - targetHeight;
-		targetWidth = 400;
-	} else if([selectedTabId isEqualToString:NewAlbumTabIdentifier]) {
-		targetHeight = 500.0;
-        yDiff = height - targetHeight;
-	}
-
-	[[[self exportManager] window] setFrame:NSMakeRect(x,y+yDiff,targetWidth,targetHeight)
-									display:YES
-									animate:YES];
-}
-
 -(NSDictionary *)selectedAlbum {
 	if([[albumsArrayController selectedObjects] count] > 0)
 		return [[albumsArrayController selectedObjects] objectAtIndex:0];
+	
+	return nil;
+}
+
+-(IBAction)cancelUpload:(id)sender {
+	[self cancelExport];
 }
 
 -(IBAction)donate:(id)sender {
 	NSLog(@"donate");
 }
 
--(IBAction)showLoginPanel:(id)sender
-{
+-(IBAction)showLoginPanel:(id)sender {
 	[NSApp beginSheet:loginPanel
 	   modalForWindow:[[self exportManager] window]
 		modalDelegate:self
@@ -216,36 +212,33 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 	[self setLoginAttempted:YES];
 }
 
--(IBAction)cancelLoginSheet:(id)sender
-{
+-(IBAction)cancelLoginSheet:(id)sender {
 	if([[[self accountManager] accounts] count] > 0)
 		[self setSelectedAccount:[[[self accountManager] accounts] objectAtIndex:0]];
-	else
-		[self setSelectedAccount:nil];
 
+	[self setLoginSheetStatusMessage:@""];
+	[self setLoginSheetIsBusy:NO];
 	[NSApp endSheet:loginPanel];
 }
 
 /** called from the login sheet.  takes username/password values from the textfields */
--(IBAction)login:(id)sender
-{
-	if([[self isLoggedIn] boolValue])
-		return;
-
-	[self setLoginStatusMessage:@""];
-	[self setIsLoggingIn:[NSNumber numberWithBool:YES]];
+-(IBAction)performLoginFromSheet:(id)sender {
+	[self setLoginSheetStatusMessage:@"Logging In..."];
+	[self setLoginSheetIsBusy:YES];
 	[[self smugMugManager] setUsername:[self username]];
 	[[self smugMugManager] setPassword:[self password]];
 	[[self smugMugManager] login]; // gets asyncronous callback
 }
 
 #pragma mark Delegate Methods
--(void)loginDidComplete:(BOOL)wasSuccessful
-{
-	[self setIsLoggingIn:[NSNumber numberWithBool:NO]];
-	
+-(void)loginDidComplete:(BOOL)wasSuccessful {
+	[self setIsBusy:NO];
+	[self setStatusText:@""];
+	[self setLoginSheetIsBusy:NO];
+	[self setLoginSheetStatusMessage:@""];
+
 	if(!wasSuccessful) {
-		[self setLoginStatusMessage:@"Login Failed"];
+		[self setLoginSheetStatusMessage:@"Login Failed"];
 		return;
 	}
 
@@ -253,23 +246,17 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 	[[self accountManager] addAccount:[[self smugMugManager] username] withPassword:[[self smugMugManager] password]];
 	[self setSelectedAccount:[[self smugMugManager] username]];
 	[NSApp endSheet:loginPanel];
-	[[self smugMugManager] buildAlbumList];
-	[self setIsLoggedIn:YES];
 }
 
--(void)loginDidEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo
-{
-	
+-(void)loginDidEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     [sheet orderOut:self];
 }
 
--(void)logoutDidComplete:(BOOL)wasSuccessful
-{
+-(void)logoutDidComplete:(BOOL)wasSuccessful {
 	NSLog(@"logout complete");
 }
 
--(void)startUpload
-{
+-(void)startUpload {
 	[self setImagesUploaded:0];
 	[self setFileUploadProgress:[NSNumber numberWithInt:0]];
 	[self setSessionUploadProgress:[NSNumber numberWithInt:0]];
@@ -282,52 +269,53 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 		  contextInfo:nil];
 	
 	NSNumber *selectedAlbumId = [[self selectedAlbum] objectForKey:@"AlbumID"];
-
+	NSString *thumbnailPath = [exportManager thumbnailPathAtIndex:[self imagesUploaded]];		
+	[self setCurrentThumbnailData:[NSData dataWithContentsOfFile: thumbnailPath]];
 	[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
 								 albumWithID:selectedAlbumId
 									 caption:@"test"];	
 }
 
--(void)albumListLoadDidComplete
-{
-//	[self startUpload];
-//	[[self smugMugManager] logout];
+-(void)performUploadCompletionTasks {
+	[NSApp endSheet:uploadPanel];
+	[[self exportManager] cancelExportBeforeBeginning];
 }
 
--(void)uploadDidCompleteForFile:(NSString *)aFullPathToImage withError:(NSString *)error
-{
+-(void)uploadDidCompleteForFile:(NSString *)aFullPathToImage withError:(NSString *)error {
 	[self setImagesUploaded:[self imagesUploaded] + 1];
 	[self setSessionUploadProgress:[NSNumber numberWithFloat:100.0*((float)[self imagesUploaded])/((float)[[self exportManager] imageCount])]];
 	
 	NSNumber *selectedAlbumId = [[self selectedAlbum] objectForKey:@"AlbumID"];
 	if([self imagesUploaded] >= [[self exportManager] imageCount]) {
-		[NSApp endSheet:uploadPanel];
+		[self performUploadCompletionTasks];
 	} else {
 		[self setSessionUploadStatusText:[NSString stringWithFormat:@"Uploading image %d of %d", [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
+		NSString *thumbnailPath = [exportManager thumbnailPathAtIndex:[self imagesUploaded]];		
+		[self setCurrentThumbnailData:[NSData dataWithContentsOfFile: thumbnailPath]];
 		[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
 									 albumWithID:selectedAlbumId
 										 caption:@"test"];
 	}
 }
 
--(void)didEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo
-{
+-(void)didEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     [sheet orderOut:self];
 }
 
--(void)uploadMadeProgressForFile:(NSString *)pathToFile bytesWritten:(long)bytesWritten totalBytes:(long)totalBytes
-{
-	float progress = 100.0*(float)bytesWritten/(float)totalBytes;
-	[self setFileUploadProgress:[NSNumber numberWithFloat:progress]];
+-(void)uploadMadeProgressForFile:(NSString *)pathToFile bytesWritten:(long)bytesWritten totalBytes:(long)totalBytes {
+	float progressForFile = MIN(100.0, ceil(100.0*(float)bytesWritten/(float)totalBytes));
+	[self setFileUploadProgress:[NSNumber numberWithFloat:progressForFile]];
+
+	float baselinePercentageCompletion = 100.0*((float)[self imagesUploaded])/((float)[[self exportManager] imageCount]);
+	float estimatedFileContribution = (100.0/((float)[[self exportManager] imageCount]))*((float)bytesWritten)/((float)totalBytes);
+	[self setSessionUploadProgress:[NSNumber numberWithFloat:MIN(100.0, ceil(baselinePercentageCompletion+estimatedFileContribution))]];
 }
 
--(NSArray *)accounts
-{
+-(NSArray *)accounts {
 	return [[accountManager accounts] arrayByAddingObject:NewAccountLabel];
 }
 
--(void)setSelectedAccount:(NSString *)account
-{
+-(void)setSelectedAccount:(NSString *)account {
 	if([account isEqualToString:NewAccountLabel]) {
 		[self showLoginPanel:self];
 		return;
@@ -338,18 +326,42 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 	[[self accountManager] setSelectedAccount:account];
 }
 
--(NSString *)selectedAccount
-{
+-(NSString *)selectedAccount {
 	return [[self accountManager] selectedAccount];
 }
 
--(BOOL)isFocused
-{
+-(BOOL)loginSheetIsBusy {
+	return loginSheetIsBusy;
+}
+
+-(void)setLoginSheetIsBusy:(BOOL)v {
+	loginSheetIsBusy = v;
+}
+
+-(NSData *)currentThumbnailData {
+	return currentThumbnailData;
+}
+
+-(void)setCurrentThumbnailData:(NSData *)d {
+	if([self currentThumbnailData] != nil)
+		[[self currentThumbnailData] release];
+	
+	currentThumbnailData = [d retain];
+}
+
+-(BOOL)isBusy {
+	return isBusy;
+}
+
+-(void)setIsBusy:(BOOL)v {
+	isBusy = v;
+}
+
+-(BOOL)isFocused {
 	return isFocused;
 }
 
--(void)setIsFocused:(BOOL)v
-{
+-(void)setIsFocused:(BOOL)v {
 	isFocused = v;
 }
 
@@ -361,16 +373,6 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 -(void)setLoginAttempted:(BOOL)v
 {
 	loginAttempted = v;
-}
-
--(BOOL)isLoggedIn
-{
-	return isLoggedIn;
-}
-
--(void)setIsLoggedIn:(BOOL)v
-{
-	isLoggedIn = v;
 }
 
 -(AccountManager *)accountManager
@@ -386,243 +388,206 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 	accountManager = [mgr retain];
 }
 
--(ExportMgr *)exportManager
-{
+-(ExportMgr *)exportManager {
 	return exportManager;
 }
 
--(int)imagesUploaded
-{
+-(int)imagesUploaded {
 	return imagesUploaded;
 }
 
--(void)setImagesUploaded:(int)v
-{
+-(void)setImagesUploaded:(int)v {
 	imagesUploaded = v;
 }
 
--(NSNumber *)isLoggingIn
-{
-	return isLoggingIn;
+-(NSString *)loginSheetStatusMessage {
+	return loginSheetStatusMessage;
 }
 
--(void)setIsLoggingIn:(NSNumber *)v
-{
-	if([self isLoggingIn] != nil)
-		[[self isLoggingIn] release];
+-(void)setLoginSheetStatusMessage:(NSString *)m {
+	if([self loginSheetStatusMessage] != nil)
+		[[self loginSheetStatusMessage] release];
 	
-	isLoggingIn = [v retain];
+	loginSheetStatusMessage = [m retain];
 }
 
--(NSString *)loginStatusMessage
-{
-	return loginStatusMessage;
-}
-
--(void)setLoginStatusMessage:(NSString *)m
-{
-	if([self loginStatusMessage] != nil)
-		[[self loginStatusMessage] release];
-	
-	loginStatusMessage = [m retain];
-}
-
--(SmugMugManager *)smugMugManager
-{
+-(SmugMugManager *)smugMugManager {
 	return smugMugManager;
 }
 
--(void)setSmugMugManager:(SmugMugManager *)m
-{
+-(void)setSmugMugManager:(SmugMugManager *)m {
 	if([self smugMugManager] != nil)
 		[[self smugMugManager] release];
 	
 	smugMugManager = [m retain];
 }
 
--(id)description
-{
+-(id)description {
     return NSLocalizedString(@"SmugMugExport", @"Name of the Plugin");
 }
 
--(id)name 
-{
+-(id)name {
     return NSLocalizedString(@"SmugMugExport", @"Name of the Project");
 }
 
--(NSString *)username
-{
+-(NSString *)username {
 	return username;
 }
 
--(void)setUsername:(NSString *)n
-{
+-(void)setUsername:(NSString *)n {
 	if([self username] != nil)
 		[[self username] release];
 	
 	username = [n retain];
 }
 
--(NSString *)password
-{
+-(NSString *)statusText {
+	return statusText;
+}
+
+-(void)setStatusText:(NSString *)t {
+	if([self statusText] != nil)
+		[[self statusText] release];
+	
+	statusText = [t retain];
+}
+
+-(NSString *)password {
 	return password;
 }
 
--(void)setPassword:(NSString *)p
-{
+-(void)setPassword:(NSString *)p {
 	if([self password] != nil)
 		[[self password] release];
 	
 	password = [p retain];
 }
 
--(NSString *)sessionUploadStatusText
-{
+-(NSString *)sessionUploadStatusText {
 	return sessionUploadStatusText;
 }
 
--(void)setSessionUploadStatusText:(NSString *)t
-{
+-(void)setSessionUploadStatusText:(NSString *)t {
 	if([self sessionUploadStatusText] != nil)
 		[[self sessionUploadStatusText] release];
 	
 	sessionUploadStatusText = [t retain];
 }
 
--(NSNumber *)fileUploadProgress
-{
+-(NSNumber *)fileUploadProgress {
 	return fileUploadProgress;
 }
 
--(void)setFileUploadProgress:(NSNumber *)v
-{
+-(void)setFileUploadProgress:(NSNumber *)v {
 	if([self fileUploadProgress] != nil)
 		[[self fileUploadProgress] release];
 	
 	fileUploadProgress = [v retain];
 }
 
--(NSNumber *)sessionUploadProgress
-{
+-(NSNumber *)sessionUploadProgress {
 	return sessionUploadProgress;
 }
 
--(void)setSessionUploadProgress:(NSNumber *)v
-{
+-(void)setSessionUploadProgress:(NSNumber *)v {
 	if([self sessionUploadProgress] != nil)
 		[[self sessionUploadProgress] release];
-	
+
 	sessionUploadProgress = [v retain];
 }
 
--(NSImage *)currentImageThumbnail
-{
-	return currentImageThumbnail;
-}
-
--(void)setCurrentImageThumbnail:(NSImage *)i
-{
-	if([self currentImageThumbnail] != nil)
-		[[self currentImageThumbnail] release];
-	
-	currentImageThumbnail = [i retain];
-}
-
--(void)cancelExport
-{
+-(void)cancelExport {
 	NSLog(@"SmugMugExport -- cancelExport");
 }
 
--(void)unlockProgress
-{
+-(void)unlockProgress {
 	NSLog(@"SmugMugExport -- unlockProgress");
 }
 
--(void)lockProgress
-{
+-(void)lockProgress {
 	NSLog(@"SmugMugExport -- lockProgress");
 }
 
--(void *)progress
-{
+-(void *)progress {
 	return (void *)@""; 
 }
 
--(void)performExport:(id)fp8
-{
+-(void)performExport:(id)fp8 {
 	NSLog(@"SmugMugExport -- performExport");
 }
 
--(void)startExport:(id)fp8
-{
+-(void)startExport:(id)fp8 {
 	[self startUpload];
 }
 
--(BOOL)validateUserCreatedPath:(id)fp8
-{
+-(BOOL)validateUserCreatedPath:(id)fp8 {
     return NO;
 }
 
--(BOOL)treatSingleSelectionDifferently
-{
+-(BOOL)treatSingleSelectionDifferently {
     return NO;
 }
 
--(id)defaultDirectory
-{
+-(id)defaultDirectory {
     return NSHomeDirectory();
 }
 
--(id)defaultFileName
-{
+-(id)defaultFileName {
 	return [NSString stringWithFormat:@"%@-%d",[[NSCalendarDate calendarDate] descriptionWithCalendarFormat:@"%Y-%m-%d"], [NSDate timeIntervalSinceReferenceDate]];;
 }
 
--(id)getDestinationPath
-{
+-(id)getDestinationPath {
 	return NSHomeDirectory();
 }
 
--(BOOL)wantsDestinationPrompt
-{
+-(BOOL)wantsDestinationPrompt {
     return NO;
 }
 
--(id)requiredFileType
-{
+-(id)requiredFileType {
 	return @"album";
 }
 
--(void)viewWillBeDeactivated
-{
+-(void)viewWillBeDeactivated {
 	[self setIsFocused:NO];
 //	[[self smugMugManager] logout];
 }
 
--(void)viewWillBeActivated
-{
-	// TODO just check for an account and if no account exists, show sheet
-	[self setIsFocused:YES];
-	// [self performSelector:@selector(resizeWindow) withObject:nil afterDelay:1.0];
+-(void)loginUntilFocused {
+
+	if([[self smugMugManager] isLoggingIn])
+		return;
+
+	if(![[[self exportManager] window] isVisible])
+		return;
+
+	if([loginPanel isVisible])
+		return;
+
+	[self attemptLoginIfNecessary];
+
+	[self performSelector:@selector(loginUntilFocused) withObject:nil afterDelay:0.25];
 }
 
--(id)lastView
-{
+-(void)viewWillBeActivated {
+	// TODO just check for an account and if no account exists, show sheet
+	[self setIsFocused:YES];
+	[self performSelector:@selector(loginUntilFocused) withObject:nil afterDelay:0.25];
+}
+
+-(id)lastView {
 	return lastView;
 }
 
--(id)firstView
-{
+-(id)firstView {
 	return firstView;
 }
 
--(id)settingsView
-{
+-(id)settingsView {
 	return settingsBox;
 }
 
--(void)clickExport
-{
+-(void)clickExport {
 	NSLog(@"SmugMugExport -- clickExport");
 }
 

@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		931533850AF4FA6D005B1241 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 931533500AF4FA6D005B1241 /* Security.framework */; };
 		932164520B2F78B000624A8D /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9321644E0B2F78B000624A8D /* NSDataAdditions.m */; };
-		932164540B2F78B000624A8D /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 932164500B2F78B000624A8D /* NSStringAdditions.m */; };
 		9321645E0B2F78BF00624A8D /* SmugMugEntityUnescapeTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 932164560B2F78BF00624A8D /* SmugMugEntityUnescapeTransformer.m */; };
 		932164600B2F78BF00624A8D /* SmugMugExport.m in Sources */ = {isa = PBXBuildFile; fileRef = 932164580B2F78BF00624A8D /* SmugMugExport.m */; };
 		932164620B2F78BF00624A8D /* SmugMugExportBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 9321645A0B2F78BF00624A8D /* SmugMugExportBox.m */; };
@@ -113,8 +112,7 @@
 		089C166AFE841209C02AAC07 /* smugmugExport */ = {
 			isa = PBXGroup;
 			children = (
-				9394BC8D0ADDBF390066CD67 /* Categories */,
-				930453550AD82E5600B932C9 /* iPhoto Interface */,
+				932164730B2F78D000624A8D /* Globals.h */,
 				08FB77AFFE84173DC02AAC07 /* Classes */,
 				32C88E010371C26100C91783 /* Other Sources */,
 				089C167CFE841241C02AAC07 /* Resources */,
@@ -151,13 +149,10 @@
 		08FB77AFFE84173DC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				932164730B2F78D000624A8D /* Globals.h */,
 				9321647D0B2F78E000624A8D /* AccountManager.h */,
 				9321647E0B2F78E000624A8D /* AccountManager.m */,
 				9321657F0B2F921D00624A8D /* KeychainManager.h */,
 				932165800B2F921E00624A8D /* KeychainManager.m */,
-				932164550B2F78BF00624A8D /* SmugMugEntityUnescapeTransformer.h */,
-				932164560B2F78BF00624A8D /* SmugMugEntityUnescapeTransformer.m */,
 				932164570B2F78BF00624A8D /* SmugMugExport.h */,
 				932164580B2F78BF00624A8D /* SmugMugExport.m */,
 				932164590B2F78BF00624A8D /* SmugMugExportBox.h */,
@@ -198,6 +193,9 @@
 			isa = PBXGroup;
 			children = (
 				932164B00B2F7BBC00624A8D /* SmugmugExport_Prefix.pch */,
+				9394BC8D0ADDBF390066CD67 /* Categories */,
+				93AE00820B358946005FDF6F /* Transformers */,
+				930453550AD82E5600B932C9 /* iPhoto Interface */,
 				930454210AD83F8100B932C9 /* XMLRPC */,
 				932165D50B2F972B00624A8D /* CocoaICU */,
 			);
@@ -250,6 +248,15 @@
 				932164500B2F78B000624A8D /* NSStringAdditions.m */,
 			);
 			name = Categories;
+			sourceTree = "<group>";
+		};
+		93AE00820B358946005FDF6F /* Transformers */ = {
+			isa = PBXGroup;
+			children = (
+				932164550B2F78BF00624A8D /* SmugMugEntityUnescapeTransformer.h */,
+				932164560B2F78BF00624A8D /* SmugMugEntityUnescapeTransformer.m */,
+			);
+			name = Transformers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -325,7 +332,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				932164520B2F78B000624A8D /* NSDataAdditions.m in Sources */,
-				932164540B2F78B000624A8D /* NSStringAdditions.m in Sources */,
 				9321645E0B2F78BF00624A8D /* SmugMugEntityUnescapeTransformer.m in Sources */,
 				932164600B2F78BF00624A8D /* SmugMugExport.m in Sources */,
 				932164620B2F78BF00624A8D /* SmugMugExportBox.m in Sources */,

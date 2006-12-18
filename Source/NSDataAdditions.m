@@ -13,11 +13,11 @@
 
 -(NSData *)md5Hash
 {
-	NSMutableData *digest = [NSMutableData dataWithLength:MD5_DIGEST_LENGTH];
-	if (digest && MD5([self bytes], [self length], [digest mutableBytes]))
-		return [NSData dataWithData:digest];
-	
-	return nil;
+	unsigned char digest[16];
+
+	MD5([self bytes],[self length],digest);
+
+	return [NSData dataWithBytes:&digest length:16];
 }
 
 @end
