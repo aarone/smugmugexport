@@ -31,8 +31,7 @@ static KeychainManager *sharedKeychainManager = nil;
 
 @implementation KeychainManager
 
-+(KeychainManager *)sharedKeychainManager
-{
++(KeychainManager *)sharedKeychainManager {
 	@synchronized(self) {
         if (sharedKeychainManager == nil) {
             [[self alloc] init]; // assignment not done here
@@ -41,8 +40,7 @@ static KeychainManager *sharedKeychainManager = nil;
     return sharedKeychainManager;
 }
 
-+ (id)allocWithZone:(NSZone *)zone
-{
++ (id)allocWithZone:(NSZone *)zone {
     @synchronized(self) {
         if (sharedKeychainManager == nil) {
             sharedKeychainManager = [super allocWithZone:zone];
@@ -52,33 +50,27 @@ static KeychainManager *sharedKeychainManager = nil;
     return nil;
 }
 
-- (id)copyWithZone:(NSZone *)zone
-{
+- (id)copyWithZone:(NSZone *)zone {
     return self;
 }
 
-- (id)retain
-{
+- (id)retain {
     return self;
 }
 
-- (unsigned)retainCount
-{
+- (unsigned)retainCount {
     return UINT_MAX;  //denotes an object that cannot be released
 }
 
-- (void)release
-{
+- (void)release {
     //do nothing
 }
 
-- (id)autorelease
-{
+- (id)autorelease {
     return self;
 }
 
--(NSArray *)keychainItemsForKind:(NSString *)itemKind
-{
+-(NSArray *)keychainItemsForKind:(NSString *)itemKind {
 	SecKeychainSearchRef search;
 	SecKeychainItemRef item;
 	SecKeychainAttributeList list;
@@ -117,8 +109,7 @@ static KeychainManager *sharedKeychainManager = nil;
 	return [NSArray arrayWithArray:foundItems];
 }
 
--(BOOL)checkForExistanceOfKeychainItem:(NSString *)keychainItemName withItemKind:(NSString *)keychainItemKind forUsername:(NSString *)username
-{
+-(BOOL)checkForExistanceOfKeychainItem:(NSString *)keychainItemName withItemKind:(NSString *)keychainItemKind forUsername:(NSString *)username {
 	SecKeychainSearchRef search;
 	SecKeychainItemRef item;
 	SecKeychainAttributeList list;
@@ -156,8 +147,7 @@ static KeychainManager *sharedKeychainManager = nil;
 	return numberOfItemsFound;
 }
 
--(BOOL)deleteKeychainItem:(NSString *)keychainItemName withItemKind:(NSString *)keychainItemKind forUsername:(NSString *)username
-{
+-(BOOL)deleteKeychainItem:(NSString *)keychainItemName withItemKind:(NSString *)keychainItemKind forUsername:(NSString *)username {
 	SecKeychainAttribute attributes[3];
     SecKeychainAttributeList list;
     SecKeychainItemRef item;
@@ -197,8 +187,7 @@ static KeychainManager *sharedKeychainManager = nil;
 	return !status;
 }
 
--(BOOL)modifyKeychainItem:(NSString *)keychainItemName withItemKind:(NSString *)keychainItemKind forUsername:(NSString *)username withNewPassword:(NSString *)newPassword
-{
+-(BOOL)modifyKeychainItem:(NSString *)keychainItemName withItemKind:(NSString *)keychainItemKind forUsername:(NSString *)username withNewPassword:(NSString *)newPassword {
 	SecKeychainAttribute attributes[3];
     SecKeychainAttributeList list;
     SecKeychainItemRef item;
@@ -233,8 +222,7 @@ static KeychainManager *sharedKeychainManager = nil;
 	return !status;
 }
 
--(BOOL)addKeychainItem:(NSString *)keychainItemName withItemKind:(NSString *)keychainItemKind forUsername:(NSString *)username withPassword:(NSString *)password
-{
+-(BOOL)addKeychainItem:(NSString *)keychainItemName withItemKind:(NSString *)keychainItemKind forUsername:(NSString *)username withPassword:(NSString *)password {
 	SecKeychainAttribute attributes[3];
     SecKeychainAttributeList list;
     SecKeychainItemRef item;
@@ -263,8 +251,7 @@ static KeychainManager *sharedKeychainManager = nil;
 	
 }
 
--(NSString *)passwordFromKeychainItem:(NSString *)keychainItemName withItemKind:(NSString *)keychainItemKind forUsername:(NSString *)username
-{
+-(NSString *)passwordFromKeychainItem:(NSString *)keychainItemName withItemKind:(NSString *)keychainItemKind forUsername:(NSString *)username {
 	SecKeychainSearchRef search;
     SecKeychainItemRef item;
     SecKeychainAttributeList list;
@@ -301,8 +288,7 @@ static KeychainManager *sharedKeychainManager = nil;
 	return password;
 }
 
--(NSString *)passwordFromSecKeychainItemRef:(SecKeychainItemRef)item
-{
+-(NSString *)passwordFromSecKeychainItemRef:(SecKeychainItemRef)item {
 	UInt32 length;
     char *password;
     SecKeychainAttribute attributes[8];

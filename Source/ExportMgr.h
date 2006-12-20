@@ -1,8 +1,7 @@
 #import "ExportImageProtocol.h"
 
 
-@interface ExportMgr : NSObject <ExportImageProtocol>
-{
+@interface ExportMgr : NSObject <ExportImageProtocol> {
 //    ArchiveDocument *mDocument;
 //    NSMutableArray *mExporters;
 //    Album *mExportAlbum;

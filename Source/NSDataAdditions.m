@@ -8,15 +8,19 @@
 
 #import "NSDataAdditions.h"
 #include <openssl/md5.h>
+#import "NSStringICUAdditions.h"
 
 @implementation NSData (NSDataAdditions)
 
--(NSData *)md5Hash
-{
+-(NSString *)md5HexString {
+	NSData *hashData = [self md5Hash];
+	return [[hashData description] replaceOccurrencesOfPattern:@"[ <>]" withString:@""];
+}
+
+-(NSData *)md5Hash {
 	unsigned char digest[16];
 
 	MD5([self bytes],[self length],digest);
-
 	return [NSData dataWithBytes:&digest length:16];
 }
 

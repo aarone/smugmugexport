@@ -11,8 +11,7 @@
 
 @implementation SmugMugExportBox
 
-- (BOOL)performKeyEquivalent:(id)fp8
-{
+- (BOOL)performKeyEquivalent:(id)fp8 {
 	return NO;
 }
 

@@ -30,54 +30,45 @@ NSString *KeychainItemKind = @"application password";
 
 @implementation AccountManager
 
--(id)init
-{
+-(id)init {
 	if(![super init])
 		return nil;
 
 	return self;
 }
 
-+(AccountManager *)accountManager
-{
++(AccountManager *)accountManager {
 	return [[[[self class] alloc] init] autorelease];
 }
 
--(void)dealloc
-{
+-(void)dealloc {
 	[super dealloc];
 }
 
--(NSString *)keychainItemNameForAccount:(NSString *)accountId
-{
+-(NSString *)keychainItemNameForAccount:(NSString *)accountId {
 	return [NSString stringWithFormat:@"%@: %@", KeychainItemName, accountId];
 }
 
--(BOOL)passwordExistsInKeychainForAccount:(NSString *)account
-{
+-(BOOL)passwordExistsInKeychainForAccount:(NSString *)account {
 	return [[KeychainManager sharedKeychainManager] checkForExistanceOfKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:account];
 }
 
--(void)addAccountToKeychain:(NSString *)account password:(NSString *)password
-{
+-(void)addAccountToKeychain:(NSString *)account password:(NSString *)password {
 	if([self passwordExistsInKeychainForAccount:account])
 		return;
 
 	[[KeychainManager sharedKeychainManager] addKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:account withPassword:password];
 }
 
--(void)removeAccountFromKeychain:(NSString *)account
-{
+-(void)removeAccountFromKeychain:(NSString *)account {
 	[[KeychainManager sharedKeychainManager] deleteKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:KeychainItemKind];
 }
 
--(void)modifyAccountInKeychain:(NSString *)account newPassword:(NSString *)newPassword
-{
+-(void)modifyAccountInKeychain:(NSString *)account newPassword:(NSString *)newPassword {
 	[[KeychainManager sharedKeychainManager] modifyKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:account withNewPassword:newPassword];
 }
 
--(void)addAccount:(NSString *)account withPassword:(NSString *)password
-{
+-(void)addAccount:(NSString *)account withPassword:(NSString *)password {
 	if([[self accounts] containsObject:account]) {
 		[self modifyAccountInKeychain:account newPassword:password];
 	} else {
@@ -88,13 +79,11 @@ NSString *KeychainItemKind = @"application password";
 	[self setSelectedAccount:account];
 }
 
--(NSString *)passwordForAccount:(NSString *)account
-{
+-(NSString *)passwordForAccount:(NSString *)account {
 	return [[KeychainManager sharedKeychainManager] passwordFromKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:account];
 }
 
--(void)addAccount:(NSString *)account
-{
+-(void)addAccount:(NSString *)account {
 	if(![[self accounts] containsObject:account]) {
 		[self setAccounts:[[self accounts] arrayByAddingObject:account]];
 	}
@@ -102,18 +91,15 @@ NSString *KeychainItemKind = @"application password";
 	[self setSelectedAccount:account];
 }
 
--(NSArray *)accounts
-{
+-(NSArray *)accounts {
 	return [[NSUserDefaults standardUserDefaults] objectForKey:SMEAccountsDefaultsKey];
 }
 
--(void)setAccounts:(NSArray *)a
-{
+-(void)setAccounts:(NSArray *)a {
 	[[NSUserDefaults standardUserDefaults] setObject:a forKey:SMEAccountsDefaultsKey];
 }
 
--(NSString *)selectedAccount
-{
+-(NSString *)selectedAccount {
 	NSString *anAccount = [[NSUserDefaults standardUserDefaults] objectForKey:SMESelectedAccountDefaultsKey];
 
 	if([[self accounts] containsObject:anAccount])
@@ -125,8 +111,7 @@ NSString *KeychainItemKind = @"application password";
 	return [[self accounts] objectAtIndex:0];
 }
 
--(void)setSelectedAccount:(NSString *)anAccount
-{
+-(void)setSelectedAccount:(NSString *)anAccount {
 	[self willChangeValueForKey:@"selectedAccount"];
 	[[NSUserDefaults standardUserDefaults] setObject:anAccount forKey:SMESelectedAccountDefaultsKey];
 	[self didChangeValueForKey:@"selectedAccount"];

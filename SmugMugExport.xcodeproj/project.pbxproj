@@ -51,8 +51,6 @@
 		931533500AF4FA6D005B1241 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		9321644D0B2F78B000624A8D /* NSDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSDataAdditions.h; path = Source/NSDataAdditions.h; sourceTree = "<group>"; };
 		9321644E0B2F78B000624A8D /* NSDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSDataAdditions.m; path = Source/NSDataAdditions.m; sourceTree = "<group>"; };
-		9321644F0B2F78B000624A8D /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSStringAdditions.h; path = Source/NSStringAdditions.h; sourceTree = "<group>"; };
-		932164500B2F78B000624A8D /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSStringAdditions.m; path = Source/NSStringAdditions.m; sourceTree = "<group>"; };
 		932164550B2F78BF00624A8D /* SmugMugEntityUnescapeTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugMugEntityUnescapeTransformer.h; path = Source/SmugMugEntityUnescapeTransformer.h; sourceTree = "<group>"; };
 		932164560B2F78BF00624A8D /* SmugMugEntityUnescapeTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SmugMugEntityUnescapeTransformer.m; path = Source/SmugMugEntityUnescapeTransformer.m; sourceTree = "<group>"; };
 		932164570B2F78BF00624A8D /* SmugMugExport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugMugExport.h; path = Source/SmugMugExport.h; sourceTree = "<group>"; };
@@ -244,8 +242,6 @@
 			children = (
 				9321644D0B2F78B000624A8D /* NSDataAdditions.h */,
 				9321644E0B2F78B000624A8D /* NSDataAdditions.m */,
-				9321644F0B2F78B000624A8D /* NSStringAdditions.h */,
-				932164500B2F78B000624A8D /* NSStringAdditions.m */,
 			);
 			name = Categories;
 			sourceTree = "<group>";

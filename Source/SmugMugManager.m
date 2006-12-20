@@ -362,14 +362,19 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 -(void)transferComplete {
 
 	[[self uploadLock] unlock];
-	[self destroyUploadResources];
+	XMLRPCResponse *response = [[[XMLRPCResponse alloc] initWithData:responseData] autorelease];
 	isUploading = NO;
+
+	NSString *errorString = nil;
+	if([response isFault]) 
+		errorString = [response faultString];
 
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:withError:)]) {
-		[[self delegate] uploadDidCompleteForFile:currentPathForUpload withError:NSLocalizedString(@"Upload Failed", @"Message to display when a file cannot be properly uploaded")];
+		[[self delegate] uploadDidCompleteForFile:currentPathForUpload withError:errorString];
 	}
 
+	[self destroyUploadResources];
 }
 
 -(void)errorOccurred {
@@ -378,15 +383,14 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:withError:)]) {
-		[[self delegate] uploadDidCompleteForFile:currentPathForUpload withError:NSLocalizedString(@"Upload Failed", @"Message to display when a file cannot be properly uploaded")];
+		[[self delegate] uploadDidCompleteForFile:currentPathForUpload withError:NSLocalizedString(@"Upload Failed", @"The upload was interrupted in progress.")];
 	}
 
 	[self destroyUploadResources];
 }
 
 
--(void)trackUploadProgress:(NSTimer *)timer
-{
+-(void)trackUploadProgress:(NSTimer *)timer {
 	CFNumberRef bytesWrittenProperty = (CFNumberRef)CFReadStreamCopyProperty (readStream, kCFStreamPropertyHTTPRequestBytesWrittenCount); 
 	
 	int bytesWritten;
@@ -398,8 +402,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 		[[self delegate] uploadMadeProgressForFile:currentPathForUpload bytesWritten:(long)bytesWritten totalBytes:uploadSize];
 }
 
--(NSData *)postBodyForImageAtPath:(NSString *)path albumId:(NSString *)albumId caption:(NSString *)caption boundary:(NSString *)boundary
-{
+-(NSData *)postBodyForImageAtPath:(NSString *)path albumId:(NSString *)albumId caption:(NSString *)caption boundary:(NSString *)boundary {
 	NSData *imageData = [NSData dataWithContentsOfFile:path];
 	NSAssert(imageData != nil, @"cannot create image from data");
 
@@ -419,9 +422,9 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	[postBody appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
 	
 	// this break uploading.. not quite sure why this doesn't work
-	//	[postBody appendData:[[NSString stringWithString:@"Content-Disposition: form-data; name=\"MD5Sum\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
-	//	[postBody appendData:[imageData md5Hash]];
-	//	[postBody appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+	[postBody appendData:[[NSString stringWithString:@"Content-Disposition: form-data; name=\"MD5Sum\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+	[postBody appendData:[[imageData md5HexString] dataUsingEncoding:NSUTF8StringEncoding]];
+	[postBody appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
 	
 	if(caption != nil) {
 		[postBody appendData:[[NSString stringWithString:@"Content-Disposition: form-data; name=\"Caption\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];

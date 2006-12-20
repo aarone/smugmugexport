@@ -69,8 +69,7 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 
 @implementation SmugMugExport
 
--(id)initWithExportImageObj:(id)exportMgr
-{
+-(id)initWithExportImageObj:(id)exportMgr {
 	if(![super init])
 		return nil;
 	
@@ -90,8 +89,7 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 	return self;
 }
 
--(void)dealloc
-{
+-(void)dealloc {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
 	[[self smugMugManager] release];
@@ -181,8 +179,7 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 		[self attemptLoginIfNecessary];
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
 //	[self resizeWindow];
 }
 
@@ -282,6 +279,10 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 }
 
 -(void)uploadDidCompleteForFile:(NSString *)aFullPathToImage withError:(NSString *)error {
+
+	if(error != nil)
+		NSLog(@"error occurred: %@", error); // todo retry some number of times???
+
 	[self setImagesUploaded:[self imagesUploaded] + 1];
 	[self setSessionUploadProgress:[NSNumber numberWithFloat:100.0*((float)[self imagesUploaded])/((float)[[self exportManager] imageCount])]];
 	
@@ -365,23 +366,19 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 	isFocused = v;
 }
 
--(BOOL)loginAttempted
-{
+-(BOOL)loginAttempted {
 	return loginAttempted;
 }
 
--(void)setLoginAttempted:(BOOL)v
-{
+-(void)setLoginAttempted:(BOOL)v {
 	loginAttempted = v;
 }
 
--(AccountManager *)accountManager
-{
+-(AccountManager *)accountManager {
 	return accountManager;
 }
 
--(void)setAccountManager:(AccountManager *)mgr
-{
+-(void)setAccountManager:(AccountManager *)mgr {
 	if([self accountManager] != nil)
 		[[self accountManager] release];
 	
@@ -553,26 +550,10 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 //	[[self smugMugManager] logout];
 }
 
--(void)loginUntilFocused {
-
-	if([[self smugMugManager] isLoggingIn])
-		return;
-
-	if(![[[self exportManager] window] isVisible])
-		return;
-
-	if([loginPanel isVisible])
-		return;
-
-	[self attemptLoginIfNecessary];
-
-	[self performSelector:@selector(loginUntilFocused) withObject:nil afterDelay:0.25];
-}
-
 -(void)viewWillBeActivated {
 	// TODO just check for an account and if no account exists, show sheet
 	[self setIsFocused:YES];
-	[self performSelector:@selector(loginUntilFocused) withObject:nil afterDelay:0.25];
+	[self performSelector:@selector(attemptLoginIfNecessary) withObject:nil afterDelay:0.25];
 }
 
 -(id)lastView {
