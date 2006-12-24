@@ -35,8 +35,6 @@
 -(AccountManager *)accountManager;
 -(void)setAccountManager:(AccountManager *)mgr;
 -(void)registerDefaults;
--(BOOL)isFocused;
--(void)setIsFocused:(BOOL)v;
 -(BOOL)loginAttempted;
 -(void)setLoginAttempted:(BOOL)v;
 -(void)performPostLoginTasks;
@@ -54,8 +52,13 @@
 -(void)setCurrentThumbnailData:(NSData *)d;
 -(BOOL)loginSheetIsBusy;
 -(void)setLoginSheetIsBusy:(BOOL)v;
-
+-(void)setUploadRetryCount:(int)v;
+-(int)uploadRetryCount;
+-(void)incrementUploadRetryCount;
+-(void)resetUploadRetryCount;
 @end
+
+static SmugMugExport *SharedExporter = nil;
 
 // UI keys
 NSString *ExistingAlbumTabIdentifier = @"existingAlbum";
@@ -67,6 +70,8 @@ NSString *SMESelectedTabIdDefaultsKey = @"SMESelectedTabId";
 NSString *SMEAccountsDefaultsKey = @"SMEAccounts";
 NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 
+static int UploadFailureRetryCount = 3;
+
 @implementation SmugMugExport
 
 -(id)initWithExportImageObj:(id)exportMgr {
@@ -74,23 +79,22 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 		return nil;
 	
 	exportManager = exportMgr;	
-	[self registerDefaults];
 	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
 
 	[self setAccountManager:[AccountManager accountManager]];
 	[self setSmugMugManager:[SmugMugManager smugmugManager]];
 	[[self smugMugManager] setDelegate:self];
 
-	[self setIsFocused:NO];
 	[self setLoginAttempted:NO];
 	[self setImagesUploaded:0];
+	[self resetUploadRetryCount];
 
 	[NSValueTransformer setValueTransformer:[[[SmugMugEntityUnescapeTransformer alloc] init] autorelease] forName:@"SmugMugEntityUnescapeTransformer"];
+	SharedExporter = self;
 	return self;
 }
 
 -(void)dealloc {
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
 
 	[[self smugMugManager] release];
 	[[self username] release];
@@ -109,9 +113,7 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 +(void)initialize {
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.accounts"] triggerChangeNotificationsForDependentKey:@"accounts"];
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.selectedAccount"] triggerChangeNotificationsForDependentKey:@"selectedAccount"];
-}
 
--(void)registerDefaults { 
 	NSMutableDictionary *defaultsDict = [NSMutableDictionary dictionary];
 	[defaultsDict setObject:ExistingAlbumTabIdentifier forKey:SMESelectedTabIdDefaultsKey];
 	[defaultsDict setObject:[NSArray array] forKey:SMEAccountsDefaultsKey];
@@ -124,10 +126,7 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 											forKeyPath:SMESelectedTabIdDefaultsKey
 											   options:0
 											   context:NULL];
-
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidBecomeKey:) name:NSWindowDidBecomeKeyNotification object:[[self exportManager] window]];
 }
-
 
 /* try to automatically show the login sheet */
 -(void)attemptLoginIfNecessary {
@@ -135,7 +134,7 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 	if([loginPanel isVisible]) // don't try to show the login sheet if it's already showing
 		return;
 
-	if(![self isFocused]) // don't show if we're not focused
+	if(![[[self exportManager] window] isKeyWindow])
 		return;
 
 	/* don't try to login if we're already logged in or attempting to login */
@@ -144,14 +143,13 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 		return;
 
 	/*
-	 * Show the login window if we're not logged in, we haven't tried to log in,
-	 * and there is no existing account to automatically choose.
+	 * Show the login window if we're not logged in and there is no existing account to automatically choose.
 	 */
 	if(![[self smugMugManager] isLoggedIn] && 
-	   ![self loginAttempted] &&
 	   [[[self accountManager] accounts] count] == 0) {
 
-		[self showLoginPanel:self];
+		// show the login panel after some delay
+		[self showLoginSheet:self];
 		return;
 	}
 
@@ -159,24 +157,19 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 	*  If we have a saved password for the previously selected account, log in to that account.
 	 */
 	if(![[self smugMugManager] isLoggedIn] && 
+	   ![[self smugMugManager] isLoggingIn] &&
 	   [[[self accountManager] accounts] count] > 0 &&
 	   [[self accountManager] selectedAccount] != nil &&
 	   ![self loginAttempted] &&
 	   [[self accountManager] passwordExistsInKeychainForAccount:[[self accountManager] selectedAccount]]) {
-		
+
 		[self setLoginAttempted:YES];
 		[self setIsBusy:YES];
 		[self setStatusText:@"Logging in..."];
 		[[self smugMugManager] setUsername:[[self accountManager] selectedAccount]];
 		[[self smugMugManager] setPassword:[[self accountManager] passwordForAccount:[[self accountManager] selectedAccount]]];
 		[[self smugMugManager] login]; // gets asyncronous callback
-	}	
-}
-
--(void)windowDidBecomeKey:(NSNotification *)not {
-
-	if([[not object] isEqualTo:[[self exportManager] window]])
-		[self attemptLoginIfNecessary];
+	}
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
@@ -198,7 +191,10 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 	NSLog(@"donate");
 }
 
--(IBAction)showLoginPanel:(id)sender {
+-(IBAction)showLoginSheet:(id)sender {
+	if(![[[self exportManager] window] isVisible])
+		return;
+	
 	[NSApp beginSheet:loginPanel
 	   modalForWindow:[[self exportManager] window]
 		modalDelegate:self
@@ -250,7 +246,7 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 }
 
 -(void)logoutDidComplete:(BOOL)wasSuccessful {
-	NSLog(@"logout complete");
+	
 }
 
 -(void)startUpload {
@@ -264,13 +260,14 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 		modalDelegate:self
 	   didEndSelector:@selector(didEndSheet:returnCode:contextInfo:)
 		  contextInfo:nil];
-	
+
 	NSNumber *selectedAlbumId = [[self selectedAlbum] objectForKey:@"AlbumID"];
 	NSString *thumbnailPath = [exportManager thumbnailPathAtIndex:[self imagesUploaded]];		
 	[self setCurrentThumbnailData:[NSData dataWithContentsOfFile: thumbnailPath]];
+	[self resetUploadRetryCount];
 	[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
 								 albumWithID:selectedAlbumId
-									 caption:@"test"];	
+									 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
 }
 
 -(void)performUploadCompletionTasks {
@@ -280,19 +277,30 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 
 -(void)uploadDidCompleteForFile:(NSString *)aFullPathToImage withError:(NSString *)error {
 
-	if(error != nil)
-		NSLog(@"error occurred: %@", error); // todo retry some number of times???
+	NSNumber *selectedAlbumId = [[self selectedAlbum] objectForKey:@"AlbumID"];
+	
+	// if an error occurred, retry up to UploadFailureRetryCount times
+	if(error != nil && [self uploadRetryCount] < UploadFailureRetryCount) {
+		[self incrementUploadRetryCount];
+		[self setSessionUploadStatusText:[NSString stringWithFormat:@"Retrying upload of image %d of %d", [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
+		[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
+									 albumWithID:selectedAlbumId
+										 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
+		return;
+	}
 
+	[self resetUploadRetryCount];
 	[self setImagesUploaded:[self imagesUploaded] + 1];
 	[self setSessionUploadProgress:[NSNumber numberWithFloat:100.0*((float)[self imagesUploaded])/((float)[[self exportManager] imageCount])]];
 	
-	NSNumber *selectedAlbumId = [[self selectedAlbum] objectForKey:@"AlbumID"];
+
 	if([self imagesUploaded] >= [[self exportManager] imageCount]) {
 		[self performUploadCompletionTasks];
 	} else {
 		[self setSessionUploadStatusText:[NSString stringWithFormat:@"Uploading image %d of %d", [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
 		NSString *thumbnailPath = [exportManager thumbnailPathAtIndex:[self imagesUploaded]];		
 		[self setCurrentThumbnailData:[NSData dataWithContentsOfFile: thumbnailPath]];
+
 		[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
 									 albumWithID:selectedAlbumId
 										 caption:@"test"];
@@ -318,7 +326,7 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 
 -(void)setSelectedAccount:(NSString *)account {
 	if([account isEqualToString:NewAccountLabel]) {
-		[self showLoginPanel:self];
+		[self showLoginSheet:self];
 		return;
 	}
 
@@ -339,6 +347,22 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 	loginSheetIsBusy = v;
 }
 
+-(void)setUploadRetryCount:(int)v {
+	uploadRetryCount = v;
+}
+
+-(int)uploadRetryCount {
+	return uploadRetryCount;
+}
+
+-(void)incrementUploadRetryCount {
+	[self setUploadRetryCount:[self uploadRetryCount]+1];
+}
+
+-(void)resetUploadRetryCount {
+	[self setUploadRetryCount:0];
+}
+
 -(NSData *)currentThumbnailData {
 	return currentThumbnailData;
 }
@@ -356,14 +380,6 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 
 -(void)setIsBusy:(BOOL)v {
 	isBusy = v;
-}
-
--(BOOL)isFocused {
-	return isFocused;
-}
-
--(void)setIsFocused:(BOOL)v {
-	isFocused = v;
 }
 
 -(BOOL)loginAttempted {
@@ -546,14 +562,17 @@ NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 }
 
 -(void)viewWillBeDeactivated {
-	[self setIsFocused:NO];
 //	[[self smugMugManager] logout];
 }
 
 -(void)viewWillBeActivated {
-	// TODO just check for an account and if no account exists, show sheet
-	[self setIsFocused:YES];
-	[self performSelector:@selector(attemptLoginIfNecessary) withObject:nil afterDelay:0.25];
+	
+	// try to login in a moment (i don't like this approach but don't know how to get a 'tab was focused'
+	// notification, only a 'tab will be focused' notification
+	[self performSelector:@selector(attemptLoginIfNecessary) 
+			   withObject:nil
+			   afterDelay:0.5
+				  inModes:[NSArray arrayWithObjects: NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
 }
 
 -(id)lastView {

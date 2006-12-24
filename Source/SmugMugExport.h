@@ -27,9 +27,10 @@
 	NSNumber *sessionUploadProgress;
 	NSString *loginSheetStatusMessage;
 	BOOL loginSheetIsBusy;
-	BOOL isFocused;
 	BOOL isBusy;
 	BOOL loginAttempted;
+
+	int uploadRetryCount;
 	NSData *currentThumbnailData;
 
 	int imagesUploaded;
@@ -41,7 +42,7 @@
 -(IBAction)cancelUpload:(id)sender;
 -(IBAction)cancelLoginSheet:(id)sender;
 -(IBAction)donate:(id)sender;
--(IBAction)showLoginPanel:(id)sender;
+-(IBAction)showLoginSheet:(id)sender;
 -(IBAction)performLoginFromSheet:(id)sender;
 
 @end

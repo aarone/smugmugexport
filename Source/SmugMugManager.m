@@ -40,7 +40,7 @@ kCFStreamEventErrorOccurred;
 -(NSString *)contentTypeForPath:(NSString *)path;
 -(NSLock *)uploadLock;
 -(void)setUploadLock:(NSLock *)aLock;
--(NSData *)postBodyForImageAtPath:(NSString *)path albumId:(NSString *)albumId caption:(NSString *)caption boundary:(NSString *)boundary;
+-(NSData *)postBodyForImageAtPath:(NSString *)path albumId:(NSString *)albumId caption:(NSString *)caption;
 -(void)appendToResponse;
 -(void)transferComplete;
 -(void)errorOccurred;
@@ -48,6 +48,8 @@ kCFStreamEventErrorOccurred;
 -(void)setIsLoggingIn:(BOOL)v;
 -(void)setIsLoggedIn:(BOOL)v;
 
+-(NSMutableData *)responseData;
+-(void)setResponseData:(NSMutableData *)d;
 
 -(void)loginWithCallback:(SEL)loginDidEndSelector;
 -(void)logoutWithCallback:(SEL)logoutDidEndSelector;
@@ -73,7 +75,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	}
 }
 
-
+static NSString *Boundary = @"_aBoundAry_$";
 
 @implementation SmugMugManager
 
@@ -291,15 +293,11 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
  */
 -(void)uploadImageAtPath:(NSString *)path albumWithID:(NSNumber *)albumId caption:(NSString *)caption {
 	
-	[[self uploadLock] lock];
-
-	NSString *boundary = @"_aBoundAry_$";
-
-	NSData *postData = [self postBodyForImageAtPath:path albumId:[albumId stringValue] caption:caption boundary:boundary];
+	NSData *postData = [self postBodyForImageAtPath:path albumId:[albumId stringValue] caption:caption];
 
 	CFHTTPMessageRef myRequest;
 	myRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, CFSTR("POST"), (CFURLRef)[NSURL URLWithString:[self postUploadURL]], kCFHTTPVersion1_1);
-	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-Type"), (CFStringRef)[NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary]);
+	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-Type"), (CFStringRef)[NSString stringWithFormat:@"multipart/form-data; boundary=%@", Boundary]);
 	CFHTTPMessageSetBody(myRequest, (CFDataRef)postData);
 
 	readStream = CFReadStreamCreateForHTTPRequest(kCFAllocatorDefault, myRequest);
@@ -314,81 +312,30 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	currentPathForUpload = [path retain];
 	CFReadStreamScheduleWithRunLoop(readStream, CFRunLoopGetCurrent(), kCFRunLoopCommonModes);
 
-	uploadSize = [[[[NSFileManager defaultManager] fileAttributesAtPath:path traverseLink:YES]  objectForKey:NSFileSize] longValue];
-	responseData = [NSMutableData data];
-	[responseData retain];
-
 	isUploading = YES;
+	uploadSize = [[[[NSFileManager defaultManager] fileAttributesAtPath:path traverseLink:YES]  objectForKey:NSFileSize] longValue];
+	[self setResponseData:[NSMutableData data]];
+
 	CFReadStreamOpen(readStream);
 
-	nextProgressThreshold = 512;
+	[NSThread detachNewThreadSelector:@selector(beingUploadProgressTracking) toTarget:self withObject:nil];
+}
+
+-(void)beingUploadProgressTracking {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	uploadProgressTimer = [[NSTimer alloc] initWithFireDate:nil interval:0.10 target:self selector:@selector(trackUploadProgress:) userInfo:nil repeats:YES];
-
+	uploadProgressTimer = [NSTimer timerWithTimeInterval:0.10 target:self selector:@selector(trackUploadProgress:) userInfo:nil repeats:YES];
+	
 	[[NSRunLoop currentRunLoop] addTimer:uploadProgressTimer forMode:NSDefaultRunLoopMode];
-
-	BOOL isRunning;
+	
 	do {
 		NSDate* next = [NSDate dateWithTimeIntervalSinceNow:0.10]; 
-		isRunning = [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
+		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
 											 beforeDate:next];
-	} while(isRunning && isUploading);
+	} while(isUploading);
 
 	[uploadProgressTimer invalidate];
 	[pool release];
 }
-
--(void)appendToResponse {
-	
-	UInt8 buffer[2048];
-	CFIndex bytesRead = CFReadStreamRead(readStream, buffer, sizeof(buffer));
-	
-	if (bytesRead < 0)
-		NSLog(@"Warning: Error (< 0b from CFReadStreamRead");
-	else if (bytesRead)
-		[responseData appendBytes:(void *)buffer length:(unsigned)bytesRead];
-}
-
--(void)destroyUploadResources {
-	
-	[uploadProgressTimer invalidate];
-	CFRelease(readStream);
-	//[uploadProgressTimer release];
-	[responseData release];
-	[currentPathForUpload release];
-
-}
-
--(void)transferComplete {
-
-	[[self uploadLock] unlock];
-	XMLRPCResponse *response = [[[XMLRPCResponse alloc] initWithData:responseData] autorelease];
-	isUploading = NO;
-
-	NSString *errorString = nil;
-	if([response isFault]) 
-		errorString = [response faultString];
-
-	if([self delegate] != nil &&
-	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:withError:)]) {
-		[[self delegate] uploadDidCompleteForFile:currentPathForUpload withError:errorString];
-	}
-
-	[self destroyUploadResources];
-}
-
--(void)errorOccurred {
-
-	isUploading = NO;
-
-	if([self delegate] != nil &&
-	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:withError:)]) {
-		[[self delegate] uploadDidCompleteForFile:currentPathForUpload withError:NSLocalizedString(@"Upload Failed", @"The upload was interrupted in progress.")];
-	}
-
-	[self destroyUploadResources];
-}
-
 
 -(void)trackUploadProgress:(NSTimer *)timer {
 	CFNumberRef bytesWrittenProperty = (CFNumberRef)CFReadStreamCopyProperty (readStream, kCFStreamPropertyHTTPRequestBytesWrittenCount); 
@@ -402,40 +349,88 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 		[[self delegate] uploadMadeProgressForFile:currentPathForUpload bytesWritten:(long)bytesWritten totalBytes:uploadSize];
 }
 
--(NSData *)postBodyForImageAtPath:(NSString *)path albumId:(NSString *)albumId caption:(NSString *)caption boundary:(NSString *)boundary {
+-(void)appendToResponse {
+	
+	UInt8 buffer[2048];
+	CFIndex bytesRead = CFReadStreamRead(readStream, buffer, sizeof(buffer));
+	
+	if (bytesRead < 0)
+		NSLog(@"Warning: Error (< 0b from CFReadStreamRead");
+	else if (bytesRead)
+		[[self responseData] appendBytes:(void *)buffer length:(unsigned)bytesRead];
+}
+
+-(NSMutableData *)responseData {
+	return responseData;
+}
+
+-(void)setResponseData:(NSMutableData *)d {
+	if([self responseData] != nil)
+		[[self responseData] release];
+	
+	responseData = [d retain];
+}
+
+-(void)destroyUploadResources {
+	isUploading = NO;
+	CFRelease(readStream);
+	[self setResponseData:nil];
+	[currentPathForUpload release];
+}
+
+-(void)transferComplete {
+
+	XMLRPCResponse *response = [[[XMLRPCResponse alloc] initWithData:[self responseData]] autorelease];
+
+	NSString *errorString = nil;
+	if([response isFault]) 
+		errorString = [response faultString];
+
+	[self destroyUploadResources];
+
+	if([self delegate] != nil &&
+	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:withError:)]) {
+		[[self delegate] uploadDidCompleteForFile:currentPathForUpload withError:errorString];
+	}
+}
+
+-(void)errorOccurred {
+
+	[self destroyUploadResources];	
+	
+	if([self delegate] != nil &&
+	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:withError:)]) {
+		[[self delegate] uploadDidCompleteForFile:currentPathForUpload withError:NSLocalizedString(@"Upload Failed", @"The upload was interrupted in progress.")];
+	}
+}
+
+-(NSData *)postDataWithName:(NSString *)aName postContents:(NSString *)postContents {
+	NSMutableData *data = [NSMutableData data];
+	[data appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", aName] dataUsingEncoding:NSUTF8StringEncoding]];
+	[data appendData:[postContents dataUsingEncoding:NSUTF8StringEncoding]];
+	[data appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n",Boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+	return data;
+}
+
+-(NSData *)postBodyForImageAtPath:(NSString *)path albumId:(NSString *)albumId caption:(NSString *)caption {
 	NSData *imageData = [NSData dataWithContentsOfFile:path];
 	NSAssert(imageData != nil, @"cannot create image from data");
 
 	NSMutableData *postBody = [NSMutableData data];
-	[postBody appendData:[[NSString stringWithFormat:@"--%@\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-	
-	[postBody appendData:[[NSString stringWithString:@"Content-Disposition: form-data; name=\"AlbumID\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
-	[postBody appendData:[albumId dataUsingEncoding:NSUTF8StringEncoding]];
-	[postBody appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-	
-	[postBody appendData:[[NSString stringWithString:@"Content-Disposition: form-data; name=\"SessionID\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
-	[postBody appendData:[[self sessionID] dataUsingEncoding:NSUTF8StringEncoding]];
-	[postBody appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-	
-	[postBody appendData:[[NSString stringWithString:@"Content-Disposition: form-data; name=\"ByteCount\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
-	[postBody appendData:[[NSString stringWithFormat:@"%d",[imageData length]] dataUsingEncoding:NSUTF8StringEncoding]];
-	[postBody appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-	
-	// this break uploading.. not quite sure why this doesn't work
-	[postBody appendData:[[NSString stringWithString:@"Content-Disposition: form-data; name=\"MD5Sum\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
-	[postBody appendData:[[imageData md5HexString] dataUsingEncoding:NSUTF8StringEncoding]];
-	[postBody appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-	
-	if(caption != nil) {
-		[postBody appendData:[[NSString stringWithString:@"Content-Disposition: form-data; name=\"Caption\"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
-		[postBody appendData:[caption dataUsingEncoding:NSUTF8StringEncoding]];
-		[postBody appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];		
-	}
-	
+	[postBody appendData:[[NSString stringWithFormat:@"--%@\r\n",Boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+
+	[postBody appendData:[self postDataWithName:@"AlbumID" postContents:albumId]];
+	[postBody appendData:[self postDataWithName:@"SessionID" postContents:[self sessionID]]];
+	[postBody appendData:[self postDataWithName:@"ByteCount" postContents:[NSString stringWithFormat:@"%d", [imageData length]]]];
+	[postBody appendData:[self postDataWithName:@"MD5Sum" postContents:[imageData md5HexString]]];
+
+	if(caption != nil)
+		[postBody appendData:[self postDataWithName:@"Caption" postContents:caption]];
+
 	[postBody appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"Image\"; filename=\"%@\"\r\n", [path lastPathComponent]] dataUsingEncoding:NSUTF8StringEncoding]];
 	[postBody appendData:[[NSString stringWithString:@"Content-Type: image/jpeg\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
 	[postBody appendData:imageData];
-	[postBody appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+	[postBody appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n",Boundary] dataUsingEncoding:NSUTF8StringEncoding]];
 
 	return postBody;	
 }
