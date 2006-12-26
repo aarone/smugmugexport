@@ -56,6 +56,11 @@
 -(int)uploadRetryCount;
 -(void)incrementUploadRetryCount;
 -(void)resetUploadRetryCount;
+
+-(NSPanel *)newAlbumSheet;
+-(NSPanel *)uploadPanel;
+-(NSPanel *)loginPanel;
+-(BOOL)sheetIsDisplayed;	
 @end
 
 static SmugMugExport *SharedExporter = nil;
@@ -165,7 +170,7 @@ static int UploadFailureRetryCount = 3;
 
 		[self setLoginAttempted:YES];
 		[self setIsBusy:YES];
-		[self setStatusText:@"Logging in..."];
+		[self setStatusText:NSLocalizedString(@"Logging in...", @"Status text for logginng in")];
 		[[self smugMugManager] setUsername:[[self accountManager] selectedAccount]];
 		[[self smugMugManager] setPassword:[[self accountManager] passwordForAccount:[[self accountManager] selectedAccount]]];
 		[[self smugMugManager] login]; // gets asyncronous callback
@@ -183,16 +188,38 @@ static int UploadFailureRetryCount = 3;
 	return nil;
 }
 
+-(NSPanel *)newAlbumSheet {
+	return newAlbumSheet;
+}
+
+-(NSPanel *)uploadPanel {
+	return uploadPanel;
+}
+
+-(NSPanel *)loginPanel {
+	return loginPanel;
+}
+
+-(BOOL)sheetIsDisplayed {
+	return [[self newAlbumSheet] isVisible] ||
+		[[self loginPanel] isVisible] ||
+		[[self uploadPanel] isVisible];
+}
+
+
 -(IBAction)cancelUpload:(id)sender {
 	[self cancelExport];
 }
 
 -(IBAction)donate:(id)sender {
-	NSLog(@"donate");
+	[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=aaron%40aarone%2eorg&no_shipping=2&no_note=1&currency_code=USD&lc=US&bn=PP%2dBuyNowBF&charset=UTF%2d8"]];
 }
 
 -(IBAction)showLoginSheet:(id)sender {
 	if(![[[self exportManager] window] isVisible])
+		return;
+
+	if([self sheetIsDisplayed])
 		return;
 	
 	[NSApp beginSheet:loginPanel
@@ -216,11 +243,45 @@ static int UploadFailureRetryCount = 3;
 
 /** called from the login sheet.  takes username/password values from the textfields */
 -(IBAction)performLoginFromSheet:(id)sender {
-	[self setLoginSheetStatusMessage:@"Logging In..."];
+	[self setLoginSheetStatusMessage:NSLocalizedString(@"Logging In...", @"log in status string")];
 	[self setLoginSheetIsBusy:YES];
 	[[self smugMugManager] setUsername:[self username]];
 	[[self smugMugManager] setPassword:[self password]];
 	[[self smugMugManager] login]; // gets asyncronous callback
+}
+
+-(IBAction)addNewAlbum:(id)sender {
+	if(![[[self exportManager] window] isVisible])
+		return;
+
+	if([self sheetIsDisplayed])
+		return;
+
+	[[self smugMugManager] clearAlbumCreationState];
+	[NSApp beginSheet:[self newAlbumSheet]
+	   modalForWindow:[[self exportManager] window]
+		modalDelegate:self
+	   didEndSelector:@selector(newAlbumDidEndSheet:returnCode:contextInfo:)
+		  contextInfo:nil];
+
+	// mark that we've shown the user the login sheet at least once
+	[self setLoginAttempted:YES];	
+}
+
+-(void)newAlbumDidEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	[sheet orderOut:self];
+}
+
+-(IBAction)removeAlbum:(id)sender {
+	
+}
+
+-(IBAction)cancelNewAlbumSheet:(id)sender {
+	[NSApp endSheet:[self newAlbumSheet]];
+}
+
+-(IBAction)createAlbum:(id)sender {
+	[[self smugMugManager] createNewAlbum];
 }
 
 #pragma mark Delegate Methods
@@ -231,7 +292,7 @@ static int UploadFailureRetryCount = 3;
 	[self setLoginSheetStatusMessage:@""];
 
 	if(!wasSuccessful) {
-		[self setLoginSheetStatusMessage:@"Login Failed"];
+		[self setLoginSheetStatusMessage:NSLocalizedString(@"Login Failed", @"Status text for failed login")];
 		return;
 	}
 
@@ -239,6 +300,20 @@ static int UploadFailureRetryCount = 3;
 	[[self accountManager] addAccount:[[self smugMugManager] username] withPassword:[[self smugMugManager] password]];
 	[self setSelectedAccount:[[self smugMugManager] username]];
 	[NSApp endSheet:loginPanel];
+
+	[[self smugMugManager] buildCategoryList]; 
+}
+
+-(void)categoryGetDidComplete:(BOOL)wasSuccessful {
+	NSLog(@"get done");
+}
+
+-(void)createNewAlbumDidComplete:(BOOL)wasSuccessful {
+	
+	if(wasSuccessful) {
+		[NSApp endSheet:[self newAlbumSheet]];
+	}
+	// show an error is not successful!
 }
 
 -(void)loginDidEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
@@ -250,10 +325,13 @@ static int UploadFailureRetryCount = 3;
 }
 
 -(void)startUpload {
+	if([self sheetIsDisplayed]) // this should be impossible
+		return;
+
 	[self setImagesUploaded:0];
 	[self setFileUploadProgress:[NSNumber numberWithInt:0]];
 	[self setSessionUploadProgress:[NSNumber numberWithInt:0]];
-	[self setSessionUploadStatusText:[NSString stringWithFormat:@"Uploading image %d of %d", [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
+	[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Uploading image %d of %d", @"Image upload progress text"), [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
 
 	[NSApp beginSheet:uploadPanel
 	   modalForWindow:[[self exportManager] window]
@@ -282,7 +360,7 @@ static int UploadFailureRetryCount = 3;
 	// if an error occurred, retry up to UploadFailureRetryCount times
 	if(error != nil && [self uploadRetryCount] < UploadFailureRetryCount) {
 		[self incrementUploadRetryCount];
-		[self setSessionUploadStatusText:[NSString stringWithFormat:@"Retrying upload of image %d of %d", [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
+		[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Retrying upload of image %d of %d", @"Retry upload progress"), [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
 		[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
 									 albumWithID:selectedAlbumId
 										 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
@@ -297,7 +375,7 @@ static int UploadFailureRetryCount = 3;
 	if([self imagesUploaded] >= [[self exportManager] imageCount]) {
 		[self performUploadCompletionTasks];
 	} else {
-		[self setSessionUploadStatusText:[NSString stringWithFormat:@"Uploading image %d of %d", [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
+		[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Uploading image %d of %d", @"Image upload progress text"), [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
 		NSString *thumbnailPath = [exportManager thumbnailPathAtIndex:[self imagesUploaded]];		
 		[self setCurrentThumbnailData:[NSData dataWithContentsOfFile: thumbnailPath]];
 
@@ -330,8 +408,8 @@ static int UploadFailureRetryCount = 3;
 		return;
 	}
 
-	NSAssert( [[self accounts] containsObject:account], @"selected account is unknown");
-	
+	NSAssert( [[self accounts] containsObject:account], @"Selected account is unknown");
+
 	[[self accountManager] setSelectedAccount:account];
 }
 

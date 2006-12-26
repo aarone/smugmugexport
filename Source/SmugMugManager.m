@@ -47,9 +47,20 @@ kCFStreamEventErrorOccurred;
 -(NSString *)postUploadURL;
 -(void)setIsLoggingIn:(BOOL)v;
 -(void)setIsLoggedIn:(BOOL)v;
+-(NSDictionary *)defaultNewAlbumPreferences;
+-(NSDictionary *)selectedCategory;
+-(void)setSelectedCategory:(NSDictionary *)d;
+-(void)createNewAlbum;
+-(void)createNewAlbumCallback:(SEL)callback;
+-(void)newAlbumCreationDidComplete:(XMLRPCCall *)rpcCall;
 
 -(NSMutableData *)responseData;
 -(void)setResponseData:(NSMutableData *)d;
+-(void)setCategories:(NSArray *)categories;
+-(void)setSubcategories:(NSArray *)anArray;
+
+-(NSMutableDictionary *)newAlbumPreferences;
+-(void)setNewAlbumPreferences:(NSMutableDictionary *)a;
 
 -(void)loginWithCallback:(SEL)loginDidEndSelector;
 -(void)logoutWithCallback:(SEL)logoutDidEndSelector;
@@ -57,6 +68,11 @@ kCFStreamEventErrorOccurred;
 -(void)loginCompletedBuildAlbumList:(XMLRPCCall *)rpcCall;
 -(void)buildAlbumListWithCallback:(SEL)callback;
 -(void)buildAlbumsListDidComplete:(XMLRPCCall *)rpcCall;
+-(void)buildCategoryListWithCallback:(SEL)callback;
+-(void)categoryGetDidComplete:(XMLRPCCall *)rpcCall;
+-(void)buildSubCategoryListWithCallback:(SEL)callback;
+-(void)subcateogryGetDidComplete:(XMLRPCCall *)rpcCall;
+
 @end
 
 static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType type, void *clientCallBackInfo) {
@@ -77,35 +93,77 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 
 static NSString *Boundary = @"_aBoundAry_$";
 
+static NSString *IsPublicPref = @"IsPublic";
+static NSString *ShowFilenamesPref = @"ShowFilenames";
+static NSString *AllowCommentsPref = @"AllowComments";
+static NSString *AllowExternalLinkingPref = @"AllowExternalLinking";
+static NSString *DisplayEXIFInfoPref = @"DisplayEXIFInfo";
+static NSString *EnableEasySharePref = @"EnableEasySharing";
+static NSString *AllowPurchasingPref = @"AllowPurchasing";
+static NSString *AllowOriginalsToBeViewedPref = @"AllowOriginalsToBeViewed";
+static NSString *AllowFriendsToEditPref = @"AllowFriendsToEdit";
+static NSString *AlbumTitlePref = @"AlbumTitle";
+static NSString *AlbumDescriptionPref = @"AlbumDescription";
+static NSString *AlbumKeywordsPref = @"AlbumKeywords";
+static NSString *AlbumCategoryPref = @"AlbumCategory";
+
 @implementation SmugMugManager
 
 +(SmugMugManager *)smugmugManager {
 	return [[[[self class] alloc] init] autorelease];
 }
 
--(id)initWithUsername:(NSString *)uname password:(NSString *)p {
+-(id)init {
 	if(![super init])
 		return nil;
 
-	[self setUsername:uname];
-	[self setPassword:p];
+//	[self setUsername:uname];
+//	[self setPassword:p];
 	[self loadFramework];
 	[self setUploadLock:[[[NSLock alloc] init] autorelease]];
-
+	[self setNewAlbumPreferences:[NSMutableDictionary dictionaryWithDictionary:[self defaultNewAlbumPreferences]]]; 
+	
 	return self;
 }
 
 -(void)dealloc {
 	[self unloadFramework];
 
+	[[self newAlbumPreferences] release];
+	[[self categories] release];
 	[[self curlHandle] release];
 	[[self albums] release];
 	[[self password] release];
 	[[self username] release];
 	[[self sessionID] release];
 	[[self uploadLock] release];
+	[[self subcategories] release];
+	[[self selectedCategory] release];
 
 	[super dealloc];
+}
+
+-(NSDictionary *)defaultNewAlbumPreferences {
+	NSNumber *Set = [NSNumber numberWithBool:YES];
+	NSNumber *NotSet = [NSNumber numberWithBool:NO];
+
+	return [NSDictionary dictionaryWithObjectsAndKeys:
+		Set, IsPublicPref,
+		Set, ShowFilenamesPref,
+		Set, AllowCommentsPref,
+		Set, AllowExternalLinkingPref,
+		Set, DisplayEXIFInfoPref,
+		Set, EnableEasySharePref,
+		Set, AllowPurchasingPref,
+		Set, AllowOriginalsToBeViewedPref,
+		Set, AllowFriendsToEditPref,
+		nil];
+
+		// unset:
+//		nil, @"Title",
+//		nil, @"Description",
+//		nil, @"Keywords",
+//		nil, @"Category"
 }
 
 -(NSLock *)uploadLock {
@@ -181,6 +239,8 @@ static NSString *Boundary = @"_aBoundAry_$";
 	sessionID = [anID retain];
 }
 
+#pragma mark Login/Logout Methods
+
 /* logout if necessary , login, then build album list for user */
 -(void)login {
 	[self logoutWithCallback:@selector(logoutCompletedNowLogin:)];
@@ -199,7 +259,6 @@ static NSString *Boundary = @"_aBoundAry_$";
 }
 
 -(void)loginCompletedBuildAlbumList:(XMLRPCCall *)rpcCall {
-	
 	if ([rpcCall succeeded]) {
 		NSDictionary *v = (NSDictionary *)[rpcCall returnedObject];
 		[self setSessionID:[v objectForKey:@"SessionID"]];
@@ -209,7 +268,6 @@ static NSString *Boundary = @"_aBoundAry_$";
 	} else {
 		[self setIsLoggedIn:NO];
 	}
-
 	[self buildAlbumListWithCallback:@selector(buildAlbumsListDidComplete:)];
 }
 
@@ -232,7 +290,6 @@ static NSString *Boundary = @"_aBoundAry_$";
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(loginDidComplete:)])
 		[[self delegate] loginDidComplete:[rpcCall succeeded]];
-
 }
 
 -(void)loginWithCallback:(SEL)loginDidEndSelector {
@@ -287,6 +344,84 @@ static NSString *Boundary = @"_aBoundAry_$";
 	
 	//	[rpcCall release];
 }
+
+#pragma mark Misc SM Info Methods
+
+-(void)buildCategoryList {
+	[self buildCategoryListWithCallback:@selector(categoryGetDidComplete:)];
+}
+
+-(void)buildCategoryListWithCallback:(SEL)callback {
+	XMLRPCCall *call = [[XMLRPCCall alloc] initWithURLString:[self XMLRPCURL]];
+	[call setMethodName:@"smugmug.categories.get"];
+	[call setParameters:[NSArray arrayWithObjects:[self sessionID], nil]];
+	[call invokeInNewThread:self callbackSelector:callback];
+}
+
+-(void)categoryGetDidComplete:(XMLRPCCall *)rpcCall {
+	if([rpcCall succeeded]) {
+		[self setCategories:[rpcCall returnedObject]];
+
+		// default to the first visible category
+		if([[self categories] count] > 0)
+			[[self newAlbumPreferences] setObject:[[self categories] objectAtIndex:0] forKey:AlbumCategoryPref];
+	}
+}
+
+-(void)buildSubCategoryList {
+	[self buildSubCategoryListWithCallback:@selector(subcategoryGetDidComplete:)];
+}
+
+-(void)buildSubCategoryListWithCallback:(SEL)callback {
+	XMLRPCCall *call = [[XMLRPCCall alloc] initWithURLString:[self XMLRPCURL]];
+	[call setMethodName:@"smugmug.subcategories.getAll"];
+	[call setParameters:[NSArray arrayWithObjects:[self sessionID], nil]];
+	[call invokeInNewThread:self callbackSelector:callback];
+}
+
+-(void)subcategoryGetDidComplete:(XMLRPCCall *)rpcCall {
+	if([rpcCall succeeded]) {
+		[self setSubcategories:[rpcCall returnedObject]];
+	}
+}
+
+#pragma mark New Album Creation Methods
+
+-(void)createNewAlbum {
+	[self createNewAlbumCallback:@selector(newAlbumCreationDidComplete:)];
+}
+
+-(void)createNewAlbumCallback:(SEL)callback {
+	XMLRPCCall *call = [[XMLRPCCall alloc] initWithURLString:[self XMLRPCURL]];
+	[call setMethodName:@"smugmug.albums.create"];
+	int selectedCategoryIndex = [selectedCategoryIndices firstIndex];
+	[call setParameters:[NSArray arrayWithObjects:[self sessionID], [[self newAlbumPreferences] objectForKey:AlbumTitlePref], [[self categories] objectAtIndex:selectedCategoryIndex], nil]];
+	[call invokeInNewThread:self callbackSelector:callback];
+}
+
+-(void)newAlbumCreationDidComplete:(XMLRPCCall *)rpcCall {
+	if([rpcCall succeeded]) {
+		[self buildAlbumListWithCallback:@selector(postAlbumCreateAlbumSyncDidComplete:)];
+	}
+}
+
+-(void)postAlbumCreateAlbumSyncDidComplete:(XMLRPCCall *)rpcCall {
+	if([rpcCall succeeded]) {
+		[self setAlbums:[rpcCall returnedObject]];
+	}
+
+	if([self delegate] != nil &&
+	   [[self delegate] respondsToSelector:@selector(createNewAlbumDidComplete:)])
+		[[self delegate] createNewAlbumDidComplete:[rpcCall succeeded]];
+}
+
+-(void)clearAlbumCreationState {
+	[[self newAlbumPreferences] removeObjectForKey:AlbumTitlePref];
+	[[self newAlbumPreferences] removeObjectForKey:AlbumDescriptionPref];
+	[[self newAlbumPreferences] removeObjectForKey:AlbumKeywordsPref];
+}
+
+#pragma mark Upload Methods
 
 /**
  *
@@ -447,8 +582,83 @@ static NSString *Boundary = @"_aBoundAry_$";
 		return @"image/png";
 	else if([[path lowercaseString] hasSuffix:@"gif"])
 		return @"image/gif";
-	
+
 	return @"image/jpeg"; // guess??
+}
+
+-(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey {
+
+	if([preferenceKey isEqualToString:IsPublicPref])
+		return @"Public";
+	else if([preferenceKey isEqualToString:ShowFilenamesPref])
+		return @"Filenames";
+	else if([preferenceKey isEqualToString:AllowCommentsPref])
+		return @"Comments";
+	else if([preferenceKey isEqualToString:AllowExternalLinkingPref])
+		return @"External";
+	else if([preferenceKey isEqualToString:DisplayEXIFInfoPref])
+		return @"EXIF";
+	else if([preferenceKey isEqualToString:EnableEasySharePref])
+		return @"Share";
+	else if([preferenceKey isEqualToString:AllowPurchasingPref])
+		return @"Printable";
+	else if([preferenceKey isEqualToString:AllowOriginalsToBeViewedPref])
+		return @"Originals";
+	else if([preferenceKey isEqualToString:AllowFriendsToEditPref])
+		return @"FamilyEdit";
+	else if([preferenceKey isEqualToString:AlbumTitlePref])
+		return @"Title";
+	else if([preferenceKey isEqualToString:AlbumDescriptionPref])
+		return @"Description";
+	else if([preferenceKey isEqualToString:AlbumKeywordsPref])
+		return @"Keywords";
+	else if([preferenceKey isEqualToString:AlbumCategoryPref])
+		return @"CategoryID";
+	
+	return nil;
+}
+	
+
+-(NSMutableDictionary *)newAlbumPreferences {
+	return newAlbumPreferences;
+}
+
+
+
+-(void)setSelectedCategory:(NSDictionary *)d {
+	if([self selectedCategory] != nil)
+		[[self selectedCategory] release];
+	
+	selectedCategory = [d retain];
+}
+
+-(void)setNewAlbumPreferences:(NSMutableDictionary *)a {
+	if([self newAlbumPreferences] != nil)
+		[[self newAlbumPreferences] release];
+	
+	newAlbumPreferences = [a retain];
+}
+
+-(NSArray *)subcategories {
+	return subcategories;
+}
+
+-(void)setSubcategories:(NSArray *)anArray {
+	if([self subcategories] != nil)
+		[[self subcategories] release];
+	
+	subcategories = [anArray retain];
+}
+
+-(NSArray *)categories {
+	return categories;
+}
+
+-(void)setCategories:(NSArray *)anArray {
+	if([self categories] != nil)
+		[[self categories] release];
+	
+	categories = [anArray retain];
 }
 
 -(NSString *)userID {

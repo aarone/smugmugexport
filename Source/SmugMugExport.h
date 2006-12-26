@@ -11,6 +11,7 @@
 @protocol ExportPluginProtocol, SmugMugManagerDelegate;
 
 @interface SmugMugExport : NSObject <ExportPluginProtocol, SmugMugManagerDelegate> {
+
 	IBOutlet id firstView;
 	IBOutlet id lastView;
 	IBOutlet NSBox *settingsBox;
@@ -18,31 +19,47 @@
 	IBOutlet NSPanel *loginPanel;
 	IBOutlet NSPopUpButton *acccountPopupButton;
 	IBOutlet NSArrayController *albumsArrayController;
+	IBOutlet NSPanel *newAlbumSheet;
+	IBOutlet NSArrayController *categoriesArrayController; 
 
-	NSString *username;  // this is the username bound to the textfield
-	NSString *password; // the password bound to the textfield
+	 // this is the username bound to the textfield, account manager holds the real username
+	NSString *username; 
+	// same goes for password..
+	NSString *password;
 	NSString *sessionUploadStatusText;
 	NSString *statusText;
 	NSNumber *fileUploadProgress;
 	NSNumber *sessionUploadProgress;
 	NSString *loginSheetStatusMessage;
+	NSData *currentThumbnailData;
+
 	BOOL loginSheetIsBusy;
 	BOOL isBusy;
 	BOOL loginAttempted;
-
 	int uploadRetryCount;
-	NSData *currentThumbnailData;
-
 	int imagesUploaded;
+
 	ExportMgr *exportManager;
 	SmugMugManager *smugMugManager;
 	AccountManager *accountManager;
 }
 
+#pragma mark Upload Actions
 -(IBAction)cancelUpload:(id)sender;
+
+#pragma mark Login Actions
 -(IBAction)cancelLoginSheet:(id)sender;
--(IBAction)donate:(id)sender;
 -(IBAction)showLoginSheet:(id)sender;
 -(IBAction)performLoginFromSheet:(id)sender;
+
+#pragma mark Misc
+-(IBAction)donate:(id)sender;
+
+#pragma mark Album Creation Actions
+-(IBAction)addNewAlbum:(id)sender;
+-(IBAction)removeAlbum:(id)sender;
+-(IBAction)cancelNewAlbumSheet:(id)sender;
+-(IBAction)createAlbum:(id)sender;
+
 
 @end

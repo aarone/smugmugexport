@@ -3,26 +3,38 @@
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {
             ACTIONS = {
+                addNewAlbum = id; 
                 cancelLoginSheet = id; 
+                cancelNewAlbumSheet = id; 
                 cancelUpload = id; 
+                createAlbum = id; 
                 donate = id; 
                 performLoginFromSheet = id; 
-                showLoginPanel = id; 
+                removeAlbum = id; 
+                showLoginSheet = id; 
             }; 
             CLASS = SmugMugExport; 
             LANGUAGE = ObjC; 
             OUTLETS = {
                 acccountPopupButton = NSPopUpButton; 
                 albumsArrayController = NSArrayController; 
+                categoriesArrayController = NSArrayController; 
                 firstView = id; 
                 lastView = id; 
                 loginPanel = NSPanel; 
+                newAlbumSheet = NSPanel; 
                 settingsBox = NSBox; 
                 uploadPanel = NSPanel; 
             }; 
             SUPERCLASS = NSObject; 
         }, 
         {CLASS = SmugMugExportBox; LANGUAGE = ObjC; SUPERCLASS = NSBox; }, 
+        {
+            CLASS = SmugMugManager; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {categoryArrayController = NSArrayController; delegate = id; }; 
+            SUPERCLASS = NSObject; 
+        }, 
         {
             CLASS = SmugmugExport; 
             LANGUAGE = ObjC; 

@@ -14,6 +14,8 @@
 -(void)logoutDidComplete:(BOOL)wasSuccessful;
 -(void)uploadDidCompleteForFile:(NSString *)aFullPathToImage withError:(NSString *)error;
 -(void)uploadMadeProgressForFile:(NSString *)pathToFile bytesWritten:(long)bytesWritten totalBytes:(long)totalBytes;
+-(void)categoryGetDidComplete:(BOOL)wasSuccessful;
+-(void)createNewAlbumDidComplete:(BOOL)wasSuccessful;
 @end
 
 @interface SmugMugManager : NSObject {
@@ -28,6 +30,10 @@
 	NSString *passwordHash;
 	CFReadStreamRef readStream;
 	NSMutableData *responseData;
+	NSArray *categories;
+	NSArray *subcategories;
+	NSMutableDictionary *newAlbumPreferences;
+	NSDictionary *selectedCategory;
 	
 	NSString *currentPathForUpload;
 	NSTimer *uploadProgressTimer;
@@ -37,6 +43,7 @@
 	BOOL isLoggedIn;
 	long nextProgressThreshold;
 	NSLock *uploadLock;
+	NSIndexSet *selectedCategoryIndices;
 }
 
 +(SmugMugManager *)smugmugManager;
@@ -51,6 +58,9 @@
 -(BOOL)isLoggingIn;
 -(BOOL)isLoggedIn;
 
+-(void)buildCategoryList; // must be logged in to call!
+-(void)buildSubCategoryList;
+
 -(NSString *)username;
 -(void)setUsername:(NSString *)n;
 -(NSString *)password;
@@ -58,6 +68,11 @@
 
 -(void)uploadImageAtPath:(NSString *)path albumWithID:(NSNumber *)albumId caption:(NSString *)caption;
 
+-(void)createNewAlbum;
+-(void)clearAlbumCreationState;
+
 -(NSArray *)albums;
+-(NSArray *)categories;
+-(NSArray *)subcategories;
 
 @end
