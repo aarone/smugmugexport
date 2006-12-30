@@ -48,8 +48,8 @@
 -(BOOL)isBusy;
 -(void)setIsBusy:(BOOL)v;
 -(void)login;
--(NSData *)currentThumbnailData;
--(void)setCurrentThumbnailData:(NSData *)d;
+-(NSImage *)currentThumbnail;
+-(void)setCurrentThumbnail:(NSImage *)d;
 -(BOOL)loginSheetIsBusy;
 -(void)setLoginSheetIsBusy:(BOOL)v;
 -(void)setUploadRetryCount:(int)v;
@@ -110,7 +110,7 @@ static int UploadFailureRetryCount = 3;
 	[[self accountManager] release];
 	[[self loginSheetStatusMessage] release];
 	[[self statusText] release];
-	[[self currentThumbnailData] release];
+	[[self currentThumbnail] release];
 
 	[super dealloc];
 }
@@ -206,8 +206,8 @@ static int UploadFailureRetryCount = 3;
 		[[self uploadPanel] isVisible];
 }
 
-
 -(IBAction)cancelUpload:(id)sender {
+	uploadCancelled = YES;
 	[self cancelExport];
 }
 
@@ -273,6 +273,31 @@ static int UploadFailureRetryCount = 3;
 }
 
 -(IBAction)removeAlbum:(id)sender {
+	if([[self selectedAlbum] objectForKey:@"AlbumID"] == nil) {
+		NSBeep();
+		return;
+	}
+	
+	NSBeginAlertSheet(NSLocalizedString(@"Delete Album", @"Delete Album Sheet Title"),
+					  NSLocalizedString(@"Delete", @"Default button title for album delete sheet"),
+					  NSLocalizedString(@"Cancel", @"Alternate button title for album delete sheet"),
+					  nil,
+					  [[self exportManager] window],
+					  self,
+					  @selector(deleteAlbumSheetDidEnd:returnCode:contextInfo:),
+					  @selector(sheetDidDismiss:returnCode:contextInfo:),
+					  NULL,
+					  NSLocalizedString(@"Are you sure you want to delete this album?  All photos in this album will be deleted from SmmugMug.", @"Warning text to display in the delete album alert sheet."));
+}
+
+-(void)deleteAlbumSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo {
+
+	if(returnCode == NSAlertDefaultReturn)
+		[[self smugMugManager] deleteAlbum:[[self selectedAlbum] objectForKey:@"AlbumID"]];
+
+}
+
+-(void)sheetDidDismiss:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo {
 	
 }
 
@@ -316,6 +341,10 @@ static int UploadFailureRetryCount = 3;
 	// show an error is not successful!
 }
 
+-(void)deleteAlbumDidComplete:(BOOL)wasSuccessful {
+
+}
+
 -(void)loginDidEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     [sheet orderOut:self];
 }
@@ -328,6 +357,7 @@ static int UploadFailureRetryCount = 3;
 	if([self sheetIsDisplayed]) // this should be impossible
 		return;
 
+	uploadCancelled = NO;
 	[self setImagesUploaded:0];
 	[self setFileUploadProgress:[NSNumber numberWithInt:0]];
 	[self setSessionUploadProgress:[NSNumber numberWithInt:0]];
@@ -340,8 +370,10 @@ static int UploadFailureRetryCount = 3;
 		  contextInfo:nil];
 
 	NSNumber *selectedAlbumId = [[self selectedAlbum] objectForKey:@"AlbumID"];
-	NSString *thumbnailPath = [exportManager thumbnailPathAtIndex:[self imagesUploaded]];		
-	[self setCurrentThumbnailData:[NSData dataWithContentsOfFile: thumbnailPath]];
+	NSString *thumbnailPath = [exportManager thumbnailPathAtIndex:[self imagesUploaded]];
+	NSImage *img = [[[NSImage alloc] initWithData:[NSData dataWithContentsOfFile: thumbnailPath]] autorelease];
+	[img setScalesWhenResized:YES];
+	[self setCurrentThumbnail:img];
 	[self resetUploadRetryCount];
 	[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
 								 albumWithID:selectedAlbumId
@@ -356,7 +388,12 @@ static int UploadFailureRetryCount = 3;
 -(void)uploadDidCompleteForFile:(NSString *)aFullPathToImage withError:(NSString *)error {
 
 	NSNumber *selectedAlbumId = [[self selectedAlbum] objectForKey:@"AlbumID"];
-	
+
+	if(uploadCancelled) {
+		[self performUploadCompletionTasks];
+		return; // stop uploading
+	}
+
 	// if an error occurred, retry up to UploadFailureRetryCount times
 	if(error != nil && [self uploadRetryCount] < UploadFailureRetryCount) {
 		[self incrementUploadRetryCount];
@@ -376,8 +413,10 @@ static int UploadFailureRetryCount = 3;
 		[self performUploadCompletionTasks];
 	} else {
 		[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Uploading image %d of %d", @"Image upload progress text"), [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
-		NSString *thumbnailPath = [exportManager thumbnailPathAtIndex:[self imagesUploaded]];		
-		[self setCurrentThumbnailData:[NSData dataWithContentsOfFile: thumbnailPath]];
+		NSString *thumbnailPath = [exportManager thumbnailPathAtIndex:[self imagesUploaded]];
+		NSImage *img = [[[NSImage alloc] initWithData:[NSData dataWithContentsOfFile: thumbnailPath]] autorelease];
+		[img setScalesWhenResized:YES];
+		[self setCurrentThumbnail:img];
 
 		[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
 									 albumWithID:selectedAlbumId
@@ -441,15 +480,15 @@ static int UploadFailureRetryCount = 3;
 	[self setUploadRetryCount:0];
 }
 
--(NSData *)currentThumbnailData {
-	return currentThumbnailData;
+-(NSImage *)currentThumbnail {
+	return currentThumbnail;
 }
 
--(void)setCurrentThumbnailData:(NSData *)d {
-	if([self currentThumbnailData] != nil)
-		[[self currentThumbnailData] release];
+-(void)setCurrentThumbnail:(NSImage *)d {
+	if([self currentThumbnail] != nil)
+		[[self currentThumbnail] release];
 	
-	currentThumbnailData = [d retain];
+	currentThumbnail = [d retain];
 }
 
 -(BOOL)isBusy {
@@ -588,7 +627,7 @@ static int UploadFailureRetryCount = 3;
 }
 
 -(void)cancelExport {
-	NSLog(@"SmugMugExport -- cancelExport");
+	[[self smugMugManager] stopUpload];
 }
 
 -(void)unlockProgress {

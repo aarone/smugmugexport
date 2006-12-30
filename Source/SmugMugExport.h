@@ -31,11 +31,12 @@
 	NSNumber *fileUploadProgress;
 	NSNumber *sessionUploadProgress;
 	NSString *loginSheetStatusMessage;
-	NSData *currentThumbnailData;
+	NSImage *currentThumbnail;
 
 	BOOL loginSheetIsBusy;
 	BOOL isBusy;
 	BOOL loginAttempted;
+	BOOL uploadCancelled;
 	int uploadRetryCount;
 	int imagesUploaded;
 

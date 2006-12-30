@@ -16,6 +16,7 @@
 -(void)uploadMadeProgressForFile:(NSString *)pathToFile bytesWritten:(long)bytesWritten totalBytes:(long)totalBytes;
 -(void)categoryGetDidComplete:(BOOL)wasSuccessful;
 -(void)createNewAlbumDidComplete:(BOOL)wasSuccessful;
+-(void)deleteAlbumDidComplete:(BOOL)wasSuccessful;
 @end
 
 @interface SmugMugManager : NSObject {
@@ -36,7 +37,6 @@
 	NSDictionary *selectedCategory;
 	
 	NSString *currentPathForUpload;
-	NSTimer *uploadProgressTimer;
 	long uploadSize;
 	BOOL isUploading;
 	BOOL isLoggingIn;
@@ -67,9 +67,11 @@
 -(void)setPassword:(NSString *)p;
 
 -(void)uploadImageAtPath:(NSString *)path albumWithID:(NSNumber *)albumId caption:(NSString *)caption;
+-(void)stopUpload;
 
 -(void)createNewAlbum;
 -(void)clearAlbumCreationState;
+-(void)deleteAlbum:(NSNumber *)albumId;
 
 -(NSArray *)albums;
 -(NSArray *)categories;

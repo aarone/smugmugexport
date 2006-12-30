@@ -53,6 +53,7 @@ kCFStreamEventErrorOccurred;
 -(void)createNewAlbum;
 -(void)createNewAlbumCallback:(SEL)callback;
 -(void)newAlbumCreationDidComplete:(XMLRPCCall *)rpcCall;
+-(void)destroyUploadResources;
 
 -(NSMutableData *)responseData;
 -(void)setResponseData:(NSMutableData *)d;
@@ -61,6 +62,7 @@ kCFStreamEventErrorOccurred;
 
 -(NSMutableDictionary *)newAlbumPreferences;
 -(void)setNewAlbumPreferences:(NSMutableDictionary *)a;
+-(NSDictionary *)newAlbumPrefDictionary;
 
 -(void)loginWithCallback:(SEL)loginDidEndSelector;
 -(void)logoutWithCallback:(SEL)logoutDidEndSelector;
@@ -72,6 +74,9 @@ kCFStreamEventErrorOccurred;
 -(void)categoryGetDidComplete:(XMLRPCCall *)rpcCall;
 -(void)buildSubCategoryListWithCallback:(SEL)callback;
 -(void)subcateogryGetDidComplete:(XMLRPCCall *)rpcCall;
+-(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSNumber *)albumId;
+
+-(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey;
 
 @end
 
@@ -89,6 +94,14 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 		default:
 			break;
 	}
+}
+
+static inline BOOL IsEmpty(id thing) {
+    return thing == nil
+	|| ([thing respondsToSelector:@selector(length)]
+        && [(NSData *)thing length] == 0)
+	|| ([thing respondsToSelector:@selector(count)]
+        && [(NSArray *)thing count] == 0);
 }
 
 static NSString *Boundary = @"_aBoundAry_$";
@@ -145,7 +158,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 -(NSDictionary *)defaultNewAlbumPreferences {
 	NSNumber *Set = [NSNumber numberWithBool:YES];
-	NSNumber *NotSet = [NSNumber numberWithBool:NO];
+//	NSNumber *NotSet = [NSNumber numberWithBool:NO];
 
 	return [NSDictionary dictionaryWithObjectsAndKeys:
 		Set, IsPublicPref,
@@ -385,9 +398,50 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	}
 }
 
+#pragma mark Delete Album Methods
+-(void)deleteAlbum:(NSNumber *)albumId {
+	if(![self isLoggedIn] || IsEmpty(albumId) ) {
+	    NSBeep();
+		NSLog(@"Cannot delete an album without a title");
+		return;
+	}
+	
+	[self deleteAlbumWithCallback:@selector(albumDeleteDidEnd:) albumId:albumId];
+}
+
+-(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSNumber *)albumId {
+	XMLRPCCall *call = [[XMLRPCCall alloc] initWithURLString:[self XMLRPCURL]];
+	[call setMethodName:@"smugmug.albums.delete"];
+
+	[call setParameters:[NSArray arrayWithObjects:[self sessionID], albumId, nil]];
+	[call invokeInNewThread:self callbackSelector:callback];	
+}
+
+-(void)albumDeleteDidEnd:(XMLRPCCall *)rpcCall {
+	if([rpcCall succeeded]) {
+		[self buildAlbumListWithCallback:@selector(postAlbumDeleteAlbumSyncDidComplete:)];
+	}
+}
+
+-(void)postAlbumDeleteAlbumSyncDidComplete:(XMLRPCCall *)rpcCall {
+	if([rpcCall succeeded])
+		[self setAlbums:[rpcCall returnedObject]];
+
+	if([self delegate] != nil &&
+	   [[self delegate] respondsToSelector:@selector(deleteAlbumDidComplete:)])
+		[[self delegate] deleteAlbumDidComplete:[rpcCall succeeded]];
+}
+
 #pragma mark New Album Creation Methods
 
 -(void)createNewAlbum {
+	if(![self isLoggedIn] ||
+	   IsEmpty([[self newAlbumPreferences] objectForKey:AlbumTitlePref])) {
+		NSBeep();
+		NSLog(@"Cannot create an album without a title");
+		return;
+	}
+
 	[self createNewAlbumCallback:@selector(newAlbumCreationDidComplete:)];
 }
 
@@ -395,8 +449,55 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	XMLRPCCall *call = [[XMLRPCCall alloc] initWithURLString:[self XMLRPCURL]];
 	[call setMethodName:@"smugmug.albums.create"];
 	int selectedCategoryIndex = [selectedCategoryIndices firstIndex];
-	[call setParameters:[NSArray arrayWithObjects:[self sessionID], [[self newAlbumPreferences] objectForKey:AlbumTitlePref], [[self categories] objectAtIndex:selectedCategoryIndex], nil]];
+	[call setParameters:[NSArray arrayWithObjects:[self sessionID], [[self newAlbumPreferences] objectForKey:AlbumTitlePref], [[self categories] objectAtIndex:selectedCategoryIndex], [self newAlbumPrefDictionary], nil]];
 	[call invokeInNewThread:self callbackSelector:callback];
+}
+
+-(NSDictionary *)newAlbumPrefDictionary {
+	NSMutableDictionary *returnDict = [NSMutableDictionary dictionary];
+	NSArray *prefKeys = [NSArray arrayWithObjects: IsPublicPref,ShowFilenamesPref,AllowCommentsPref,AllowExternalLinkingPref,DisplayEXIFInfoPref,EnableEasySharePref,AllowPurchasingPref,AllowOriginalsToBeViewedPref,AllowFriendsToEditPref,AlbumDescriptionPref,AlbumKeywordsPref,nil];
+	NSEnumerator *keyEnumerator = [prefKeys objectEnumerator];
+	NSString *thisKey;
+	while(thisKey = [keyEnumerator nextObject]) {
+		if(!IsEmpty([newAlbumPreferences objectForKey:thisKey])) {
+			[returnDict setObject:[newAlbumPreferences objectForKey:thisKey]
+						   forKey:[self smugMugNewAlbumKeyForPref:thisKey]];
+		}
+	}
+
+	return [NSDictionary dictionaryWithDictionary:returnDict];
+}
+
+-(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey {
+	
+	if([preferenceKey isEqualToString:IsPublicPref])
+		return @"Public";
+	else if([preferenceKey isEqualToString:ShowFilenamesPref])
+		return @"Filenames";
+	else if([preferenceKey isEqualToString:AllowCommentsPref])
+		return @"Comments";
+	else if([preferenceKey isEqualToString:AllowExternalLinkingPref])
+		return @"External";
+	else if([preferenceKey isEqualToString:DisplayEXIFInfoPref])
+		return @"EXIF";
+	else if([preferenceKey isEqualToString:EnableEasySharePref])
+		return @"Share";
+	else if([preferenceKey isEqualToString:AllowPurchasingPref])
+		return @"Printable";
+	else if([preferenceKey isEqualToString:AllowOriginalsToBeViewedPref])
+		return @"Originals";
+	else if([preferenceKey isEqualToString:AllowFriendsToEditPref])
+		return @"FamilyEdit";
+	else if([preferenceKey isEqualToString:AlbumTitlePref])
+		return @"Title";
+	else if([preferenceKey isEqualToString:AlbumDescriptionPref])
+		return @"Description";
+	else if([preferenceKey isEqualToString:AlbumKeywordsPref])
+		return @"Keywords";
+	else if([preferenceKey isEqualToString:AlbumCategoryPref])
+		return @"CategoryID";
+	
+	return nil;
 }
 
 -(void)newAlbumCreationDidComplete:(XMLRPCCall *)rpcCall {
@@ -458,41 +559,63 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 -(void)beingUploadProgressTracking {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	uploadProgressTimer = [NSTimer timerWithTimeInterval:0.10 target:self selector:@selector(trackUploadProgress:) userInfo:nil repeats:YES];
+	NSTimer *uploadProgressTimer  = [NSTimer timerWithTimeInterval:0.10 target:self selector:@selector(trackUploadProgress:) userInfo:nil repeats:YES];
 	
-	[[NSRunLoop currentRunLoop] addTimer:uploadProgressTimer forMode:NSDefaultRunLoopMode];
-	
-	do {
-		NSDate* next = [NSDate dateWithTimeIntervalSinceNow:0.10]; 
-		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
-											 beforeDate:next];
-	} while(isUploading);
+	[[NSRunLoop currentRunLoop] addTimer:uploadProgressTimer forMode:NSModalPanelRunLoopMode];
 
-	[uploadProgressTimer invalidate];
+	while ( [[NSRunLoop currentRunLoop] runMode:NSModalPanelRunLoopMode
+									 beforeDate:[NSDate distantFuture]] );
+
 	[pool release];
 }
 
 -(void)trackUploadProgress:(NSTimer *)timer {
+
+	if(!isUploading) {
+		[timer invalidate];
+		return;
+	}
+
 	CFNumberRef bytesWrittenProperty = (CFNumberRef)CFReadStreamCopyProperty (readStream, kCFStreamPropertyHTTPRequestBytesWrittenCount); 
 	
 	int bytesWritten;
 	CFNumberGetValue (bytesWrittenProperty, 3, &bytesWritten);
 
+	[self performSelectorOnMainThread:@selector(updateProgress:) withObject:[NSArray arrayWithObjects:currentPathForUpload, [NSNumber numberWithLong:(long)bytesWritten], [NSNumber numberWithLong:uploadSize], nil] waitUntilDone:NO];
+}
+
+-(void)updateProgress:(NSArray *)args {
+	long bytesWritten = [(NSNumber *)[args objectAtIndex:1] longValue];
+	long totalBytes = [(NSNumber *)[args objectAtIndex:2] longValue];
+	
 	// notify delegate of progress
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(uploadMadeProgressForFile:bytesWritten:totalBytes:)])
-		[[self delegate] uploadMadeProgressForFile:currentPathForUpload bytesWritten:(long)bytesWritten totalBytes:uploadSize];
+		[[self delegate] uploadMadeProgressForFile:[args objectAtIndex:0] bytesWritten:bytesWritten totalBytes:totalBytes];
 }
 
 -(void)appendToResponse {
-	
+
 	UInt8 buffer[2048];
+	
+	if(!isUploading)
+		return;
+
 	CFIndex bytesRead = CFReadStreamRead(readStream, buffer, sizeof(buffer));
 	
 	if (bytesRead < 0)
 		NSLog(@"Warning: Error (< 0b from CFReadStreamRead");
 	else if (bytesRead)
 		[[self responseData] appendBytes:(void *)buffer length:(unsigned)bytesRead];
+}
+
+-(void)stopUpload {
+	[self destroyUploadResources];
+	
+	if([self delegate] != nil &&
+	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:withError:)]) {
+		[[self delegate] uploadDidCompleteForFile:currentPathForUpload withError:NSLocalizedString(@"Upload was cancelled.", @"Error strinng for cancelled upload")];
+	}
 }
 
 -(NSMutableData *)responseData {
@@ -530,9 +653,8 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 }
 
 -(void)errorOccurred {
-
 	[self destroyUploadResources];	
-	
+
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:withError:)]) {
 		[[self delegate] uploadDidCompleteForFile:currentPathForUpload withError:NSLocalizedString(@"Upload Failed", @"The upload was interrupted in progress.")];
@@ -584,40 +706,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 		return @"image/gif";
 
 	return @"image/jpeg"; // guess??
-}
-
--(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey {
-
-	if([preferenceKey isEqualToString:IsPublicPref])
-		return @"Public";
-	else if([preferenceKey isEqualToString:ShowFilenamesPref])
-		return @"Filenames";
-	else if([preferenceKey isEqualToString:AllowCommentsPref])
-		return @"Comments";
-	else if([preferenceKey isEqualToString:AllowExternalLinkingPref])
-		return @"External";
-	else if([preferenceKey isEqualToString:DisplayEXIFInfoPref])
-		return @"EXIF";
-	else if([preferenceKey isEqualToString:EnableEasySharePref])
-		return @"Share";
-	else if([preferenceKey isEqualToString:AllowPurchasingPref])
-		return @"Printable";
-	else if([preferenceKey isEqualToString:AllowOriginalsToBeViewedPref])
-		return @"Originals";
-	else if([preferenceKey isEqualToString:AllowFriendsToEditPref])
-		return @"FamilyEdit";
-	else if([preferenceKey isEqualToString:AlbumTitlePref])
-		return @"Title";
-	else if([preferenceKey isEqualToString:AlbumDescriptionPref])
-		return @"Description";
-	else if([preferenceKey isEqualToString:AlbumKeywordsPref])
-		return @"Keywords";
-	else if([preferenceKey isEqualToString:AlbumCategoryPref])
-		return @"CategoryID";
-	
-	return nil;
-}
-	
+}	
 
 -(NSMutableDictionary *)newAlbumPreferences {
 	return newAlbumPreferences;
