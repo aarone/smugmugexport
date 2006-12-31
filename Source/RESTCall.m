@@ -26,6 +26,11 @@
 
 @implementation NSString (NSStringURLAdditions)
 -(NSString *)urlEscapedString {
+//	CFStringRef preprocessedString = CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault, (CFStringRef)self, CFSTR(""), kCFStringEncodingUTF8);
+//	CFStringRef urlString = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, preprocessedString, NULL, NULL, kCFStringEncodingUTF8);
+//	return [(NSString *)urlString autorelease];
+	
+	
 	NSString *escapedString = (NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
 																				  (CFStringRef)self,
 																				  NULL,
@@ -47,7 +52,13 @@
 	for(i=0;i<[names count];i++) {
 		NSString *aKey = [names objectAtIndex:i];
 		NSString *aVal = [values objectAtIndex:i];
-		[parameterList appendFormat:@"%@=%@", aKey, aVal];
+		if([aVal isKindOfClass:[NSString class]])
+			[parameterList appendFormat:@"%@=%@", aKey, [aVal urlEscapedString]];
+		else if([aVal respondsToSelector:@selector(stringValue)])
+			[parameterList appendFormat:@"%@=%@", aKey, [[aVal stringValue] urlEscapedString]];
+		else 
+			[parameterList appendFormat:@"%@=%@", aKey, aVal];
+
 		if(i<[names count]-1)
 			[parameterList appendString:@"&"];
 	}

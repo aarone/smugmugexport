@@ -11,7 +11,6 @@
 #import "ExportPluginProtocol.h"
 #import "ExportMgr.h"
 #import "AccountManager.h"
-#import "SmugMugEntityUnescapeTransformer.h"
 
 @interface SmugMugExport (Private)
 -(ExportMgr *)exportManager;
@@ -63,8 +62,6 @@
 -(BOOL)sheetIsDisplayed;	
 @end
 
-static SmugMugExport *SharedExporter = nil;
-
 // UI keys
 NSString *ExistingAlbumTabIdentifier = @"existingAlbum";
 NSString *NewAlbumTabIdentifier = @"newAlbum";
@@ -94,8 +91,6 @@ static int UploadFailureRetryCount = 3;
 	[self setImagesUploaded:0];
 	[self resetUploadRetryCount];
 
-	[NSValueTransformer setValueTransformer:[[[SmugMugEntityUnescapeTransformer alloc] init] autorelease] forName:@"SmugMugEntityUnescapeTransformer"];
-	SharedExporter = self;
 	return self;
 }
 
@@ -326,7 +321,7 @@ static int UploadFailureRetryCount = 3;
 	[self setSelectedAccount:[[self smugMugManager] username]];
 	[NSApp endSheet:loginPanel];
 
-	[[self smugMugManager] buildCategoryList]; 
+	[[self smugMugManager] buildCategoryList];
 }
 
 -(void)categoryGetDidComplete:(BOOL)wasSuccessful {

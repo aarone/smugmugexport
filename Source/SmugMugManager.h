@@ -66,12 +66,12 @@
 -(NSString *)password;
 -(void)setPassword:(NSString *)p;
 
--(void)uploadImageAtPath:(NSString *)path albumWithID:(NSNumber *)albumId caption:(NSString *)caption;
+-(void)uploadImageAtPath:(NSString *)path albumWithID:(NSString *)albumId caption:(NSString *)caption;
 -(void)stopUpload;
 
 -(void)createNewAlbum;
 -(void)clearAlbumCreationState;
--(void)deleteAlbum:(NSNumber *)albumId;
+-(void)deleteAlbum:(NSString *)albumId;
 
 -(NSArray *)albums;
 -(NSArray *)categories;

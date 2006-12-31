@@ -75,7 +75,7 @@ kCFStreamEventErrorOccurred;
 -(void)categoryGetDidComplete:(RESTCall *)rpcCall;
 -(void)buildSubCategoryListWithCallback:(SEL)callback;
 -(void)subcategoryGetDidComplete:(RESTCall *)rpcCall;
--(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSNumber *)albumId;
+-(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSString *)albumId;
 
 -(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey;
 
@@ -409,17 +409,30 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 				responseTarget:self];
 }
 
--(void)categoryGetDidComplete:(RESTCall *)call {
-	if([self smResponseWasSuccessful:call]) {
+-(void)initializeCategoriesWithDocument:(NSXMLDocument *)doc {
+	NSXMLElement *root = [doc rootElement];
+	NSError *error = nil;
+	NSArray *categoryNodes = [root nodesForXPath:@"//Categories/Category" error:&error ];
 
-		NSLog(@"%@", [[[NSString alloc] initWithData:[[call document] XMLData] encoding: NSUTF8StringEncoding] autorelease]);
-		// TODO decode response...
-		//[self setCategories:[rpcCall returnedObject]];
+	NSXMLNode *node;
+	NSEnumerator *nodeEnumertor = [categoryNodes objectEnumerator];
+	NSMutableArray *returnedCategories = [NSMutableArray array];
+	while(node = [nodeEnumertor nextObject]) {
+		NSString *categoryId = [[(NSXMLElement *)node attributeForName:@"id"] stringValue];
+		NSString *categoryTitle = [[[(NSXMLElement *)node elementsForName:@"Title"] objectAtIndex:0] stringValue];
 
-		// default to the first visible category
-//		if([[self categories] count] > 0)
-//			[[self newAlbumPreferences] setObject:[[self categories] objectAtIndex:0] forKey:AlbumCategoryPref];
+		NSAssert(categoryId != nil && categoryTitle != nil, NSLocalizedString(@"Unexpected XML response for category get", @"Error string when the xml returned by the category get method is malformed."));
+
+		[returnedCategories addObject:[NSDictionary dictionaryWithObjectsAndKeys:categoryId, @"CategoryID", categoryTitle, @"Title", nil]];
 	}
+
+	[self setCategories:[NSArray arrayWithArray:returnedCategories]];
+}
+
+-(void)categoryGetDidComplete:(RESTCall *)call {
+	if([self smResponseWasSuccessful:call])
+		[self initializeCategoriesWithDocument:[call document]];
+	
 }
 
 -(void)buildSubCategoryList {
@@ -435,16 +448,33 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 				responseTarget:self];
 }
 
--(void)subcategoryGetDidComplete:(RESTCall *)call {
-	if([self smResponseWasSuccessful:call]) {
-		// TODO decode response 
-		NSLog(@"%@", [[[NSString alloc] initWithData:[[call document] XMLData] encoding: NSUTF8StringEncoding] autorelease]);
-		//		[self setSubcategories:[rpcCall returnedObject]];
+-(void)initializeSubcategoriesWithDocument:(NSXMLDocument *)doc {
+	NSXMLElement *root = [doc rootElement];
+	NSError *error = nil;
+	NSArray *subcategoryNodes = [root nodesForXPath:@"//SubCategories/SubCategory" error:&error ];
+
+	NSXMLNode *node;
+	NSEnumerator *nodeEnumertor = [subcategoryNodes objectEnumerator];
+	NSMutableArray *returnedSubCategories = [NSMutableArray array];
+	while(node = [nodeEnumertor nextObject]) {
+		NSString *categoryId = [[(NSXMLElement *)node attributeForName:@"id"] stringValue];
+		NSString *categoryTitle = [[[(NSXMLElement *)node elementsForName:@"Title"] objectAtIndex:0] stringValue];
+			
+		NSAssert(categoryId != nil && categoryTitle != nil, NSLocalizedString(@"Unexpected XML response for category get", @"Error string when the xml returned by the subcategory get method is malformed."));
+		
+		[returnedSubCategories addObject:[NSDictionary dictionaryWithObjectsAndKeys:categoryId, @"CategoryID", categoryTitle, @"Title", nil]];
 	}
+
+	[self setSubcategories:[NSArray arrayWithArray:returnedSubCategories]];
+}
+
+-(void)subcategoryGetDidComplete:(RESTCall *)call {
+	if([self smResponseWasSuccessful:call])
+		[self initializeSubcategoriesWithDocument:[call document]];
 }
 
 #pragma mark Delete Album Methods
--(void)deleteAlbum:(NSNumber *)albumId {
+-(void)deleteAlbum:(NSString *)albumId {
 	if(![self isLoggedIn] || IsEmpty(albumId) ) {
 	    NSBeep();
 		NSLog(@"Cannot delete an album without a title");
@@ -454,11 +484,11 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	[self deleteAlbumWithCallback:@selector(albumDeleteDidEnd:) albumId:albumId];
 }
 
--(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSNumber *)albumId {
+-(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSString *)albumId {
 	RESTCall *call = [RESTCall RESTCall];
 	[call invokeMethodWithHost:[self RESTURL]
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", @"AlbumID", nil]
-						values:[NSArray arrayWithObjects:@"smugmug.albums.delete", [self sessionID], [albumId stringValue], nil]
+						values:[NSArray arrayWithObjects:@"smugmug.albums.delete", [self sessionID], albumId, nil]
 			  responseCallback:callback
 				responseTarget:self];
 }
@@ -467,6 +497,8 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	if([self smResponseWasSuccessful:call]) {
 		[self buildAlbumListWithCallback:@selector(postAlbumDeleteAlbumSyncDidComplete:)];
 	}
+	
+	// TODO spawn an error here...
 }
 
 -(void)postAlbumDeleteAlbumSyncDidComplete:(RESTCall *)call {
@@ -499,12 +531,12 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	int selectedCategoryIndex = [selectedCategoryIndices firstIndex];
 	NSDictionary *basicNewAlbumPrefs = [self newAlbumOptionalPrefDictionary];
 	NSMutableDictionary *newAlbumProerties = [NSMutableDictionary dictionaryWithDictionary:basicNewAlbumPrefs];
-	[newAlbumProerties setObject:[[self categories] objectAtIndex:selectedCategoryIndex]
+	[newAlbumProerties setObject:[[[self categories] objectAtIndex:selectedCategoryIndex] objectForKey:@"CategoryID"]
 						  forKey:@"CategoryID"];
 	[newAlbumProerties setObject:@"smugmug.albums.create" forKey:@"method"];
 	[newAlbumProerties setObject:[self sessionID] forKey:@"SessionID"];
 	[newAlbumProerties setObject:[[self newAlbumPreferences] objectForKey:AlbumTitlePref] forKey:@"Title"];
-	NSMutableArray *orderedKeys = [NSMutableArray arrayWithObjects:@"method", @"SessionID", @"CategoryID", nil];
+	NSMutableArray *orderedKeys = [NSMutableArray arrayWithObjects:@"method", @"SessionID", @"Title", @"CategoryID", nil];
 	[orderedKeys addObjectsFromArray:[basicNewAlbumPrefs allKeys]];
 
 	[call invokeMethodWithHost:[self RESTURL]
@@ -562,18 +594,16 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 }
 
 -(void)newAlbumCreationDidComplete:(RESTCall *)call {
-	if([self smResponseWasSuccessful:call]) {
-		// TODO evaluate response or throw error for build albums
-		
+
+	if([self smResponseWasSuccessful:call])
 		[self buildAlbumListWithCallback:@selector(postAlbumCreateAlbumSyncDidComplete:)];
-	}
+	
+	// TODO return error if necessary
 }
 
 -(void)postAlbumCreateAlbumSyncDidComplete:(RESTCall *)call {
-	if([self smResponseWasSuccessful:call]) {
-		NSLog(@"%@", [[[NSString alloc] initWithData:[[call document] XMLData] encoding: NSUTF8StringEncoding] autorelease]);
-		//[self setAlbums:[rpcCall returnedObject]];
-	}
+	if([self smResponseWasSuccessful:call])
+		[self initializeAlbumsFromResponse:[call document]];
 
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(createNewAlbumDidComplete:)])
@@ -591,9 +621,9 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 /**
  *
  */
--(void)uploadImageAtPath:(NSString *)path albumWithID:(NSNumber *)albumId caption:(NSString *)caption {
+-(void)uploadImageAtPath:(NSString *)path albumWithID:(NSString *)albumId caption:(NSString *)caption {
 	
-	NSData *postData = [self postBodyForImageAtPath:path albumId:[albumId stringValue] caption:caption];
+	NSData *postData = [self postBodyForImageAtPath:path albumId:albumId caption:caption];
 
 	CFHTTPMessageRef myRequest;
 	myRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, CFSTR("POST"), (CFURLRef)[NSURL URLWithString:[self postUploadURL]], kCFHTTPVersion1_1);
@@ -702,7 +732,8 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 -(void)transferComplete {
 
-	NSXMLDocument *response = [[[NSXMLDocument alloc] initWithData:[self responseData]] autorelease];
+	NSError *error = nil;
+	NSXMLDocument *response = [[[NSXMLDocument alloc] initWithData:[self responseData] options:0 error:&error] autorelease];
 	NSLog(@"%@", [[[NSString alloc] initWithData:[response XMLData] encoding: NSUTF8StringEncoding] autorelease]);
 	NSString *errorString = nil;
 //	if([response isFault]) 
