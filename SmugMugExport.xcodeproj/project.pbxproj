@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		930DE1ED0B46AF44008120ED /* RESTCall.h in Private Frameworks */ = {isa = PBXBuildFile; fileRef = 930DE1EB0B46AF44008120ED /* RESTCall.h */; };
+		930DE1EE0B46AF44008120ED /* RESTCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 930DE1EC0B46AF44008120ED /* RESTCall.m */; };
 		931533850AF4FA6D005B1241 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 931533500AF4FA6D005B1241 /* Security.framework */; };
 		932164520B2F78B000624A8D /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9321644E0B2F78B000624A8D /* NSDataAdditions.m */; };
 		9321645E0B2F78BF00624A8D /* SmugMugEntityUnescapeTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 932164560B2F78BF00624A8D /* SmugMugEntityUnescapeTransformer.m */; };
@@ -38,6 +40,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				932166510B3213F200624A8D /* CURLHandle.framework in Private Frameworks */,
+				930DE1ED0B46AF44008120ED /* RESTCall.h in Private Frameworks */,
 			);
 			name = "Private Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -48,6 +51,8 @@
 		089C1672FE841209C02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		089C167FFE841241C02AAC07 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		930DE1EB0B46AF44008120ED /* RESTCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RESTCall.h; path = Source/RESTCall.h; sourceTree = "<group>"; };
+		930DE1EC0B46AF44008120ED /* RESTCall.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RESTCall.m; path = Source/RESTCall.m; sourceTree = "<group>"; };
 		931533500AF4FA6D005B1241 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		9321644D0B2F78B000624A8D /* NSDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSDataAdditions.h; path = Source/NSDataAdditions.h; sourceTree = "<group>"; };
 		9321644E0B2F78B000624A8D /* NSDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSDataAdditions.m; path = Source/NSDataAdditions.m; sourceTree = "<group>"; };
@@ -157,6 +162,8 @@
 				9321645A0B2F78BF00624A8D /* SmugMugExportBox.m */,
 				9321645B0B2F78BF00624A8D /* SmugMugManager.h */,
 				9321645C0B2F78BF00624A8D /* SmugMugManager.m */,
+				930DE1EB0B46AF44008120ED /* RESTCall.h */,
+				930DE1EC0B46AF44008120ED /* RESTCall.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -340,6 +347,7 @@
 				932165DD0B2F975200624A8D /* ICUMatcher.m in Sources */,
 				932165DF0B2F975200624A8D /* ICUPattern.m in Sources */,
 				932165E10B2F975200624A8D /* NSStringICUAdditions.m in Sources */,
+				930DE1EE0B46AF44008120ED /* RESTCall.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

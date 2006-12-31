@@ -8,8 +8,8 @@
 
 #import "SmugMugManager.h"
 #import <CURLHandle/CURLHandle.h>
-#import "XMLRPCCall.h"
 #import "NSDataAdditions.h"
+#import "RESTCall.h"
 
 static const CFOptionFlags DAClientNetworkEvents = 
 kCFStreamEventOpenCompleted     |
@@ -18,7 +18,6 @@ kCFStreamEventEndEncountered    |
 kCFStreamEventErrorOccurred;
 
 @interface SmugMugManager (Private)
--(void)loadFramework;
 -(CURLHandle *)curlHandle;
 -(void)setCurlHandle:(CURLHandle *)h;
 -(NSString *)sessionID;
@@ -26,17 +25,19 @@ kCFStreamEventErrorOccurred;
 -(NSString *)version;
 -(NSString *)apiKey;
 -(NSString *)appName;
--(NSString *)XMLRPCURL;
--(NSString *)XMLRPCUploadURL;
--(NSString *)CURLFrameworkPath;
 -(NSString *)userID;
 -(void)setAlbums:(NSArray *)a;
 -(void)setUserID:(NSString *)anID;
 -(NSString *)passwordHash;
 -(void)setPasswordHash:(NSString *)p;
--(BOOL)CURLIsLoaded;
--(void)unloadFramework;
--(void)loadFramework;
+
+
+-(NSURL *)RESTURL;
+-(NSURL *)RESTUploadURL;
+
+-(BOOL)smResponseWasSuccessful:(RESTCall *)call;
+-(void)evaluateLoginResponse:(NSXMLDocument *)d;
+
 -(NSString *)contentTypeForPath:(NSString *)path;
 -(NSLock *)uploadLock;
 -(void)setUploadLock:(NSLock *)aLock;
@@ -52,7 +53,7 @@ kCFStreamEventErrorOccurred;
 -(void)setSelectedCategory:(NSDictionary *)d;
 -(void)createNewAlbum;
 -(void)createNewAlbumCallback:(SEL)callback;
--(void)newAlbumCreationDidComplete:(XMLRPCCall *)rpcCall;
+-(void)newAlbumCreationDidComplete:(RESTCall *)rpcCall;
 -(void)destroyUploadResources;
 
 -(NSMutableData *)responseData;
@@ -62,18 +63,18 @@ kCFStreamEventErrorOccurred;
 
 -(NSMutableDictionary *)newAlbumPreferences;
 -(void)setNewAlbumPreferences:(NSMutableDictionary *)a;
--(NSDictionary *)newAlbumPrefDictionary;
+-(NSDictionary *)newAlbumOptionalPrefDictionary;
 
 -(void)loginWithCallback:(SEL)loginDidEndSelector;
 -(void)logoutWithCallback:(SEL)logoutDidEndSelector;
--(void)logoutCompletedNowLogin:(XMLRPCCall *)rpcCall;
--(void)loginCompletedBuildAlbumList:(XMLRPCCall *)rpcCall;
+-(void)logoutCompletedNowLogin:(RESTCall *)rpcCall;
+-(void)loginCompletedBuildAlbumList:(RESTCall *)rpcCall;
 -(void)buildAlbumListWithCallback:(SEL)callback;
--(void)buildAlbumsListDidComplete:(XMLRPCCall *)rpcCall;
+-(void)buildAlbumsListDidComplete:(RESTCall *)call;
 -(void)buildCategoryListWithCallback:(SEL)callback;
--(void)categoryGetDidComplete:(XMLRPCCall *)rpcCall;
+-(void)categoryGetDidComplete:(RESTCall *)rpcCall;
 -(void)buildSubCategoryListWithCallback:(SEL)callback;
--(void)subcateogryGetDidComplete:(XMLRPCCall *)rpcCall;
+-(void)subcategoryGetDidComplete:(RESTCall *)rpcCall;
 -(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSNumber *)albumId;
 
 -(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey;
@@ -132,7 +133,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 //	[self setUsername:uname];
 //	[self setPassword:p];
-	[self loadFramework];
+//	[self loadFramework];
 	[self setUploadLock:[[[NSLock alloc] init] autorelease]];
 	[self setNewAlbumPreferences:[NSMutableDictionary dictionaryWithDictionary:[self defaultNewAlbumPreferences]]]; 
 	
@@ -140,7 +141,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 }
 
 -(void)dealloc {
-	[self unloadFramework];
+//	[self unloadFramework];
 
 	[[self newAlbumPreferences] release];
 	[[self categories] release];
@@ -213,33 +214,6 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 -(id)delegate {
 	return delegate;
 }
-
--(NSString *)CURLFrameworkPath {
-	return [[[NSBundle bundleForClass:[self class]] privateFrameworksPath] stringByAppendingPathComponent:@"/CURLHandle.framework"];
-}
-
--(void)unloadFramework {
-	if([self CURLIsLoaded])
-		[CURLHandle curlGoodbye];
-}
-
--(void)loadFramework {
-	if([self CURLIsLoaded])
-		return;
-
-	NSBundle *framework = [NSBundle bundleWithPath:[self CURLFrameworkPath]];
-	[framework load];
-
-	CURLHandle *h = [[[CURLHandle alloc] init] autorelease];
-	[self setCurlHandle:h];
-	[CURLHandle curlHelloSignature:@"XxXx" acceptAll:YES];
-}
-
--(BOOL)CURLIsLoaded {
-	NSBundle *frameworkBundle = [NSBundle bundleWithPath:[self CURLFrameworkPath]];
-    
-	return frameworkBundle != nil && [frameworkBundle isLoaded];
-}
 	
 -(NSString *)sessionID {
 	return sessionID;
@@ -259,9 +233,10 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	[self logoutWithCallback:@selector(logoutCompletedNowLogin:)];
 }
 
--(void)logoutCompletedNowLogin:(XMLRPCCall *)rpcCall {
-	if(rpcCall == nil || [rpcCall succeeded])
+-(void)logoutCompletedNowLogin:(RESTCall *)call {
+	if(call == nil || ([call wasSuccessful] && [self smResponseWasSuccessful:call])) {
 		[self setIsLoggedIn:NO];
+	}
 
 	[self setIsLoggingIn:YES];
 	[self loginWithCallback:@selector(loginCompletedBuildAlbumList:)];	
@@ -271,48 +246,129 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	[self logoutWithCallback:@selector(logoutCallback:)];
 }
 
--(void)loginCompletedBuildAlbumList:(XMLRPCCall *)rpcCall {
-	if ([rpcCall succeeded]) {
-		NSDictionary *v = (NSDictionary *)[rpcCall returnedObject];
-		[self setSessionID:[v objectForKey:@"SessionID"]];
-		[self setPasswordHash:[v objectForKey:@"PaswordHash"]];
-		[self setUserID:[v objectForKey:@"UserID"]];
-		[self setIsLoggedIn:YES];
+-(void)loginCompletedBuildAlbumList:(RESTCall *)call {
+	if ([call wasSuccessful] && [self smResponseWasSuccessful:call]) {
+		[self evaluateLoginResponse:[call document]];
 	} else {
 		[self setIsLoggedIn:NO];
 	}
+
 	[self buildAlbumListWithCallback:@selector(buildAlbumsListDidComplete:)];
 }
 
--(void)buildAlbumListWithCallback:(SEL)callback {
-	XMLRPCCall *call = [[XMLRPCCall alloc] initWithURLString:[self XMLRPCURL]];
-	[call setMethodName:@"smugmug.albums.get"];
-	[call setParameters:[NSArray arrayWithObjects:[self sessionID], nil]];
-	[call invokeInNewThread:self callbackSelector:callback];
+-(void)evaluateLoginResponse:(NSXMLDocument *)d {
+	NSXMLElement *root = [d rootElement];
+	NSError *error = nil;
+	NSString *sessId = [[[root nodesForXPath:@"//Login/SessionID" error:&error] objectAtIndex:0] stringValue];
+	NSString *passHash = [[[root nodesForXPath:@"//Login/PasswordHash" error:&error] objectAtIndex:0] stringValue];
+	NSString *uid = [[[root nodesForXPath:@"//Login/UserID" error:&error] objectAtIndex:0] stringValue];
+				
+	NSAssert(sessId != nil && passHash != nil && uid != nil, NSLocalizedString(@"Unexpected XML response for login", @"Error string when the xml returned by the login method is malformed."));
+	[self setSessionID:sessId];
+	[self setPasswordHash:passHash];
+	[self setUserID:uid];
 }
 
--(void)buildAlbumsListDidComplete:(XMLRPCCall *)rpcCall {
+-(void)buildAlbumListWithCallback:(SEL)callback {
+	RESTCall *call = [RESTCall RESTCall];
+	[call invokeMethodWithHost:[self RESTURL] 
+						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
+						values:[NSArray arrayWithObjects:@"smugmug.albums.get", [self sessionID], nil]
+			  responseCallback:callback
+				responseTarget:self];
+}
 
-	if([rpcCall succeeded]) {
-		[self setAlbums:[rpcCall returnedObject]];
+/*
+ <?xml version="1.0" encoding="utf-8"?>
+ <rsp stat="ok">
+ <method>smugmug.albums.get</method>
+ <Albums>
+	 <Album id="1973549">
+		 <Title>Our Wedding</Title>
+		 <Category id="23">
+			<Title>Weddings</Title>
+		 </Category>
+	 </Album>
+	 <Album id="1986684">
+		 <Title>Molly &amp; Tom's Wedding</Title>
+		 <Category id="23">
+			<Title>Weddings</Title>
+		 </Category>
+	 </Album>
+	 <Album id="1884785">
+		 <Title>honeymoon</Title>
+		 <Category id="33">
+			<Title>Vacation</Title>
+		 </Category>
+	 </Album>
+ </Albums>
+ </rsp>
+ */
+-(void)initializeAlbumsFromResponse:(NSXMLDocument *)doc {
+
+	/*
+	 int "AlbumID"
+	 String "Title"
+	 String "Category"
+	 int "CategoryID"
+	 String "SubCategory" optional
+	 int "SubCategoryID" optional
+	 */
+	NSXMLElement *root = [doc rootElement];
+	NSError *error = nil;
+	NSArray *albumNodes = [root nodesForXPath:@"//Albums/Album" error:&error ];
+	NSXMLNode *node;
+	NSEnumerator *nodeEnumertor = [albumNodes objectEnumerator];
+	NSMutableArray *returnedAlbums = [NSMutableArray array];
+	while(node = [nodeEnumertor nextObject]) {
+		NSXMLNode *albumAttr = [(NSXMLElement *)node attributeForName:@"id"];
+		NSString *albumId = [albumAttr stringValue];
+		NSString *albumTitle = [[[(NSXMLElement *)node elementsForName:@"Title"] objectAtIndex:0] stringValue];
+
+		NSAssert(albumId != nil && albumTitle != nil, NSLocalizedString(@"Unexpected XML response for album get", @"Error string when the xml returned by the album get method is malformed."));
+		
+		[returnedAlbums addObject:[NSDictionary dictionaryWithObjectsAndKeys:albumId, @"AlbumID", albumTitle, @"Title", nil]];
 	}
+	[self setAlbums:returnedAlbums];
+	
+}
+
+-(void)buildAlbumsListDidComplete:(RESTCall *)call {
+
+	if([self smResponseWasSuccessful:call])
+		[self initializeAlbumsFromResponse:[call document]];
 
 	[self setIsLoggingIn:NO];
 	[self setIsLoggedIn:YES];
 
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(loginDidComplete:)])
-		[[self delegate] loginDidComplete:[rpcCall succeeded]];
+		[[self delegate] loginDidComplete:[self smResponseWasSuccessful:call]];
 }
 
 -(void)loginWithCallback:(SEL)loginDidEndSelector {
-	[self loadFramework];
-	[self logout]; // logout from the current session
 	[self setIsLoggingIn:YES];
-	XMLRPCCall *call = [[XMLRPCCall alloc] initWithURLString:[self XMLRPCURL]];
-	[call setMethodName:@"smugmug.login.withPassword"];
-	[call setParameters:[NSArray arrayWithObjects:[self username], [self password], [self version], [self apiKey], nil]];
-	[call invokeInNewThread:self callbackSelector:loginDidEndSelector];	
+	RESTCall *call = [RESTCall RESTCall];
+
+	[call invokeMethodWithHost:[self RESTURL] 
+						  keys:[NSArray arrayWithObjects:@"method", @"EmailAddress",@"Password", @"APIKey", nil]
+						values:[NSArray arrayWithObjects:@"smugmug.login.withPassword", [self username], [self password], [self apiKey], nil]
+			  responseCallback:loginDidEndSelector
+				responseTarget:self];
+}
+
+-(BOOL)smResponseWasSuccessful:(RESTCall *)call {
+	if(![call wasSuccessful])
+		return NO;
+
+	NSXMLElement *root = [[call document] rootElement];
+	return [[[root attributeForName:@"stat"] stringValue] isEqualToString:@"ok"];
+}
+
+-(void)loginCompleted:(RESTCall *)call {
+	if([self smResponseWasSuccessful:call]) {
+		[self evaluateLoginResponse:[call document]];
+	}
 }
 
 -(void)logoutWithCallback:(SEL)logoutDidEndSelector {
@@ -321,41 +377,21 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 		return;
 	}
 
-	[self loadFramework];
-	XMLRPCCall *call = [[XMLRPCCall alloc] initWithURLString:[self XMLRPCURL]];
-	[call setMethodName:@"smugmug.logout"];
-	[call setParameters:[NSArray arrayWithObjects:[self sessionID], nil]];
-	[call invokeInNewThread:self callbackSelector:logoutDidEndSelector];
+	RESTCall *call = [RESTCall RESTCall];	
+	[call invokeMethodWithHost:[self RESTURL] 
+						  keys:[NSArray arrayWithObjects:@"method", "SessionID", nil]
+						values:[NSArray arrayWithObjects:@"smugmug.logout", [self sessionID], nil]
+			  responseCallback:logoutDidEndSelector
+				responseTarget:self];
 }
 
--(void)loginCallback:(XMLRPCCall *)rpcCall {
+-(void)logoutCallback:(RESTCall *)call {
 
-	[self setIsLoggingIn:NO];
-	
-	if ([rpcCall succeeded]) {
-		NSDictionary *v = (NSDictionary *)[rpcCall returnedObject];
-		[self setSessionID:[v objectForKey:@"SessionID"]];
-		[self setPasswordHash:[v objectForKey:@"PaswordHash"]];
-		[self setUserID:[v objectForKey:@"UserID"]];
-		[self setIsLoggedIn:YES];
-	}
-
-	if([self delegate] != nil &&
-	   [[self delegate] respondsToSelector:@selector(loginDidComplete:)])
-		[[self delegate] loginDidComplete:[rpcCall succeeded]];
-	
-	//	[rpcCall release];
-}
-
--(void)logoutCallback:(XMLRPCCall *)rpcCall {
-	
 	[self setIsLoggedIn:NO];
-	
+
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(logoutDidComplete:)])
-		[[self delegate] logoutDidComplete:[rpcCall succeeded]];
-	
-	//	[rpcCall release];
+		[[self delegate] logoutDidComplete:[self smResponseWasSuccessful:call]];	
 }
 
 #pragma mark Misc SM Info Methods
@@ -365,19 +401,24 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 }
 
 -(void)buildCategoryListWithCallback:(SEL)callback {
-	XMLRPCCall *call = [[XMLRPCCall alloc] initWithURLString:[self XMLRPCURL]];
-	[call setMethodName:@"smugmug.categories.get"];
-	[call setParameters:[NSArray arrayWithObjects:[self sessionID], nil]];
-	[call invokeInNewThread:self callbackSelector:callback];
+	RESTCall *call = [RESTCall RESTCall];
+	[call invokeMethodWithHost:[self RESTURL]
+						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
+						values:[NSArray arrayWithObjects:@"smugmug.categories.get", [self sessionID], nil]
+			  responseCallback:callback
+				responseTarget:self];
 }
 
--(void)categoryGetDidComplete:(XMLRPCCall *)rpcCall {
-	if([rpcCall succeeded]) {
-		[self setCategories:[rpcCall returnedObject]];
+-(void)categoryGetDidComplete:(RESTCall *)call {
+	if([self smResponseWasSuccessful:call]) {
+
+		NSLog(@"%@", [[[NSString alloc] initWithData:[[call document] XMLData] encoding: NSUTF8StringEncoding] autorelease]);
+		// TODO decode response...
+		//[self setCategories:[rpcCall returnedObject]];
 
 		// default to the first visible category
-		if([[self categories] count] > 0)
-			[[self newAlbumPreferences] setObject:[[self categories] objectAtIndex:0] forKey:AlbumCategoryPref];
+//		if([[self categories] count] > 0)
+//			[[self newAlbumPreferences] setObject:[[self categories] objectAtIndex:0] forKey:AlbumCategoryPref];
 	}
 }
 
@@ -386,15 +427,19 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 }
 
 -(void)buildSubCategoryListWithCallback:(SEL)callback {
-	XMLRPCCall *call = [[XMLRPCCall alloc] initWithURLString:[self XMLRPCURL]];
-	[call setMethodName:@"smugmug.subcategories.getAll"];
-	[call setParameters:[NSArray arrayWithObjects:[self sessionID], nil]];
-	[call invokeInNewThread:self callbackSelector:callback];
+	RESTCall *call = [RESTCall RESTCall];
+	[call invokeMethodWithHost:[self RESTURL]
+						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
+						values:[NSArray arrayWithObjects:@"smugmug.subcategories.getAll", [self sessionID], nil]
+			  responseCallback:callback
+				responseTarget:self];
 }
 
--(void)subcategoryGetDidComplete:(XMLRPCCall *)rpcCall {
-	if([rpcCall succeeded]) {
-		[self setSubcategories:[rpcCall returnedObject]];
+-(void)subcategoryGetDidComplete:(RESTCall *)call {
+	if([self smResponseWasSuccessful:call]) {
+		// TODO decode response 
+		NSLog(@"%@", [[[NSString alloc] initWithData:[[call document] XMLData] encoding: NSUTF8StringEncoding] autorelease]);
+		//		[self setSubcategories:[rpcCall returnedObject]];
 	}
 }
 
@@ -410,26 +455,29 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 }
 
 -(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSNumber *)albumId {
-	XMLRPCCall *call = [[XMLRPCCall alloc] initWithURLString:[self XMLRPCURL]];
-	[call setMethodName:@"smugmug.albums.delete"];
-
-	[call setParameters:[NSArray arrayWithObjects:[self sessionID], albumId, nil]];
-	[call invokeInNewThread:self callbackSelector:callback];	
+	RESTCall *call = [RESTCall RESTCall];
+	[call invokeMethodWithHost:[self RESTURL]
+						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", @"AlbumID", nil]
+						values:[NSArray arrayWithObjects:@"smugmug.albums.delete", [self sessionID], [albumId stringValue], nil]
+			  responseCallback:callback
+				responseTarget:self];
 }
 
--(void)albumDeleteDidEnd:(XMLRPCCall *)rpcCall {
-	if([rpcCall succeeded]) {
+-(void)albumDeleteDidEnd:(RESTCall *)call {
+	if([self smResponseWasSuccessful:call]) {
 		[self buildAlbumListWithCallback:@selector(postAlbumDeleteAlbumSyncDidComplete:)];
 	}
 }
 
--(void)postAlbumDeleteAlbumSyncDidComplete:(XMLRPCCall *)rpcCall {
-	if([rpcCall succeeded])
-		[self setAlbums:[rpcCall returnedObject]];
+-(void)postAlbumDeleteAlbumSyncDidComplete:(RESTCall *)call {
+
+	if([self smResponseWasSuccessful:call])
+		[self initializeAlbumsFromResponse:[call document]];
+
 
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(deleteAlbumDidComplete:)])
-		[[self delegate] deleteAlbumDidComplete:[rpcCall succeeded]];
+		[[self delegate] deleteAlbumDidComplete:[self smResponseWasSuccessful:call]];
 }
 
 #pragma mark New Album Creation Methods
@@ -446,14 +494,27 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 }
 
 -(void)createNewAlbumCallback:(SEL)callback {
-	XMLRPCCall *call = [[XMLRPCCall alloc] initWithURLString:[self XMLRPCURL]];
-	[call setMethodName:@"smugmug.albums.create"];
+	RESTCall *call = [RESTCall RESTCall];
+	
 	int selectedCategoryIndex = [selectedCategoryIndices firstIndex];
-	[call setParameters:[NSArray arrayWithObjects:[self sessionID], [[self newAlbumPreferences] objectForKey:AlbumTitlePref], [[self categories] objectAtIndex:selectedCategoryIndex], [self newAlbumPrefDictionary], nil]];
-	[call invokeInNewThread:self callbackSelector:callback];
+	NSDictionary *basicNewAlbumPrefs = [self newAlbumOptionalPrefDictionary];
+	NSMutableDictionary *newAlbumProerties = [NSMutableDictionary dictionaryWithDictionary:basicNewAlbumPrefs];
+	[newAlbumProerties setObject:[[self categories] objectAtIndex:selectedCategoryIndex]
+						  forKey:@"CategoryID"];
+	[newAlbumProerties setObject:@"smugmug.albums.create" forKey:@"method"];
+	[newAlbumProerties setObject:[self sessionID] forKey:@"SessionID"];
+	[newAlbumProerties setObject:[[self newAlbumPreferences] objectForKey:AlbumTitlePref] forKey:@"Title"];
+	NSMutableArray *orderedKeys = [NSMutableArray arrayWithObjects:@"method", @"SessionID", @"CategoryID", nil];
+	[orderedKeys addObjectsFromArray:[basicNewAlbumPrefs allKeys]];
+
+	[call invokeMethodWithHost:[self RESTURL]
+						  keys:orderedKeys
+					 valueDict:newAlbumProerties
+			  responseCallback:callback
+				responseTarget:self];
 }
 
--(NSDictionary *)newAlbumPrefDictionary {
+-(NSDictionary *)newAlbumOptionalPrefDictionary {
 	NSMutableDictionary *returnDict = [NSMutableDictionary dictionary];
 	NSArray *prefKeys = [NSArray arrayWithObjects: IsPublicPref,ShowFilenamesPref,AllowCommentsPref,AllowExternalLinkingPref,DisplayEXIFInfoPref,EnableEasySharePref,AllowPurchasingPref,AllowOriginalsToBeViewedPref,AllowFriendsToEditPref,AlbumDescriptionPref,AlbumKeywordsPref,nil];
 	NSEnumerator *keyEnumerator = [prefKeys objectEnumerator];
@@ -500,20 +561,23 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	return nil;
 }
 
--(void)newAlbumCreationDidComplete:(XMLRPCCall *)rpcCall {
-	if([rpcCall succeeded]) {
+-(void)newAlbumCreationDidComplete:(RESTCall *)call {
+	if([self smResponseWasSuccessful:call]) {
+		// TODO evaluate response or throw error for build albums
+		
 		[self buildAlbumListWithCallback:@selector(postAlbumCreateAlbumSyncDidComplete:)];
 	}
 }
 
--(void)postAlbumCreateAlbumSyncDidComplete:(XMLRPCCall *)rpcCall {
-	if([rpcCall succeeded]) {
-		[self setAlbums:[rpcCall returnedObject]];
+-(void)postAlbumCreateAlbumSyncDidComplete:(RESTCall *)call {
+	if([self smResponseWasSuccessful:call]) {
+		NSLog(@"%@", [[[NSString alloc] initWithData:[[call document] XMLData] encoding: NSUTF8StringEncoding] autorelease]);
+		//[self setAlbums:[rpcCall returnedObject]];
 	}
 
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(createNewAlbumDidComplete:)])
-		[[self delegate] createNewAlbumDidComplete:[rpcCall succeeded]];
+		[[self delegate] createNewAlbumDidComplete:[self smResponseWasSuccessful:call]];
 }
 
 -(void)clearAlbumCreationState {
@@ -638,11 +702,11 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 -(void)transferComplete {
 
-	XMLRPCResponse *response = [[[XMLRPCResponse alloc] initWithData:[self responseData]] autorelease];
-
+	NSXMLDocument *response = [[[NSXMLDocument alloc] initWithData:[self responseData]] autorelease];
+	NSLog(@"%@", [[[NSString alloc] initWithData:[response XMLData] encoding: NSUTF8StringEncoding] autorelease]);
 	NSString *errorString = nil;
-	if([response isFault]) 
-		errorString = [response faultString];
+//	if([response isFault]) 
+//		errorString = [response faultString];
 
 	[self destroyUploadResources];
 
@@ -829,12 +893,12 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	return @"SmugMugExport";
 }
 
--(NSString *)XMLRPCURL {
-	return @"https://api.SmugMug.com/hack/xmlrpc/";
+-(NSURL *)RESTURL {
+	return [NSURL URLWithString:@"https://api.SmugMug.com/hack/rest/1.1.1/"];
 }
 
--(NSString *)XMLRPCUploadURL {
-	return @"http://upload.SmugMug.com/hack/xmlrpc/";
+-(NSURL *)RESTUploadURL {
+	return [NSURL URLWithString:@"http://upload.SmugMug.com/hack/rest/1.1.1/"];
 }
 
 -(NSString *)postUploadURL {
