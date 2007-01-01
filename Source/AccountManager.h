@@ -10,7 +10,7 @@
 @class KeychainManager;
 
 /**
-* Interface between exporter instance and the known user accounts.  Does not actually
+ * Interface between exporter instance and the known user accounts.  Does not actually
  * communicate with SmugMug.
  */
 @interface AccountManager : NSObject {

@@ -8,6 +8,8 @@
 
 #import "RESTCall.h"
 
+NSString *UserAgent = @"iPhoto SmugMugExport";
+
 @interface NSURLRequest (NSURLRequestSMAdditions)
 +(NSURLRequest *)smRequestWithURL:(NSURL *)aUrl;
 @end
@@ -15,7 +17,7 @@
 @implementation NSURLRequest (NSURLRequestSMAdditions)
 +(NSURLRequest *)smRequestWithURL:(NSURL *)aUrl {
 	NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:aUrl];
-	[req setValue:@"iPhoto SmugMugExport" forHTTPHeaderField:@"User-Agent"];
+	[req setValue:UserAgent forHTTPHeaderField:@"User-Agent"];
 	return req;
 }
 @end
@@ -26,11 +28,6 @@
 
 @implementation NSString (NSStringURLAdditions)
 -(NSString *)urlEscapedString {
-//	CFStringRef preprocessedString = CFURLCreateStringByReplacingPercentEscapesUsingEncoding(kCFAllocatorDefault, (CFStringRef)self, CFSTR(""), kCFStringEncodingUTF8);
-//	CFStringRef urlString = CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, preprocessedString, NULL, NULL, kCFStringEncodingUTF8);
-//	return [(NSString *)urlString autorelease];
-	
-	
 	NSString *escapedString = (NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
 																				  (CFStringRef)self,
 																				  NULL,
@@ -51,11 +48,11 @@
 	int i;
 	for(i=0;i<[names count];i++) {
 		NSString *aKey = [names objectAtIndex:i];
-		NSString *aVal = [values objectAtIndex:i];
+		id aVal = [values objectAtIndex:i];
 		if([aVal isKindOfClass:[NSString class]])
-			[parameterList appendFormat:@"%@=%@", aKey, [aVal urlEscapedString]];
+			[parameterList appendFormat:@"%@=%@", aKey, [(NSString *)aVal urlEscapedString]];
 		else if([aVal respondsToSelector:@selector(stringValue)])
-			[parameterList appendFormat:@"%@=%@", aKey, [[aVal stringValue] urlEscapedString]];
+			[parameterList appendFormat:@"%@=%@", aKey, [[(NSNumber *)aVal stringValue] urlEscapedString]];
 		else 
 			[parameterList appendFormat:@"%@=%@", aKey, aVal];
 

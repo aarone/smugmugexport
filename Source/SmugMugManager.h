@@ -7,7 +7,6 @@
 //
 
 #import <Cocoa/Cocoa.h>
-@class CURLHandle;
 
 @protocol SmugMugManagerDelegate
 -(void)loginDidComplete:(BOOL)wasSuccessful;
@@ -21,7 +20,6 @@
 
 @interface SmugMugManager : NSObject {
 	id delegate;
-	CURLHandle *curlHandle;
 
 	NSArray *albums;
 	NSString *username;
@@ -35,19 +33,17 @@
 	NSArray *subcategories;
 	NSMutableDictionary *newAlbumPreferences;
 	NSDictionary *selectedCategory;
-	
+
 	NSString *currentPathForUpload;
 	long uploadSize;
 	BOOL isUploading;
 	BOOL isLoggingIn;
 	BOOL isLoggedIn;
 	long nextProgressThreshold;
-	NSLock *uploadLock;
 	NSIndexSet *selectedCategoryIndices;
 }
 
 +(SmugMugManager *)smugmugManager;
--(id)initWithUsername:(NSString *)accountId password:(NSString *)password;
 
 -(void)setDelegate:(id)delegate;
 -(id)delegate;

@@ -37,6 +37,7 @@
 	BOOL isBusy;
 	BOOL loginAttempted;
 	BOOL uploadCancelled;
+	BOOL errorAlertSheetIsVisisble;
 	int uploadRetryCount;
 	int imagesUploaded;
 
@@ -60,7 +61,7 @@
 -(IBAction)addNewAlbum:(id)sender;
 -(IBAction)removeAlbum:(id)sender;
 -(IBAction)cancelNewAlbumSheet:(id)sender;
--(IBAction)createAlbum:(id)sender;
+//-(IBAction)createAlbum:(id)sender;
 
 
 @end

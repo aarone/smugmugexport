@@ -9,6 +9,8 @@
 #import <Cocoa/Cocoa.h>
 
 
+extern NSString *UserAgent;
+
 @interface RESTCall : NSObject {
 	NSURLConnection *connection;
 	NSMutableData *response;

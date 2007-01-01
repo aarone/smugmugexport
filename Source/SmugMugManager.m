@@ -7,7 +7,6 @@
 //
 
 #import "SmugMugManager.h"
-#import <CURLHandle/CURLHandle.h>
 #import "NSDataAdditions.h"
 #import "RESTCall.h"
 
@@ -18,11 +17,8 @@ kCFStreamEventEndEncountered    |
 kCFStreamEventErrorOccurred;
 
 @interface SmugMugManager (Private)
--(CURLHandle *)curlHandle;
--(void)setCurlHandle:(CURLHandle *)h;
 -(NSString *)sessionID;
 -(void)setSessionID:(NSString *)anID;
--(NSString *)version;
 -(NSString *)apiKey;
 -(NSString *)appName;
 -(NSString *)userID;
@@ -39,8 +35,6 @@ kCFStreamEventErrorOccurred;
 -(void)evaluateLoginResponse:(NSXMLDocument *)d;
 
 -(NSString *)contentTypeForPath:(NSString *)path;
--(NSLock *)uploadLock;
--(void)setUploadLock:(NSLock *)aLock;
 -(NSData *)postBodyForImageAtPath:(NSString *)path albumId:(NSString *)albumId caption:(NSString *)caption;
 -(void)appendToResponse;
 -(void)transferComplete;
@@ -131,30 +125,138 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	if(![super init])
 		return nil;
 
-//	[self setUsername:uname];
-//	[self setPassword:p];
-//	[self loadFramework];
-	[self setUploadLock:[[[NSLock alloc] init] autorelease]];
 	[self setNewAlbumPreferences:[NSMutableDictionary dictionaryWithDictionary:[self defaultNewAlbumPreferences]]]; 
 	
 	return self;
 }
 
 -(void)dealloc {
-//	[self unloadFramework];
 
 	[[self newAlbumPreferences] release];
 	[[self categories] release];
-	[[self curlHandle] release];
 	[[self albums] release];
 	[[self password] release];
 	[[self username] release];
 	[[self sessionID] release];
-	[[self uploadLock] release];
 	[[self subcategories] release];
 	[[self selectedCategory] release];
 
 	[super dealloc];
+}
+
+#pragma mark Miscellaneous Get/Set Methods
+-(NSMutableDictionary *)newAlbumPreferences {
+	return newAlbumPreferences;
+}
+
+
+
+-(void)setSelectedCategory:(NSDictionary *)d {
+	if([self selectedCategory] != nil)
+		[[self selectedCategory] release];
+	
+	selectedCategory = [d retain];
+}
+
+-(void)setNewAlbumPreferences:(NSMutableDictionary *)a {
+	if([self newAlbumPreferences] != nil)
+		[[self newAlbumPreferences] release];
+	
+	newAlbumPreferences = [a retain];
+}
+
+-(NSArray *)subcategories {
+	return subcategories;
+}
+
+-(void)setSubcategories:(NSArray *)anArray {
+	if([self subcategories] != nil)
+		[[self subcategories] release];
+	
+	subcategories = [anArray retain];
+}
+
+-(NSArray *)categories {
+	return categories;
+}
+
+-(void)setCategories:(NSArray *)anArray {
+	if([self categories] != nil)
+		[[self categories] release];
+	
+	categories = [anArray retain];
+}
+
+-(NSString *)userID {
+	return userID;
+}
+
+-(void)setUserID:(NSString *)anID {
+	
+	if([self userID] != nil)
+		[[self userID] release];
+	
+	userID = [anID retain];
+}
+
+-(NSString *)passwordHash {
+	return passwordHash;
+}
+
+-(void)setPasswordHash:(NSString *)p {
+	if([self passwordHash] != nil)
+		[[self passwordHash] release];
+	
+	passwordHash = [p retain];
+}
+
+-(NSString *)username {
+	return username;
+}
+
+-(void)setUsername:(NSString *)n {
+	if([self username] != nil)
+		[[self username] release];
+	
+	username = [n retain];
+}
+
+-(NSString *)password {
+	return password;
+}
+
+-(void)setPassword:(NSString *)p {
+	if([self password] != nil)
+		[[self password] release];
+	
+	password = [p retain];
+}
+
+-(void)setAlbums:(NSArray *)a {
+	if([self albums] != nil)
+		[[self albums] release];
+	
+	albums = [a retain];
+}
+
+-(NSArray *)albums {
+	return albums;
+}
+
+-(NSString *)apiKey {
+	return @"98LHI74dS6P0A8cQ1M6h0R1hXsbIPDXc";
+}
+
+-(NSString *)appName {
+	return @"SmugMugExport";
+}
+
+-(NSURL *)RESTURL {
+	return [NSURL URLWithString:@"https://api.smugmug.com/hack/rest/1.1.1/"];
+}
+
+-(NSString *)postUploadURL {
+	return @"http://upload.SmugMug.com/photos/xmladd.mg";
 }
 
 -(NSDictionary *)defaultNewAlbumPreferences {
@@ -180,16 +282,6 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 //		nil, @"Category"
 }
 
--(NSLock *)uploadLock {
-	return uploadLock;
-}
-
--(void)setUploadLock:(NSLock *)aLock {
-	if([self uploadLock] != nil)
-		[[self uploadLock] release];
-	
-	uploadLock = [aLock retain];
-}
 
 -(void)setIsLoggedIn:(BOOL)v {
 	isLoggedIn = v;
@@ -247,13 +339,16 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 }
 
 -(void)loginCompletedBuildAlbumList:(RESTCall *)call {
-	if ([call wasSuccessful] && [self smResponseWasSuccessful:call]) {
+	if ([self smResponseWasSuccessful:call]) {
 		[self evaluateLoginResponse:[call document]];
+		[self buildAlbumListWithCallback:@selector(buildAlbumsListDidComplete:)];
 	} else {
 		[self setIsLoggedIn:NO];
+		[self setIsLoggingIn:NO];
+		[self performSelectorOnMainThread:@selector(notifyDelegateOfLoginCompleted:) withObject:[NSNumber numberWithBool:NO] waitUntilDone:NO];
 	}
 
-	[self buildAlbumListWithCallback:@selector(buildAlbumsListDidComplete:)];
+	
 }
 
 -(void)evaluateLoginResponse:(NSXMLDocument *)d {
@@ -333,6 +428,12 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	
 }
 
+-(void)notifyDelegateOfLoginCompleted:(NSNumber *)wasSuccessful {
+	if([self delegate] != nil &&
+	   [[self delegate] respondsToSelector:@selector(loginDidComplete:)])
+		[[self delegate] loginDidComplete:[wasSuccessful boolValue]];
+}
+
 -(void)buildAlbumsListDidComplete:(RESTCall *)call {
 
 	if([self smResponseWasSuccessful:call])
@@ -341,9 +442,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	[self setIsLoggingIn:NO];
 	[self setIsLoggedIn:YES];
 
-	if([self delegate] != nil &&
-	   [[self delegate] respondsToSelector:@selector(loginDidComplete:)])
-		[[self delegate] loginDidComplete:[self smResponseWasSuccessful:call]];
+	[self performSelectorOnMainThread:@selector(notifyDelegateOfLoginCompleted:) withObject:[NSNumber numberWithBool:[self smResponseWasSuccessful:call]] waitUntilDone:NO];
 }
 
 -(void)loginWithCallback:(SEL)loginDidEndSelector {
@@ -379,10 +478,16 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 	RESTCall *call = [RESTCall RESTCall];	
 	[call invokeMethodWithHost:[self RESTURL] 
-						  keys:[NSArray arrayWithObjects:@"method", "SessionID", nil]
+						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.logout", [self sessionID], nil]
 			  responseCallback:logoutDidEndSelector
 				responseTarget:self];
+}
+
+-(void)notifyDelegaeOfLogout:(NSNumber *)wasSuccessful {
+	if([self delegate] != nil &&
+	   [[self delegate] respondsToSelector:@selector(logoutDidComplete:)])
+		[[self delegate] logoutDidComplete:[wasSuccessful boolValue]];
 }
 
 -(void)logoutCallback:(RESTCall *)call {
@@ -391,7 +496,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(logoutDidComplete:)])
-		[[self delegate] logoutDidComplete:[self smResponseWasSuccessful:call]];	
+		[[self delegate] performSelectorOnMainThread:@selector(logoutDidComplete:) withObject:[NSNumber numberWithBool:[self smResponseWasSuccessful:call]] waitUntilDone:NO];
 }
 
 #pragma mark Misc SM Info Methods
@@ -493,12 +598,24 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 				responseTarget:self];
 }
 
+-(void)notifyDelegateOfAlbumSyncCompletion:(NSNumber *)wasSuccessful {
+	if([self delegate] != nil &&
+	   [[self delegate] respondsToSelector:@selector(deleteAlbumDidComplete:)])
+		[[self delegate] deleteAlbumDidComplete:[wasSuccessful boolValue]];	
+}
+
+-(void)notifyDelegateOfAlbumCompletion:(NSNumber *)wasSuccessful {
+	if([self delegate] != nil &&
+	   [[self delegate] respondsToSelector:@selector(createNewAlbumDidComplete:)])
+		[[self delegate] createNewAlbumDidComplete:[wasSuccessful boolValue]];
+}
+
 -(void)albumDeleteDidEnd:(RESTCall *)call {
 	if([self smResponseWasSuccessful:call]) {
 		[self buildAlbumListWithCallback:@selector(postAlbumDeleteAlbumSyncDidComplete:)];
+	} else {
+		[self notifyDelegateOfAlbumCompletion:[NSNumber numberWithBool:NO]];
 	}
-	
-	// TODO spawn an error here...
 }
 
 -(void)postAlbumDeleteAlbumSyncDidComplete:(RESTCall *)call {
@@ -506,23 +623,18 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	if([self smResponseWasSuccessful:call])
 		[self initializeAlbumsFromResponse:[call document]];
 
-
-	if([self delegate] != nil &&
-	   [[self delegate] respondsToSelector:@selector(deleteAlbumDidComplete:)])
-		[[self delegate] deleteAlbumDidComplete:[self smResponseWasSuccessful:call]];
+	[self notifyDelegateOfAlbumSyncCompletion:[NSNumber numberWithBool:[self smResponseWasSuccessful:call]]];
 }
 
 #pragma mark New Album Creation Methods
 
 -(void)createNewAlbum {
-	if(![self isLoggedIn] ||
-	   IsEmpty([[self newAlbumPreferences] objectForKey:AlbumTitlePref])) {
-		NSBeep();
-		NSLog(@"Cannot create an album without a title");
-		return;
-	}
-
-	[self createNewAlbumCallback:@selector(newAlbumCreationDidComplete:)];
+	
+	// don't try to create an album if we're not logged in or there is no album title
+	if(![self isLoggedIn] || IsEmpty([[self newAlbumPreferences] objectForKey:AlbumTitlePref]))
+		[self performSelectorOnMainThread:@selector(notifyDelegateOfAlbumCompletion:) withObject:[NSNumber numberWithBool:NO] waitUntilDone:NO];
+	else
+		[self createNewAlbumCallback:@selector(newAlbumCreationDidComplete:)];
 }
 
 -(void)createNewAlbumCallback:(SEL)callback {
@@ -597,17 +709,17 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 	if([self smResponseWasSuccessful:call])
 		[self buildAlbumListWithCallback:@selector(postAlbumCreateAlbumSyncDidComplete:)];
-	
-	// TODO return error if necessary
+	else {
+		[self performSelectorOnMainThread:@selector(notifyDelegateOfAlbumCompletion:) withObject:[NSNumber numberWithBool:NO] waitUntilDone:NO];
+	}
 }
+
 
 -(void)postAlbumCreateAlbumSyncDidComplete:(RESTCall *)call {
 	if([self smResponseWasSuccessful:call])
 		[self initializeAlbumsFromResponse:[call document]];
 
-	if([self delegate] != nil &&
-	   [[self delegate] respondsToSelector:@selector(createNewAlbumDidComplete:)])
-		[[self delegate] createNewAlbumDidComplete:[self smResponseWasSuccessful:call]];
+	[self performSelectorOnMainThread:@selector(notifyDelegateOfAlbumCompletion:) withObject:[NSNumber numberWithBool:[self smResponseWasSuccessful:call]] waitUntilDone:NO];
 }
 
 -(void)clearAlbumCreationState {
@@ -618,9 +730,6 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 #pragma mark Upload Methods
 
-/**
- *
- */
 -(void)uploadImageAtPath:(NSString *)path albumWithID:(NSString *)albumId caption:(NSString *)caption {
 	
 	NSData *postData = [self postBodyForImageAtPath:path albumId:albumId caption:caption];
@@ -628,6 +737,8 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	CFHTTPMessageRef myRequest;
 	myRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, CFSTR("POST"), (CFURLRef)[NSURL URLWithString:[self postUploadURL]], kCFHTTPVersion1_1);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-Type"), (CFStringRef)[NSString stringWithFormat:@"multipart/form-data; boundary=%@", Boundary]);
+	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("User-Agent"), (CFStringRef)UserAgent);
+	
 	CFHTTPMessageSetBody(myRequest, (CFDataRef)postData);
 
 	readStream = CFReadStreamCreateForHTTPRequest(kCFAllocatorDefault, myRequest);
@@ -643,7 +754,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	CFReadStreamScheduleWithRunLoop(readStream, CFRunLoopGetCurrent(), kCFRunLoopCommonModes);
 
 	isUploading = YES;
-	uploadSize = [[[[NSFileManager defaultManager] fileAttributesAtPath:path traverseLink:YES]  objectForKey:NSFileSize] longValue];
+	uploadSize = [postData length];
 	[self setResponseData:[NSMutableData data]];
 
 	CFReadStreamOpen(readStream);
@@ -653,8 +764,8 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 -(void)beingUploadProgressTracking {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSTimer *uploadProgressTimer  = [NSTimer timerWithTimeInterval:0.10 target:self selector:@selector(trackUploadProgress:) userInfo:nil repeats:YES];
-	
+	NSTimer *uploadProgressTimer  = [NSTimer timerWithTimeInterval:0.25 target:self selector:@selector(trackUploadProgress:) userInfo:nil repeats:YES];
+
 	[[NSRunLoop currentRunLoop] addTimer:uploadProgressTimer forMode:NSModalPanelRunLoopMode];
 
 	while ( [[NSRunLoop currentRunLoop] runMode:NSModalPanelRunLoopMode
@@ -675,17 +786,18 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	int bytesWritten;
 	CFNumberGetValue (bytesWrittenProperty, 3, &bytesWritten);
 
-	[self performSelectorOnMainThread:@selector(updateProgress:) withObject:[NSArray arrayWithObjects:currentPathForUpload, [NSNumber numberWithLong:(long)bytesWritten], [NSNumber numberWithLong:uploadSize], nil] waitUntilDone:NO];
+	NSArray *args = [NSArray arrayWithObjects:currentPathForUpload, [NSNumber numberWithLong:(long)bytesWritten], [NSNumber numberWithLong:uploadSize], nil];
+	[self performSelectorOnMainThread:@selector(notifyDelegateOfUploadProgress:) withObject:args waitUntilDone:NO];
+	
+	if(bytesWritten >= uploadSize)
+		[timer invalidate];
+//		isUploading = NO; // stop the timer. we're not getting any more data from the socket for this image
 }
 
--(void)updateProgress:(NSArray *)args {
-	long bytesWritten = [(NSNumber *)[args objectAtIndex:1] longValue];
-	long totalBytes = [(NSNumber *)[args objectAtIndex:2] longValue];
-	
-	// notify delegate of progress
+-(void)notifyDelegateOfUploadProgress:(NSArray *)args {
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(uploadMadeProgressForFile:bytesWritten:totalBytes:)])
-		[[self delegate] uploadMadeProgressForFile:[args objectAtIndex:0] bytesWritten:bytesWritten totalBytes:totalBytes];
+		[[self delegate] uploadMadeProgressForFile:[args objectAtIndex:0] bytesWritten:[[args objectAtIndex:1] longValue] totalBytes:[[args objectAtIndex:2] longValue]];
 }
 
 -(void)appendToResponse {
@@ -703,13 +815,18 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 		[[self responseData] appendBytes:(void *)buffer length:(unsigned)bytesRead];
 }
 
--(void)stopUpload {
-	[self destroyUploadResources];
+-(void)notifyDelegateOfUploadCompletion:(NSArray *)args {
+	NSString *error = [args count] > 1 ? [args objectAtIndex:1] : nil;
 	
 	if([self delegate] != nil &&
-	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:withError:)]) {
-		[[self delegate] uploadDidCompleteForFile:currentPathForUpload withError:NSLocalizedString(@"Upload was cancelled.", @"Error strinng for cancelled upload")];
-	}
+	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:withError:)])
+		[[self delegate] uploadDidCompleteForFile:[args objectAtIndex:0] withError:error];
+}
+
+-(void)stopUpload {
+	NSArray *args = [NSArray arrayWithObjects:currentPathForUpload, NSLocalizedString(@"Upload was cancelled.", @"Error strinng for cancelled upload"), nil];
+	[self performSelectorOnMainThread:@selector(notifyDelegateOfUploadCompletion:) withObject:args waitUntilDone:YES];
+	[self destroyUploadResources];
 }
 
 -(NSMutableData *)responseData {
@@ -725,6 +842,9 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 -(void)destroyUploadResources {
 	isUploading = NO;
+	
+	CFReadStreamUnscheduleFromRunLoop(readStream, CFRunLoopGetCurrent(), kCFRunLoopCommonModes);
+	CFReadStreamClose(readStream);
 	CFRelease(readStream);
 	[self setResponseData:nil];
 	[currentPathForUpload release];
@@ -732,28 +852,32 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 -(void)transferComplete {
 
-	NSError *error = nil;
-	NSXMLDocument *response = [[[NSXMLDocument alloc] initWithData:[self responseData] options:0 error:&error] autorelease];
-	NSLog(@"%@", [[[NSString alloc] initWithData:[response XMLData] encoding: NSUTF8StringEncoding] autorelease]);
+//	NSError *error = nil;
+//	NSXMLDocument *response = [[[NSXMLDocument alloc] initWithData:[self responseData] options:0 error:&error] autorelease];
 	NSString *errorString = nil;
-//	if([response isFault]) 
-//		errorString = [response faultString];
+	// TODO get an error string (if it exists) from the response
 
+	NSMutableArray *args = [NSMutableArray arrayWithObject:currentPathForUpload];
+	if(errorString != nil)
+		[args addObject:errorString];
+
+	[self performSelectorOnMainThread:@selector(notifyDelegateOfUploadCompletion:) withObject:args waitUntilDone:NO];
 	[self destroyUploadResources];
+}
+
+-(void)notifyDelegateOfUploadError:(NSArray *)args {
+	NSString *error = [args count] > 1 ? [args objectAtIndex:1] : nil;
 
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:withError:)]) {
-		[[self delegate] uploadDidCompleteForFile:currentPathForUpload withError:errorString];
-	}
+		[[self delegate] uploadDidCompleteForFile:[args objectAtIndex:0] withError:error];
+	}	
 }
 
 -(void)errorOccurred {
-	[self destroyUploadResources];	
-
-	if([self delegate] != nil &&
-	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:withError:)]) {
-		[[self delegate] uploadDidCompleteForFile:currentPathForUpload withError:NSLocalizedString(@"Upload Failed", @"The upload was interrupted in progress.")];
-	}
+	NSArray *args = [NSArray arrayWithObjects:currentPathForUpload, NSLocalizedString(@"Upload Failed", @"The upload was interrupted in progress."), nil];
+	[self performSelectorOnMainThread:@selector(notifyDelegateOfUploadError:) withObject:args waitUntilDone:NO];
+	[self destroyUploadResources];
 }
 
 -(NSData *)postDataWithName:(NSString *)aName postContents:(NSString *)postContents {
@@ -801,139 +925,6 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 		return @"image/gif";
 
 	return @"image/jpeg"; // guess??
-}	
-
--(NSMutableDictionary *)newAlbumPreferences {
-	return newAlbumPreferences;
-}
-
-
-
--(void)setSelectedCategory:(NSDictionary *)d {
-	if([self selectedCategory] != nil)
-		[[self selectedCategory] release];
-	
-	selectedCategory = [d retain];
-}
-
--(void)setNewAlbumPreferences:(NSMutableDictionary *)a {
-	if([self newAlbumPreferences] != nil)
-		[[self newAlbumPreferences] release];
-	
-	newAlbumPreferences = [a retain];
-}
-
--(NSArray *)subcategories {
-	return subcategories;
-}
-
--(void)setSubcategories:(NSArray *)anArray {
-	if([self subcategories] != nil)
-		[[self subcategories] release];
-	
-	subcategories = [anArray retain];
-}
-
--(NSArray *)categories {
-	return categories;
-}
-
--(void)setCategories:(NSArray *)anArray {
-	if([self categories] != nil)
-		[[self categories] release];
-	
-	categories = [anArray retain];
-}
-
--(NSString *)userID {
-	return userID;
-}
-
--(void)setUserID:(NSString *)anID {
-
-	if([self userID] != nil)
-		[[self userID] release];
-
-	userID = [anID retain];
-}
-
--(NSString *)passwordHash {
-	return passwordHash;
-}
-
--(void)setPasswordHash:(NSString *)p {
-	if([self passwordHash] != nil)
-		[[self passwordHash] release];
-	
-	passwordHash = [p retain];
-}
-
--(NSString *)username {
-	return username;
-}
-
--(void)setUsername:(NSString *)n {
-	if([self username] != nil)
-		[[self username] release];
-	
-	username = [n retain];
-}
-		
--(NSString *)password {
-	return password;
-}
-
--(void)setPassword:(NSString *)p {
-	if([self password] != nil)
-		[[self password] release];
-	
-	password = [p retain];
-}
-
--(CURLHandle *)curlHandle {
-	return curlHandle;
-}
-
--(void)setCurlHandle:(CURLHandle *)h {
-	if([self curlHandle] != nil)
-		[[self curlHandle] release];
-	
-	curlHandle = [h retain];
-}
-
--(NSString *)version {
-	return @"1.1.0";
-}
-
--(void)setAlbums:(NSArray *)a {
-	if([self albums] != nil)
-		[[self albums] release];
-	
-	albums = [a retain];
-}
-
--(NSArray *)albums {
-	return albums;
-}
-
--(NSString *)apiKey {
-	return @"98LHI74dS6P0A8cQ1M6h0R1hXsbIPDXc";
-}
-
--(NSString *)appName {
-	return @"SmugMugExport";
-}
-
--(NSURL *)RESTURL {
-	return [NSURL URLWithString:@"https://api.SmugMug.com/hack/rest/1.1.1/"];
-}
-
--(NSURL *)RESTUploadURL {
-	return [NSURL URLWithString:@"http://upload.SmugMug.com/hack/rest/1.1.1/"];
-}
-
--(NSString *)postUploadURL {
-	return @"http://upload.SmugMug.com/photos/xmladd.mg";
 }
 
 @end
