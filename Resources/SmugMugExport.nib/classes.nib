@@ -7,6 +7,7 @@
                 cancelLoginSheet = id; 
                 cancelNewAlbumSheet = id; 
                 cancelUpload = id; 
+                createAlbum = id; 
                 donate = id; 
                 performLoginFromSheet = id; 
                 removeAlbum = id; 

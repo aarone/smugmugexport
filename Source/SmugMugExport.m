@@ -56,6 +56,9 @@
 -(void)resetUploadRetryCount;
 -(void)presentError:(NSString *)errorText;
 
+
+-(NSString *)imageUploadProgressText;
+-(void)setImageUploadProgressText:(NSString *)text;
 -(NSPanel *)newAlbumSheet;
 -(NSPanel *)uploadPanel;
 -(NSPanel *)loginPanel;
@@ -106,6 +109,7 @@ static int UploadFailureRetryCount = 3;
 	[[self loginSheetStatusMessage] release];
 	[[self statusText] release];
 	[[self currentThumbnail] release];
+	[[self imageUploadProgressText] release];
 
 	[super dealloc];
 }
@@ -286,7 +290,8 @@ static int UploadFailureRetryCount = 3;
 
 #pragma mark Add Album
 
--(IBAction)addNewAlbum:(id)sender {
+-(IBAction)addNewAlbum:(id)sender { // opens the create album sheet
+	
 	if(![[[self exportManager] window] isVisible])
 		return;
 
@@ -325,13 +330,15 @@ static int UploadFailureRetryCount = 3;
 	} else {
 		// album creation occurs in a sheet, don't try to show an error dialog in another sheet...
 		NSBeep();
+		
 		//[self presentError:NSLocalizedString(@"Album creation failed.", @"Error message to display when album creation fails.")];
 	}
 }
 
-//-(IBAction)createAlbum:(id)sender {
-//	[[self smugMugManager] createNewAlbum];
-//}
+
+-(IBAction)createAlbum:(id)sender {
+	[[self smugMugManager] createNewAlbum];
+}
 
 #pragma mark Delete Album
 
@@ -456,7 +463,7 @@ static int UploadFailureRetryCount = 3;
 
 		[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
 									 albumWithID:selectedAlbumId
-										 caption:@"test"];
+										 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
 	}
 }
 
@@ -471,6 +478,8 @@ static int UploadFailureRetryCount = 3;
 	float baselinePercentageCompletion = 100.0*((float)[self imagesUploaded])/((float)[[self exportManager] imageCount]);
 	float estimatedFileContribution = (100.0/((float)[[self exportManager] imageCount]))*((float)bytesWritten)/((float)totalBytes);
 	[self setSessionUploadProgress:[NSNumber numberWithFloat:MIN(100.0, ceil(baselinePercentageCompletion+estimatedFileContribution))]];
+
+	[self setImageUploadProgressText:[NSString stringWithFormat:@"%0.0fKB of %0.0fKB", bytesWritten/1024.0, totalBytes/1024.0]];
 }
 
 -(IBAction)cancelUpload:(id)sender {
@@ -479,6 +488,17 @@ static int UploadFailureRetryCount = 3;
 }
 
 #pragma mark Get and Set properties
+
+-(NSString *)imageUploadProgressText {
+	return imageUploadProgressText;
+}
+
+-(void)setImageUploadProgressText:(NSString *)text {
+	if([self imageUploadProgressText] != nil)
+		[[self imageUploadProgressText] release];
+	
+	imageUploadProgressText = [text retain];
+}
 
 -(NSArray *)accounts {
 	return [[accountManager accounts] arrayByAddingObject:NewAccountLabel];

@@ -31,7 +31,7 @@ NSString *UserAgent = @"iPhoto SmugMugExport";
 	NSString *escapedString = (NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
 																				  (CFStringRef)self,
 																				  NULL,
-																				  NULL,
+																				  CFSTR("?=&+'"),
 																				  kCFStringEncodingUTF8);
 	return [escapedString autorelease];
 }

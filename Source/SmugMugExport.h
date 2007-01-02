@@ -32,6 +32,7 @@
 	NSNumber *sessionUploadProgress;
 	NSString *loginSheetStatusMessage;
 	NSImage *currentThumbnail;
+	NSString *imageUploadProgressText; // below the thumbnail..
 
 	BOOL loginSheetIsBusy;
 	BOOL isBusy;
@@ -61,7 +62,7 @@
 -(IBAction)addNewAlbum:(id)sender;
 -(IBAction)removeAlbum:(id)sender;
 -(IBAction)cancelNewAlbumSheet:(id)sender;
-//-(IBAction)createAlbum:(id)sender;
+-(IBAction)createAlbum:(id)sender;
 
 
 @end

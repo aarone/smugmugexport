@@ -764,7 +764,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 -(void)beingUploadProgressTracking {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSTimer *uploadProgressTimer  = [NSTimer timerWithTimeInterval:0.25 target:self selector:@selector(trackUploadProgress:) userInfo:nil repeats:YES];
+	NSTimer *uploadProgressTimer  = [NSTimer timerWithTimeInterval:0.125 target:self selector:@selector(trackUploadProgress:) userInfo:nil repeats:YES];
 
 	[[NSRunLoop currentRunLoop] addTimer:uploadProgressTimer forMode:NSModalPanelRunLoopMode];
 
