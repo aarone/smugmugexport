@@ -8,13 +8,18 @@
 
 #import "NSDataAdditions.h"
 #include <openssl/md5.h>
-#import "NSStringICUAdditions.h"
 
 @implementation NSData (NSDataAdditions)
 
 -(NSString *)md5HexString {
 	NSData *hashData = [self md5Hash];
-	return [[hashData description] replaceOccurrencesOfPattern:@"[ <>]" withString:@""];
+	unsigned char *hashBytes = (unsigned char *)[hashData bytes];
+	NSMutableString *hexString = [NSMutableString string];
+	int i;
+	for(i=0;i<[hashData length];i++)
+		[hexString appendFormat:@"%02x", hashBytes[i]];
+	
+	return [NSString stringWithString:hexString];
 }
 
 -(NSData *)md5Hash {
