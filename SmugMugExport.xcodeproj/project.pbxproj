@@ -7,12 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		93018C210B48884000D02BA6 /* ICUMatcher.h in Private Frameworks */ = {isa = PBXBuildFile; fileRef = 93018C1B0B48884000D02BA6 /* ICUMatcher.h */; };
-		93018C220B48884000D02BA6 /* ICUMatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 93018C1C0B48884000D02BA6 /* ICUMatcher.m */; };
-		93018C230B48884000D02BA6 /* ICUPattern.h in Private Frameworks */ = {isa = PBXBuildFile; fileRef = 93018C1D0B48884000D02BA6 /* ICUPattern.h */; };
-		93018C240B48884000D02BA6 /* ICUPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 93018C1E0B48884000D02BA6 /* ICUPattern.m */; };
-		93018C250B48884000D02BA6 /* NSStringICUAdditions.h in Private Frameworks */ = {isa = PBXBuildFile; fileRef = 93018C1F0B48884000D02BA6 /* NSStringICUAdditions.h */; };
-		93018C260B48884000D02BA6 /* NSStringICUAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 93018C200B48884000D02BA6 /* NSStringICUAdditions.m */; };
 		930DE1EE0B46AF44008120ED /* RESTCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 930DE1EC0B46AF44008120ED /* RESTCall.m */; };
 		930DE5BC0B4831B2008120ED /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 930DE5BB0B4831B2008120ED /* libcrypto.dylib */; };
 		930DE5F30B4831D2008120ED /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 930DE5BE0B4831D2008120ED /* Security.framework */; };
@@ -36,9 +30,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				93018C210B48884000D02BA6 /* ICUMatcher.h in Private Frameworks */,
-				93018C230B48884000D02BA6 /* ICUPattern.h in Private Frameworks */,
-				93018C250B48884000D02BA6 /* NSStringICUAdditions.h in Private Frameworks */,
 			);
 			name = "Private Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -49,12 +40,6 @@
 		089C1672FE841209C02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		089C167FFE841241C02AAC07 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
-		93018C1B0B48884000D02BA6 /* ICUMatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ICUMatcher.h; path = Source/ICUMatcher.h; sourceTree = "<group>"; };
-		93018C1C0B48884000D02BA6 /* ICUMatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ICUMatcher.m; path = Source/ICUMatcher.m; sourceTree = "<group>"; };
-		93018C1D0B48884000D02BA6 /* ICUPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ICUPattern.h; path = Source/ICUPattern.h; sourceTree = "<group>"; };
-		93018C1E0B48884000D02BA6 /* ICUPattern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ICUPattern.m; path = Source/ICUPattern.m; sourceTree = "<group>"; };
-		93018C1F0B48884000D02BA6 /* NSStringICUAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSStringICUAdditions.h; path = Source/NSStringICUAdditions.h; sourceTree = "<group>"; };
-		93018C200B48884000D02BA6 /* NSStringICUAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSStringICUAdditions.m; path = Source/NSStringICUAdditions.m; sourceTree = "<group>"; };
 		930DE1EB0B46AF44008120ED /* RESTCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RESTCall.h; path = Source/RESTCall.h; sourceTree = "<group>"; };
 		930DE1EC0B46AF44008120ED /* RESTCall.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RESTCall.m; path = Source/RESTCall.m; sourceTree = "<group>"; };
 		930DE5BB0B4831B2008120ED /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
@@ -188,7 +173,6 @@
 				932164B00B2F7BBC00624A8D /* SmugmugExport_Prefix.pch */,
 				9394BC8D0ADDBF390066CD67 /* Categories */,
 				930453550AD82E5600B932C9 /* iPhoto Interface */,
-				932165D50B2F972B00624A8D /* CocoaICU */,
 			);
 			name = "Other Sources";
 			sourceTree = "<group>";
@@ -202,19 +186,6 @@
 				932164780B2F78D600624A8D /* ExportPluginProtocol.h */,
 			);
 			name = "iPhoto Interface";
-			sourceTree = "<group>";
-		};
-		932165D50B2F972B00624A8D /* CocoaICU */ = {
-			isa = PBXGroup;
-			children = (
-				93018C1B0B48884000D02BA6 /* ICUMatcher.h */,
-				93018C1C0B48884000D02BA6 /* ICUMatcher.m */,
-				93018C1D0B48884000D02BA6 /* ICUPattern.h */,
-				93018C1E0B48884000D02BA6 /* ICUPattern.m */,
-				93018C1F0B48884000D02BA6 /* NSStringICUAdditions.h */,
-				93018C200B48884000D02BA6 /* NSStringICUAdditions.m */,
-			);
-			name = CocoaICU;
 			sourceTree = "<group>";
 		};
 		9394BC8D0ADDBF390066CD67 /* Categories */ = {
@@ -305,9 +276,6 @@
 				932164800B2F78E000624A8D /* AccountManager.m in Sources */,
 				932165820B2F921E00624A8D /* KeychainManager.m in Sources */,
 				930DE1EE0B46AF44008120ED /* RESTCall.m in Sources */,
-				93018C220B48884000D02BA6 /* ICUMatcher.m in Sources */,
-				93018C240B48884000D02BA6 /* ICUPattern.m in Sources */,
-				93018C260B48884000D02BA6 /* NSStringICUAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
