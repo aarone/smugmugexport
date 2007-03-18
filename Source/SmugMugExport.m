@@ -187,18 +187,18 @@ static int UploadFailureRetryCount = 3;
 		return;
 	
 	/*
-	 * Show the login window if we're not logged in and there is no existing account to automatically choose.
+	 * Show the login window if we're not logged in and there is no way to autologin
 	 */
 	if(![[self smugMugManager] isLoggedIn] && 
-	   [[[self accountManager] accounts] count] == 0) {
+	   ![[self accountManager] canAttemptAutoLogin]) {
 		
 		// show the login panel after some delay
 		[self showLoginSheet:self];
 		return;
 	}
 	
-	/**
-		*  If we have a saved password for the previously selected account, log in to that account.
+	/*
+	 *  If we have a saved password for the previously selected account, log in to that account.
 	 */
 	if(![[self smugMugManager] isLoggedIn] && 
 	   ![[self smugMugManager] isLoggingIn] &&
@@ -206,7 +206,7 @@ static int UploadFailureRetryCount = 3;
 	   [[self accountManager] selectedAccount] != nil &&
 	   ![self loginAttempted] &&
 	   [[self accountManager] passwordExistsInKeychainForAccount:[[self accountManager] selectedAccount]]) {
-		
+
 		[self setLoginAttempted:YES];
 		[self setIsBusy:YES];
 		[self setStatusText:NSLocalizedString(@"Logging in...", @"Status text for logginng in")];

@@ -200,13 +200,13 @@ NSString *UserAgent = @"iPhoto SmugMugExport";
 	[NSThread detachNewThreadSelector:@selector(invokeMethodWithUrl:) toTarget:self withObject:url];
 }
 
--(void)invokeMethodWithHost:(NSURL *)baseUrl keys:(NSArray *)keys values:(NSArray *)values responseCallback:(SEL)callbackSel responseTarget:(id)responseTarget {
+-(void)invokeMethodWithURL:(NSURL *)baseUrl keys:(NSArray *)keys values:(NSArray *)values responseCallback:(SEL)callbackSel responseTarget:(id)responseTarget {
 	
 	NSURL *uploadUrl = [baseUrl URLByAppendingParameterListWithNames:keys values:values];
 	[self invokeMethod:uploadUrl responseCallback:callbackSel responseTarget:responseTarget];
 }
 
--(void)invokeMethodWithHost:(NSURL *)baseURL keys:(NSArray *)keys valueDict:(NSDictionary *)keyValDict responseCallback:(SEL)callbackSel responseTarget:(id)responseTarget {
+-(void)invokeMethodWithURL:(NSURL *)baseURL keys:(NSArray *)keys valueDict:(NSDictionary *)keyValDict responseCallback:(SEL)callbackSel responseTarget:(id)responseTarget {
 
 	NSMutableArray *values = [NSMutableArray array];
 	NSEnumerator *keyEnumerator = [keys objectEnumerator];
@@ -214,7 +214,7 @@ NSString *UserAgent = @"iPhoto SmugMugExport";
 	while(aKey = [keyEnumerator nextObject])
 		[values addObject:[keyValDict objectForKey:aKey]];
 	
-	[self invokeMethodWithHost:baseURL keys:keys values:values responseCallback:callbackSel responseTarget:responseTarget];
+	[self invokeMethodWithURL:baseURL keys:keys values:values responseCallback:callbackSel responseTarget:responseTarget];
 }
 
 #pragma mark NSURLConnection Delegate Methods

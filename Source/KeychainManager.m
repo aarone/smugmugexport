@@ -6,28 +6,16 @@
 //  Copyright 2006 Aaron Evans. All rights reserved.
 //
 
-/* the code that was used to initially build this class was found here:
-http://homepage.mac.com/agerson/examples/keychain/
-
-and had the following header:
-//
-// AGKeychain.m
-// Based on code from "Core Mac OS X and Unix Programming"
-// by Mark Dalrymple and Aaron Hillegass
-// http://borkware.com/corebook/source-code
-//
-// Created by Adam Gerson on 3/6/05.
-// agerson@mac.com
-//
-
- I made some changes to this class to make it more usable.
- */
 
 #import "KeychainManager.h"
 #import <Security/Security.h>
 #import <CoreFoundation/CoreFoundation.h>
 
 static KeychainManager *sharedKeychainManager = nil;
+
+@interface KeychainManager (Private)
+-(NSString *)passwordFromSecKeychainItemRef:(SecKeychainItemRef)item;
+@end
 
 @implementation KeychainManager
 
@@ -134,15 +122,14 @@ static KeychainManager *sharedKeychainManager = nil;
 	
     result = SecKeychainSearchCreateFromAttributes(NULL, kSecGenericPasswordItemClass, &list, &search);
 	
-    if (result != noErr) {
-        NSLog (@"status %d from SecKeychainSearchCreateFromAttributes\n", result);
-    }
+    if (result != noErr)
+		return NO;
 
 	while (SecKeychainSearchCopyNext (search, &item) == noErr) {
         CFRelease (item);
         numberOfItemsFound++;
     }
-
+	
     CFRelease (search);
 	return numberOfItemsFound;
 }
@@ -172,16 +159,13 @@ static KeychainManager *sharedKeychainManager = nil;
     list.attr = attributes;
 	
 	result = SecKeychainSearchCreateFromAttributes(NULL, kSecGenericPasswordItemClass, &list, &search);
-	while (SecKeychainSearchCopyNext (search, &item) == noErr) {
+	while (SecKeychainSearchCopyNext (search, &item) == noErr)
         numberOfItemsFound++;
-    }
-	if (numberOfItemsFound) {
-		status = SecKeychainItemDelete(item);
-	}
+
 	
-    if (status != 0) {
-        NSLog(@"Error deleting item: %d\n", (int)status);
-    }
+	if (numberOfItemsFound)
+		status = SecKeychainItemDelete(item);
+	
 	CFRelease (item);
 	CFRelease(search);
 	return !status;
@@ -214,9 +198,9 @@ static KeychainManager *sharedKeychainManager = nil;
 	SecKeychainSearchCopyNext (search, &item);
     status = SecKeychainItemModifyContent(item, &list, [newPassword length], [newPassword UTF8String]);
 	
-    if (status != 0) {
+    if (status != 0)
         NSLog(@"Error modifying item: %d", (int)status);
-    }
+	
 	CFRelease (item);
 	CFRelease(search);
 	return !status;
@@ -275,11 +259,10 @@ static KeychainManager *sharedKeychainManager = nil;
 	
     result = SecKeychainSearchCreateFromAttributes(NULL, kSecGenericPasswordItemClass, &list, &search);
 	
-    if (result != noErr) {
+    if (result != noErr)
         NSLog (@"status %d from SecKeychainSearchCreateFromAttributes\n", result);
-    }
 	
-	NSString *password = @"error";
+	NSString *password = nil;
     if (SecKeychainSearchCopyNext (search, &item) == noErr) {
 		password = [self passwordFromSecKeychainItemRef:item];
 		CFRelease(item);

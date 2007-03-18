@@ -366,7 +366,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 -(void)buildAlbumListWithCallback:(SEL)callback {
 	RESTCall *call = [RESTCall RESTCall];
-	[call invokeMethodWithHost:[self RESTURL] 
+	[call invokeMethodWithURL:[self RESTURL] 
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.albums.get", [self sessionID], nil]
 			  responseCallback:callback
@@ -449,7 +449,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	[self setIsLoggingIn:YES];
 	RESTCall *call = [RESTCall RESTCall];
 
-	[call invokeMethodWithHost:[self RESTURL] 
+	[call invokeMethodWithURL:[self RESTURL] 
 						  keys:[NSArray arrayWithObjects:@"method", @"EmailAddress",@"Password", @"APIKey", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.login.withPassword", [self username], [self password], [self apiKey], nil]
 			  responseCallback:loginDidEndSelector
@@ -477,7 +477,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	}
 
 	RESTCall *call = [RESTCall RESTCall];	
-	[call invokeMethodWithHost:[self RESTURL] 
+	[call invokeMethodWithURL:[self RESTURL] 
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.logout", [self sessionID], nil]
 			  responseCallback:logoutDidEndSelector
@@ -507,7 +507,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 -(void)buildCategoryListWithCallback:(SEL)callback {
 	RESTCall *call = [RESTCall RESTCall];
-	[call invokeMethodWithHost:[self RESTURL]
+	[call invokeMethodWithURL:[self RESTURL]
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.categories.get", [self sessionID], nil]
 			  responseCallback:callback
@@ -546,7 +546,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 -(void)buildSubCategoryListWithCallback:(SEL)callback {
 	RESTCall *call = [RESTCall RESTCall];
-	[call invokeMethodWithHost:[self RESTURL]
+	[call invokeMethodWithURL:[self RESTURL]
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.subcategories.getAll", [self sessionID], nil]
 			  responseCallback:callback
@@ -591,7 +591,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 -(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSString *)albumId {
 	RESTCall *call = [RESTCall RESTCall];
-	[call invokeMethodWithHost:[self RESTURL]
+	[call invokeMethodWithURL:[self RESTURL]
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", @"AlbumID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.albums.delete", [self sessionID], albumId, nil]
 			  responseCallback:callback
@@ -651,7 +651,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	NSMutableArray *orderedKeys = [NSMutableArray arrayWithObjects:@"method", @"SessionID", @"Title", @"CategoryID", nil];
 	[orderedKeys addObjectsFromArray:[basicNewAlbumPrefs allKeys]];
 
-	[call invokeMethodWithHost:[self RESTURL]
+	[call invokeMethodWithURL:[self RESTURL]
 						  keys:orderedKeys
 					 valueDict:newAlbumProerties
 			  responseCallback:callback
@@ -895,6 +895,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 	NSMutableData *postBody = [NSMutableData data];
 	[postBody appendData:[[NSString stringWithFormat:@"--%@\r\n",Boundary] dataUsingEncoding:NSUTF8StringEncoding]];
 
+	
 	[postBody appendData:[self postDataWithName:@"AlbumID" postContents:albumId]];
 	[postBody appendData:[self postDataWithName:@"SessionID" postContents:[self sessionID]]];
 	[postBody appendData:[self postDataWithName:@"ByteCount" postContents:[NSString stringWithFormat:@"%d", [imageData length]]]];
@@ -912,6 +913,8 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 }
 
 -(NSString *)contentTypeForPath:(NSString *)path {
+	
+	// is there a better way to do this?
 	if([[path lowercaseString] hasSuffix:@"jpg"] ||
 	   [[path lowercaseString] hasSuffix:@"jpeg"] ||
 	   [[path lowercaseString] hasSuffix:@"jpe"])

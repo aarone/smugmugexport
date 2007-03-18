@@ -24,8 +24,7 @@
 
 	 // this is the username bound to the textfield, account manager holds the real username
 	NSString *username; 
-	// same goes for password..
-	NSString *password;
+	NSString *password; // same goes for password..
 	NSString *sessionUploadStatusText;
 	NSString *statusText;
 	NSNumber *fileUploadProgress;
@@ -33,7 +32,7 @@
 	NSString *loginSheetStatusMessage;
 	NSImage *currentThumbnail;
 	NSString *imageUploadProgressText; // below the thumbnail..
-
+	
 	BOOL loginSheetIsBusy;
 	BOOL isBusy;
 	BOOL loginAttempted;

@@ -65,14 +65,18 @@ NSString *KeychainItemKind = @"application password";
 }
 
 -(void)modifyAccountInKeychain:(NSString *)account newPassword:(NSString *)newPassword {
-	[[KeychainManager sharedKeychainManager] modifyKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:account withNewPassword:newPassword];
+	if([self passwordForAccount:account] != nil)
+		[[KeychainManager sharedKeychainManager] modifyKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:account withNewPassword:newPassword];
+	else
+		[self addAccountToKeychain:account password:newPassword];
 }
 
 -(void)addAccount:(NSString *)account withPassword:(NSString *)password {
-	if([[self accounts] containsObject:account]) {
+	if([[self accounts] containsObject:account] && rememberPasswordInKeychain) {
 		[self modifyAccountInKeychain:account newPassword:password];
 	} else {
-		[self addAccountToKeychain:account password:password];
+		if(rememberPasswordInKeychain)
+			[self addAccountToKeychain:account password:password];
 		[self addAccount:account];		
 	}
 	
@@ -84,10 +88,9 @@ NSString *KeychainItemKind = @"application password";
 }
 
 -(void)addAccount:(NSString *)account {
-	if(![[self accounts] containsObject:account]) {
+	if(![[self accounts] containsObject:account])
 		[self setAccounts:[[self accounts] arrayByAddingObject:account]];
-	}
-	
+
 	[self setSelectedAccount:account];
 }
 
@@ -100,6 +103,7 @@ NSString *KeychainItemKind = @"application password";
 }
 
 -(NSString *)selectedAccount {
+
 	NSString *anAccount = [[NSUserDefaults standardUserDefaults] objectForKey:SMESelectedAccountDefaultsKey];
 
 	if([[self accounts] containsObject:anAccount])
@@ -115,6 +119,19 @@ NSString *KeychainItemKind = @"application password";
 	[self willChangeValueForKey:@"selectedAccount"];
 	[[NSUserDefaults standardUserDefaults] setObject:anAccount forKey:SMESelectedAccountDefaultsKey];
 	[self didChangeValueForKey:@"selectedAccount"];
+}
+
+-(BOOL)canAttemptAutoLogin {
+	return [[self accounts] count] > 0 &&
+		[self selectedAccount] != nil &&
+		[self passwordForAccount:[self selectedAccount]] != nil;
+}
+
+-(BOOL)rememberPasswordInKeychain {
+	if([[NSUserDefaults standardUserDefaults] objectForKey:@"rememberPasswordInKeychain"] == nil)
+		return NO;
+	
+	return [[[NSUserDefaults standardUserDefaults] objectForKey:@"rememberPasswordInKeychain"] boolValue];
 }
 
 @end

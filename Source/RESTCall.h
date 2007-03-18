@@ -11,6 +11,11 @@
 
 extern NSString *UserAgent;
 
+/*!
+	@class		RESTCall
+	@abstract   Interface for a REST API.
+	@discussion SmugMug provides a <a href="http://smugmug.jot.com/API/Versions/1.1.1">REST interface</a>.  This class is a simple wrapper that abstracts the details of sending and receiving data using a REST interface.  It assumes that all calls are given by  a URL and calls return an XML document if successful or an error otherwise.
+*/
 @interface RESTCall : NSObject {
 	NSURLConnection *connection;
 	NSMutableData *response;
@@ -26,17 +31,43 @@ extern NSString *UserAgent;
 +(RESTCall *)RESTCall;
 
 #pragma mark REST method invocation API
+/*!
+    @method     invokeMethod:responseCallback:responseTarget
+    @abstract   Performs a GET at the given url and return the response to the given target.
+    @discussion The callback should take a parameter which will be the RESTCall that originally invoked the method.
+*/
 -(void)invokeMethod:(NSURL *)url responseCallback:(SEL)callback responseTarget:(id)target;
--(void)invokeMethodWithHost:(NSURL *)baseUrl keys:(NSArray *)keys values:(NSArray *)values responseCallback:(SEL)callback responseTarget:(id)target;
--(void)invokeMethodWithHost:(NSURL *)baseURL keys:(NSArray *)keys valueDict:(NSDictionary *)keyValDict responseCallback:(SEL)callback responseTarget:(id)target;
 
+/*!
+    @method     invokeMethodWithURL:keys:values:responseCallback:responseTarget:
+    @abstract   performs a GET for the given url and append a sequence of key=val parameters to the URL
+    @discussion The keys and values will be escaped and the callback semantics are the same as invokeMethod:responseCallback:responseTarget
+*/
+-(void)invokeMethodWithURL:(NSURL *)baseUrl keys:(NSArray *)keys values:(NSArray *)values responseCallback:(SEL)callback responseTarget:(id)target;
+
+/*!
+    @method     invokeMethodWithURL:keys:valueDict:responseCallback:responseTarget:
+    @abstract   Invokes invokeMethodWithURL:keys:values:responseCallback:responseTarget: with the keys and values given by the given dictionary.
+*/
+-(void)invokeMethodWithURL:(NSURL *)baseURL keys:(NSArray *)keys valueDict:(NSDictionary *)keyValDict responseCallback:(SEL)callback responseTarget:(id)target;
+
+/*!
+    @method     wasSuccessful
+    @abstract   Returns the YES if the last GET was succcessful and NO if no GET has been performed or the last call was unsucessful.
+*/
 -(BOOL)wasSuccessful;
+
+/*!
+    @method     error
+    @abstract   Returns the last error encountered during the REST call or nil if no errors have been encountered.
+    @discussion This is simply the error from the underlying NSURLConnection.
+*/
 -(NSError *)error;
+
+/*!
+    @method     document
+    @abstract   Returns the XML document returned by the last GET call or nil of no document has been returned.
+*/
 -(NSXMLDocument *)document;
-
-//-(void)invokeMethodWithRelativePath:(NSString *)path responseCallback:(SEL)callback responseTarget:(id)target;
-//-(void)invokeMethodWithKeys:(NSArray *)keys values:(NSArray *)values responseCallback:(SEL)callback responseTarget:(id)target;
-//-(void)invokeMethodWithDictionary:(NSDictionary *)dictionary orderedKey:(NSArray *)orderedKeys responseCallback:(SEL)callback responseTarget:(id)target;
-
 
 @end

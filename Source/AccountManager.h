@@ -15,6 +15,7 @@
  */
 @interface AccountManager : NSObject {
 	KeychainManager *keychainManager;
+	BOOL rememberPasswordInKeychain;
 }
 
 +(AccountManager *)accountManager;
@@ -24,5 +25,5 @@
 -(void)setSelectedAccount:(NSString *)anAccount;
 -(NSString *)passwordForAccount:(NSString *)account;
 -(BOOL)passwordExistsInKeychainForAccount:(NSString *)account;
-
+-(BOOL)canAttemptAutoLogin;
 @end
