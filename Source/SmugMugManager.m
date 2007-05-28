@@ -115,6 +115,25 @@ static NSString *AlbumDescriptionPref = @"AlbumDescription";
 static NSString *AlbumKeywordsPref = @"AlbumKeywords";
 static NSString *AlbumCategoryPref = @"AlbumCategory";
 
+static NSString *AlbumId = @"AlbumID";
+
+@interface NSDictionary (SMAdditions)
+-(NSComparisonResult)compareByAlbumId:(NSDictionary *)aDict;
+@end
+
+@implementation NSDictionary (SMAdditions)
+-(NSComparisonResult)compareByAlbumId:(NSDictionary *)aDict {
+	
+	if([self objectForKey:AlbumId] == nil)
+		return NSOrderedAscending;
+	
+	if([aDict objectForKey:AlbumId] == nil)
+		return NSOrderedDescending;
+		
+	return [[aDict objectForKey:AlbumId] intValue] - [[self objectForKey:AlbumId] intValue];
+}
+@end
+
 @implementation SmugMugManager
 
 +(SmugMugManager *)smugmugManager {
@@ -424,8 +443,9 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 		
 		[returnedAlbums addObject:[NSDictionary dictionaryWithObjectsAndKeys:albumId, @"AlbumID", albumTitle, @"Title", nil]];
 	}
-	[self setAlbums:returnedAlbums];
 	
+	[returnedAlbums sortUsingSelector:@selector(compareByAlbumId:)];
+	[self performSelectorOnMainThread:@selector(setAlbums:)	withObject:[NSArray arrayWithArray:returnedAlbums] waitUntilDone:false];
 }
 
 -(void)notifyDelegateOfLoginCompleted:(NSNumber *)wasSuccessful {
@@ -531,7 +551,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 		[returnedCategories addObject:[NSDictionary dictionaryWithObjectsAndKeys:categoryId, @"CategoryID", categoryTitle, @"Title", nil]];
 	}
 
-	[self setCategories:[NSArray arrayWithArray:returnedCategories]];
+	[self performSelectorOnMainThread:@selector(setCategories:)	withObject:[NSArray arrayWithArray:returnedCategories] waitUntilDone:false];
 }
 
 -(void)categoryGetDidComplete:(RESTCall *)call {
@@ -570,7 +590,7 @@ static NSString *AlbumCategoryPref = @"AlbumCategory";
 		[returnedSubCategories addObject:[NSDictionary dictionaryWithObjectsAndKeys:categoryId, @"CategoryID", categoryTitle, @"Title", nil]];
 	}
 
-	[self setSubcategories:[NSArray arrayWithArray:returnedSubCategories]];
+	[self performSelectorOnMainThread:@selector(setSubcategories:)	withObject:[NSArray arrayWithArray:returnedSubCategories] waitUntilDone:false];	
 }
 
 -(void)subcategoryGetDidComplete:(RESTCall *)call {
