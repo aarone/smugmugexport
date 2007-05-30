@@ -32,12 +32,16 @@
 	NSString *loginSheetStatusMessage;
 	NSImage *currentThumbnail;
 	NSString *imageUploadProgressText; // below the thumbnail..
+	NSURL *uploadSiteUrl;
 	
+	
+	BOOL isUploading;
 	BOOL loginSheetIsBusy;
 	BOOL isBusy;
 	BOOL loginAttempted;
 	BOOL uploadCancelled;
 	BOOL errorAlertSheetIsVisisble;
+	BOOL siteUrlHasBeenFetched;
 	int uploadRetryCount;
 	int imagesUploaded;
 

@@ -70,6 +70,8 @@ kCFStreamEventErrorOccurred;
 -(void)buildSubCategoryListWithCallback:(SEL)callback;
 -(void)subcategoryGetDidComplete:(RESTCall *)rpcCall;
 -(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSString *)albumId;
+-(void)getImageUrlsWithCallback:(SEL)callback imageId:(NSString *)imageId;
+-(void)getImageUrlsDidComplete:(RESTCall *)call;
 
 -(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey;
 
@@ -365,9 +367,7 @@ static NSString *AlbumId = @"AlbumID";
 		[self setIsLoggedIn:NO];
 		[self setIsLoggingIn:NO];
 		[self performSelectorOnMainThread:@selector(notifyDelegateOfLoginCompleted:) withObject:[NSNumber numberWithBool:NO] waitUntilDone:NO];
-	}
-
-	
+	}	
 }
 
 -(void)evaluateLoginResponse:(NSXMLDocument *)d {
@@ -520,6 +520,39 @@ static NSString *AlbumId = @"AlbumID";
 }
 
 #pragma mark Misc SM Info Methods
+
+-(void)fetchImageUrls:(NSString *)imageId {
+	[self getImageUrlsWithCallback:@selector(getImageUrlsDidComplete:) imageId:imageId];
+}
+
+-(void)getImageUrlsWithCallback:(SEL)callback imageId:(NSString *)imageId {
+	RESTCall *call = [RESTCall RESTCall];
+	[call invokeMethodWithURL:[self RESTURL]
+						 keys:[NSArray arrayWithObjects:@"method", @"SessionID", @"ImageID", nil]
+					   values:[NSArray arrayWithObjects:@"smugmug.images.getURLs", [self sessionID], imageId, nil]
+			 responseCallback:callback
+			   responseTarget:self];
+}
+
+-(void)getImageUrlsDidComplete:(RESTCall *)call {
+	if([self smResponseWasSuccessful:call]) {
+		NSXMLElement *root = [[call  document] rootElement];
+		
+		NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+		NSError *error = nil;
+		NSArray *urlNodes = [root nodesForXPath:@"/rsp/ImageURLs/Image/*" error:&error];
+		NSEnumerator *nodeEnumerator = [urlNodes objectEnumerator];
+		NSXMLNode *node = nil;
+		while(node = [nodeEnumerator nextObject]) {
+			[dict setObject:[node stringValue] forKey:[node name]];
+		}
+		 
+		if([self delegate] != nil &&
+			[[self delegate] respondsToSelector:@selector(imageUrlFetchDidComplete:)])
+
+		[[self delegate] performSelectorOnMainThread:@selector(imageUrlFetchDidComplete:) withObject:dict waitUntilDone:NO];
+	}
+}
 
 -(void)buildCategoryList {
 	[self buildCategoryListWithCallback:@selector(categoryGetDidComplete:)];
@@ -836,15 +869,15 @@ static NSString *AlbumId = @"AlbumID";
 }
 
 -(void)notifyDelegateOfUploadCompletion:(NSArray *)args {
-	NSString *error = [args count] > 1 ? [args objectAtIndex:1] : nil;
+	NSString *error = [args count] > 2 ? [args objectAtIndex:2] : nil;
 	
 	if([self delegate] != nil &&
-	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:withError:)])
-		[[self delegate] uploadDidCompleteForFile:[args objectAtIndex:0] withError:error];
+	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:imageId:withError:)])
+		[[self delegate] uploadDidCompleteForFile:[args objectAtIndex:0] imageId:[args objectAtIndex:1] withError:error];
 }
 
 -(void)stopUpload {
-	NSArray *args = [NSArray arrayWithObjects:currentPathForUpload, NSLocalizedString(@"Upload was cancelled.", @"Error strinng for cancelled upload"), nil];
+	NSArray *args = [NSArray arrayWithObjects:currentPathForUpload, [NSNull null], NSLocalizedString(@"Upload was cancelled.", @"Error strinng for cancelled upload"), nil];
 	[self performSelectorOnMainThread:@selector(notifyDelegateOfUploadCompletion:) withObject:args waitUntilDone:YES];
 	[self destroyUploadResources];
 }
@@ -872,12 +905,21 @@ static NSString *AlbumId = @"AlbumID";
 
 -(void)transferComplete {
 
-//	NSError *error = nil;
-//	NSXMLDocument *response = [[[NSXMLDocument alloc] initWithData:[self responseData] options:0 error:&error] autorelease];
+	NSError *error = nil;
+	NSXMLDocument *response = [[[NSXMLDocument alloc] initWithData:[self responseData] options:0 error:&error] autorelease];
 	NSString *errorString = nil;
-	// TODO get an error string (if it exists) from the response
 
-	NSMutableArray *args = [NSMutableArray arrayWithObject:currentPathForUpload];
+	NSArray *uploadedImageIds = [[response rootElement] nodesForXPath:@"//value/int" error:&error ];
+	
+	NSXMLNode *node;
+	NSEnumerator *nodeEnumertor = [uploadedImageIds objectEnumerator];
+	NSString *imageId = nil;
+	while(node = [nodeEnumertor nextObject]) {
+		imageId = [(NSXMLElement *)node stringValue];
+		break;
+	}
+
+	NSMutableArray *args = [NSMutableArray arrayWithObjects:currentPathForUpload, imageId, nil];
 	if(errorString != nil)
 		[args addObject:errorString];
 
@@ -886,16 +928,16 @@ static NSString *AlbumId = @"AlbumID";
 }
 
 -(void)notifyDelegateOfUploadError:(NSArray *)args {
-	NSString *error = [args count] > 1 ? [args objectAtIndex:1] : nil;
+	NSString *error = [args count] > 2 ? [args objectAtIndex:2] : nil;
 
 	if([self delegate] != nil &&
-	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:withError:)]) {
-		[[self delegate] uploadDidCompleteForFile:[args objectAtIndex:0] withError:error];
+	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:imageId:withError:)]) {
+		[[self delegate] uploadDidCompleteForFile:[args objectAtIndex:0] imageId:[args objectAtIndex:1] withError:error];
 	}	
 }
 
 -(void)errorOccurred {
-	NSArray *args = [NSArray arrayWithObjects:currentPathForUpload, NSLocalizedString(@"Upload Failed", @"The upload was interrupted in progress."), nil];
+	NSArray *args = [NSArray arrayWithObjects:currentPathForUpload, [NSNull null], NSLocalizedString(@"Upload Failed", @"The upload was interrupted in progress."), nil];
 	[self performSelectorOnMainThread:@selector(notifyDelegateOfUploadError:) withObject:args waitUntilDone:NO];
 	[self destroyUploadResources];
 }

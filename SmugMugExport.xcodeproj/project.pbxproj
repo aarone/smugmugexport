@@ -343,6 +343,10 @@
 		93BD6F1B0AD84A49007CE525 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					"$(NATIVE_ARCH)",
+					ppc,
+				);
 				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;

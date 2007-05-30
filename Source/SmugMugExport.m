@@ -55,6 +55,8 @@
 -(void)incrementUploadRetryCount;
 -(void)resetUploadRetryCount;
 -(void)presentError:(NSString *)errorText;
+-(BOOL)isUploading;
+-(void)setIsUploading:(BOOL)v;
 
 
 -(NSString *)imageUploadProgressText;
@@ -62,7 +64,12 @@
 -(NSPanel *)newAlbumSheet;
 -(NSPanel *)uploadPanel;
 -(NSPanel *)loginPanel;
--(BOOL)sheetIsDisplayed;	
+-(BOOL)sheetIsDisplayed;
+
+-(BOOL)siteUrlHasBeenFetched;
+-(void)setSiteUrlHasBeenFetched:(BOOL)v;
+-(NSURL *)uploadSiteUrl;
+-(void)setUploadSiteUrl:(NSURL *)url;
 @end
 
 // UI keys
@@ -74,6 +81,7 @@ NSString *NewAccountLabel = @"New Account...";
 NSString *SMESelectedTabIdDefaultsKey = @"SMESelectedTabId";
 NSString *SMEAccountsDefaultsKey = @"SMEAccounts";
 NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
+NSString *SMOpenInBrowserAfterUploadCompletion = @"SMOpenInBrowserAfterUploadCompletion";
 
 static int UploadFailureRetryCount = 3;
 
@@ -91,14 +99,16 @@ static int UploadFailureRetryCount = 3;
 	[[self smugMugManager] setDelegate:self];
 
 	[self setLoginAttempted:NO];
+	[self setSiteUrlHasBeenFetched:NO];
 	[self setImagesUploaded:0];
 	[self resetUploadRetryCount];
-
+	[self setIsUploading:NO];
 	return self;
 }
 
 -(void)dealloc {
 
+	[[self uploadSiteUrl] release];
 	[[self smugMugManager] release];
 	[[self username] release];
 	[[self password] release];
@@ -121,7 +131,7 @@ static int UploadFailureRetryCount = 3;
 	NSMutableDictionary *defaultsDict = [NSMutableDictionary dictionary];
 	[defaultsDict setObject:ExistingAlbumTabIdentifier forKey:SMESelectedTabIdDefaultsKey];
 	[defaultsDict setObject:[NSArray array] forKey:SMEAccountsDefaultsKey];
-//	[defaultsDict setObject:nil forKey:SMESelectedAccountDefaultsKey];
+	[defaultsDict setObject:@"yes" forKey:SMOpenInBrowserAfterUploadCompletion];
 	[[NSUserDefaults standardUserDefaults] registerDefaults:defaultsDict];
 }
 
@@ -383,6 +393,26 @@ static int UploadFailureRetryCount = 3;
 		[self presentError:NSLocalizedString(@"Album deletion failed.", @"Error message to display when album delete fails.")];
 }
 
+#pragma mark Image Url Fetching
+
+-(void)imageUrlFetchDidComplete:(NSDictionary *)imageUrls {
+	NSString *siteUrlString = [imageUrls objectForKey:@"AlbumURL"];
+	if(siteUrlString != nil) {
+		[self setUploadSiteUrl:[NSURL URLWithString:siteUrlString]];
+	} else {
+		[self setSiteUrlHasBeenFetched:NO];
+	}
+	
+	/* it's possible that we're done uploading the images for an album and *then* we
+		receive this callback notifying us of the url for the album.  In that case,
+	   we open the gallery in the browser. Otherwise, this happens when the upload
+		completes
+		*/
+	if(![self isUploading] && [self uploadSiteUrl] != nil) {
+		[[NSWorkspace sharedWorkspace] openURL:[self uploadSiteUrl]];
+	}
+}
+
 #pragma mark Category Get
 
 -(void)categoryGetDidComplete:(BOOL)wasSuccessful {
@@ -402,6 +432,7 @@ static int UploadFailureRetryCount = 3;
 	[self setSessionUploadProgress:[NSNumber numberWithInt:0]];
 	[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Uploading image %d of %d", @"Image upload progress text"), [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
 
+	[self setIsUploading:YES];
 	[NSApp beginSheet:uploadPanel
 	   modalForWindow:[[self exportManager] window]
 		modalDelegate:self
@@ -414,25 +445,41 @@ static int UploadFailureRetryCount = 3;
 	[img setScalesWhenResized:YES];
 	[self setCurrentThumbnail:img];
 	[self resetUploadRetryCount];
+	[self setUploadSiteUrl:nil];
+	[self setSiteUrlHasBeenFetched:NO];
 	[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
 								 albumWithID:selectedAlbumId
 									 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
 }
 
--(void)performUploadCompletionTasks {
+-(void)performUploadCompletionTasks:(BOOL)wasSuccessful {
 	[NSApp endSheet:uploadPanel];
 	[[self exportManager] cancelExportBeforeBeginning];
+	[self setIsUploading:NO];
+	// if this really bothers you you can set your preferences to not open in the browser
+	if(![[NSUserDefaults standardUserDefaults] boolForKey:SMOpenInBrowserAfterUploadCompletion])
+		return;
+
+	if([self uploadSiteUrl] != nil)
+		[[NSWorkspace sharedWorkspace] openURL:uploadSiteUrl];
 }
 
--(void)uploadDidCompleteForFile:(NSString *)aFullPathToImage withError:(NSString *)error {
+-(void)uploadDidCompleteForFile:(NSString *)aFullPathToImage imageId:(NSString *)imageId withError:(NSString *)error {
 
 	NSString *selectedAlbumId = [[self selectedAlbum] objectForKey:@"AlbumID"];
 
 	if(uploadCancelled) {
-		[self performUploadCompletionTasks];
+		[self performUploadCompletionTasks:NO];
 		return; // stop uploading
 	}
 
+	@synchronized(self) {
+		if(!siteUrlHasBeenFetched) {
+			[self setSiteUrlHasBeenFetched:NO];
+			[[self smugMugManager] fetchImageUrls:imageId];
+		}
+	}
+	
 	// if an error occurred, retry up to UploadFailureRetryCount times
 	if(error != nil && [self uploadRetryCount] < UploadFailureRetryCount) {
 		[self incrementUploadRetryCount];
@@ -442,7 +489,7 @@ static int UploadFailureRetryCount = 3;
 										 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
 		return;
 	} else if (error != nil) {
-		[self performUploadCompletionTasks];
+		[self performUploadCompletionTasks:NO];
 		[self presentError:NSLocalizedString(@"Image upload failed.", @"Error message to display when upload fails.")];
 		return;
 	}
@@ -451,9 +498,8 @@ static int UploadFailureRetryCount = 3;
 	[self setImagesUploaded:[self imagesUploaded] + 1];
 	[self setSessionUploadProgress:[NSNumber numberWithFloat:100.0*((float)[self imagesUploaded])/((float)[[self exportManager] imageCount])]];
 	
-
 	if([self imagesUploaded] >= [[self exportManager] imageCount]) {
-		[self performUploadCompletionTasks];
+		[self performUploadCompletionTasks:YES];
 	} else {
 		[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Uploading image %d of %d", @"Image upload progress text"), [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
 		NSString *thumbnailPath = [exportManager thumbnailPathAtIndex:[self imagesUploaded]];
@@ -554,6 +600,25 @@ static int UploadFailureRetryCount = 3;
 	currentThumbnail = [d retain];
 }
 
+-(BOOL)siteUrlHasBeenFetched {
+	return siteUrlHasBeenFetched;
+}
+
+-(void)setSiteUrlHasBeenFetched:(BOOL)v {
+	siteUrlHasBeenFetched = v;
+}
+
+-(NSURL *)uploadSiteUrl {
+	return uploadSiteUrl;
+}
+
+-(void)setUploadSiteUrl:(NSURL *)url {
+	if(uploadSiteUrl != nil)
+		[[self uploadSiteUrl] release];
+	
+	uploadSiteUrl = [url retain];
+}
+
 -(BOOL)isBusy {
 	return isBusy;
 }
@@ -568,6 +633,14 @@ static int UploadFailureRetryCount = 3;
 
 -(void)setLoginAttempted:(BOOL)v {
 	loginAttempted = v;
+}
+
+-(BOOL)isUploading {
+	return isUploading;
+}
+
+-(void)setIsUploading:(BOOL)v {
+	isUploading = v;
 }
 
 -(AccountManager *)accountManager {

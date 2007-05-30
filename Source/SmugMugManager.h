@@ -11,11 +11,12 @@
 @protocol SmugMugManagerDelegate
 -(void)loginDidComplete:(BOOL)wasSuccessful;
 -(void)logoutDidComplete:(BOOL)wasSuccessful;
--(void)uploadDidCompleteForFile:(NSString *)aFullPathToImage withError:(NSString *)error;
+-(void)uploadDidCompleteForFile:(NSString *)aFullPathToImage imageId:(NSString *)imageId  withError:(NSString *)error;
 -(void)uploadMadeProgressForFile:(NSString *)pathToFile bytesWritten:(long)bytesWritten totalBytes:(long)totalBytes;
 -(void)categoryGetDidComplete:(BOOL)wasSuccessful;
 -(void)createNewAlbumDidComplete:(BOOL)wasSuccessful;
 -(void)deleteAlbumDidComplete:(BOOL)wasSuccessful;
+-(void)imageUrlFetchDidComplete:(NSDictionary *)imageUrls;
 @end
 
 @interface SmugMugManager : NSObject {
@@ -64,6 +65,8 @@
 
 -(void)uploadImageAtPath:(NSString *)path albumWithID:(NSString *)albumId caption:(NSString *)caption;
 -(void)stopUpload;
+
+-(void)fetchImageUrls:(NSString *)imageId;
 
 -(void)createNewAlbum;
 -(void)clearAlbumCreationState;
