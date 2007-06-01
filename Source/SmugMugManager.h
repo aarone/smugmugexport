@@ -9,13 +9,15 @@
 #import <Cocoa/Cocoa.h>
 
 @protocol SmugMugManagerDelegate
--(void)loginDidComplete:(BOOL)wasSuccessful;
--(void)logoutDidComplete:(BOOL)wasSuccessful;
--(void)uploadDidCompleteForFile:(NSString *)aFullPathToImage imageId:(NSString *)imageId  withError:(NSString *)error;
--(void)uploadMadeProgressForFile:(NSString *)pathToFile bytesWritten:(long)bytesWritten totalBytes:(long)totalBytes;
--(void)categoryGetDidComplete:(BOOL)wasSuccessful;
--(void)createNewAlbumDidComplete:(BOOL)wasSuccessful;
--(void)deleteAlbumDidComplete:(BOOL)wasSuccessful;
+-(void)loginDidComplete:(NSNumber *)wasSuccessful;
+-(void)logoutDidComplete:(NSNumber *)wasSuccessful;
+-(void)uploadDidCompleteWithArgs:(NSArray *)args;
+-(void)uploadMadeProgressWithArgs:(NSArray *)args;
+//-(void)uploadDidCompleteForFile:(NSString *)aFullPathToImage imageId:(NSString *)imageId  withError:(NSString *)error;
+//-(void)uploadMadeProgressForFile:(NSString *)pathToFile bytesWritten:(long)bytesWritten totalBytes:(long)totalBytes;
+-(void)categoryGetDidComplete:(NSNumber *)wasSuccessful;
+-(void)createNewAlbumDidComplete:(NSNumber *)wasSuccessful;
+-(void)deleteAlbumDidComplete:(NSNumber *)wasSuccessful;
 -(void)imageUrlFetchDidComplete:(NSDictionary *)imageUrls;
 @end
 

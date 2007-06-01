@@ -72,10 +72,16 @@
 -(void)setUploadSiteUrl:(NSURL *)url;
 @end
 
+// Globals
+NSString *AlbumID = @"id";
+NSString *CategoryID = @"id";
+NSString *SubCategoryID = @"id";
+
 // UI keys
 NSString *ExistingAlbumTabIdentifier = @"existingAlbum";
 NSString *NewAlbumTabIdentifier = @"newAlbum";
 NSString *NewAccountLabel = @"New Account...";
+NSString *UserAgent = @"iPhoto SmugMugExport";
 
 // defaults keys
 NSString *SMESelectedTabIdDefaultsKey = @"SMESelectedTabId";
@@ -95,7 +101,7 @@ static int UploadFailureRetryCount = 3;
 	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
 
 	[self setAccountManager:[AccountManager accountManager]];
-	[self setSmugMugManager:[SmugMugManager smugmugManager]];
+	[self performSelectorOnMainThread:@selector(setSmugMugManager:)  withObject:[SmugMugManager smugmugManager] waitUntilDone:YES];
 	[[self smugMugManager] setDelegate:self];
 
 	[self setLoginAttempted:NO];
@@ -218,10 +224,10 @@ static int UploadFailureRetryCount = 3;
 	   [[self accountManager] passwordExistsInKeychainForAccount:[[self accountManager] selectedAccount]]) {
 
 		[self setLoginAttempted:YES];
-		[self setIsBusy:YES];
-		[self setStatusText:NSLocalizedString(@"Logging in...", @"Status text for logginng in")];
+		[self performSelectorOnMainThread:@selector(setIsBusyWithNumber:) withObject:[NSNumber numberWithBool:YES] waitUntilDone:NO];	
+		[self performSelectorOnMainThread:@selector(setStatusText:) withObject:NSLocalizedString(@"Logging in...", @"Status text for logginng in") waitUntilDone:NO];
 		[[self smugMugManager] setUsername:[[self accountManager] selectedAccount]];
-		[[self smugMugManager] setPassword:[[self accountManager] passwordForAccount:[[self accountManager] selectedAccount]]];
+		[[self smugMugManager] setPassword:[[self accountManager] passwordForAccount:[[self accountManager] selectedAccount]]]; 
 		[[self smugMugManager] login]; // gets asyncronous callback
 	}
 }
@@ -248,7 +254,7 @@ static int UploadFailureRetryCount = 3;
 -(IBAction)cancelLoginSheet:(id)sender {
 	if([[[self accountManager] accounts] count] > 0)
 		[self setSelectedAccount:[[[self accountManager] accounts] objectAtIndex:0]];
-
+	
 	[self setLoginSheetStatusMessage:@""];
 	[self setLoginSheetIsBusy:NO];
 	[NSApp endSheet:loginPanel];
@@ -263,7 +269,7 @@ static int UploadFailureRetryCount = 3;
 	[[self smugMugManager] login]; // gets asyncronous callback
 }
 
--(void)loginDidComplete:(BOOL)wasSuccessful {
+-(void)loginDidComplete:(NSNumber *)wasSuccessful {
 	[self setIsBusy:NO];
 	[self setStatusText:@""];
 	[self setLoginSheetIsBusy:NO];
@@ -279,10 +285,12 @@ static int UploadFailureRetryCount = 3;
 	
 	// attempt to login, if successful add to keychain
 	[[self accountManager] addAccount:[[self smugMugManager] username] withPassword:[[self smugMugManager] password]];
+	
 	[self setSelectedAccount:[[self smugMugManager] username]];
 	[NSApp endSheet:loginPanel];
 	
 	[[self smugMugManager] buildCategoryList];
+//	[[self smugMugManager] buildSubCategoryList];
 }
 
 
@@ -291,8 +299,8 @@ static int UploadFailureRetryCount = 3;
 }
 
 #pragma mark Logout 
--(void)logoutDidComplete:(BOOL)wasSuccessful {
-	if(!wasSuccessful)
+-(void)logoutDidComplete:(NSNumber *)wasSuccessful {
+	if(![wasSuccessful boolValue])
 		[self presentError:NSLocalizedString(@"Logout failed.", @"Error message to display when logout fails.")];
 }
 
@@ -333,9 +341,9 @@ static int UploadFailureRetryCount = 3;
 	
 }
 
--(void)createNewAlbumDidComplete:(BOOL)wasSuccessful {
+-(void)createNewAlbumDidComplete:(NSNumber *)wasSuccessful {
 	
-	if(wasSuccessful) {
+	if([wasSuccessful boolValue]) {
 		[NSApp endSheet:[self newAlbumSheet]];
 	} else {
 		// album creation occurs in a sheet, don't try to show an error dialog in another sheet...
@@ -353,7 +361,7 @@ static int UploadFailureRetryCount = 3;
 #pragma mark Delete Album
 
 -(IBAction)removeAlbum:(id)sender {
-	if([[self selectedAlbum] objectForKey:@"AlbumID"] == nil) { // no album is selected
+	if([[self selectedAlbum] objectForKey:AlbumID] == nil) { // no album is selected
 		NSBeep();
 		return;
 	}
@@ -384,12 +392,12 @@ static int UploadFailureRetryCount = 3;
 -(void)deleteAlbumSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo {
 
 	if(returnCode == NSAlertDefaultReturn)
-		[[self smugMugManager] deleteAlbum:[[self selectedAlbum] objectForKey:@"AlbumID"]];
+		[[self smugMugManager] deleteAlbum:[[self selectedAlbum] objectForKey:AlbumID]];
 
 }
 
--(void)deleteAlbumDidComplete:(BOOL)wasSuccessful {
-	if(!wasSuccessful)
+-(void)deleteAlbumDidComplete:(NSNumber *)wasSuccessful {
+	if(![wasSuccessful boolValue])
 		[self presentError:NSLocalizedString(@"Album deletion failed.", @"Error message to display when album delete fails.")];
 }
 
@@ -415,8 +423,8 @@ static int UploadFailureRetryCount = 3;
 
 #pragma mark Category Get
 
--(void)categoryGetDidComplete:(BOOL)wasSuccessful {
-	if(!wasSuccessful)
+-(void)categoryGetDidComplete:(NSNumber *)wasSuccessful {
+	if(![wasSuccessful boolValue])
 		[self presentError:NSLocalizedString(@"Could not fetch categories.", @"Error message to display when category get fails.")];
 }
 
@@ -439,7 +447,7 @@ static int UploadFailureRetryCount = 3;
 	   didEndSelector:@selector(didEndSheet:returnCode:contextInfo:)
 		  contextInfo:nil];
 
-	NSString *selectedAlbumId = [[self selectedAlbum] objectForKey:@"AlbumID"];
+	NSString *selectedAlbumId = [[[self selectedAlbum] objectForKey:AlbumID] stringValue];
 	NSString *thumbnailPath = [exportManager thumbnailPathAtIndex:[self imagesUploaded]];
 	NSImage *img = [[[NSImage alloc] initWithData:[NSData dataWithContentsOfFile: thumbnailPath]] autorelease];
 	[img setScalesWhenResized:YES];
@@ -456,7 +464,7 @@ static int UploadFailureRetryCount = 3;
 	[NSApp endSheet:uploadPanel];
 	[[self exportManager] cancelExportBeforeBeginning];
 	[self setIsUploading:NO];
-	// if this really bothers you you can set your preferences to not open in the browser
+	// if this really bothers you you can set your preferences to not open the page in the browser
 	if(![[NSUserDefaults standardUserDefaults] boolForKey:SMOpenInBrowserAfterUploadCompletion])
 		return;
 
@@ -464,9 +472,13 @@ static int UploadFailureRetryCount = 3;
 		[[NSWorkspace sharedWorkspace] openURL:uploadSiteUrl];
 }
 
--(void)uploadDidCompleteForFile:(NSString *)aFullPathToImage imageId:(NSString *)imageId withError:(NSString *)error {
+-(void)uploadDidCompleteWithArgs:(NSArray *)args {
 
-	NSString *selectedAlbumId = [[self selectedAlbum] objectForKey:@"AlbumID"];
+//	NSString *aFullPathToImage = [args objectAtIndex:0];
+	NSString *imageId = [args objectAtIndex:1];
+	NSError *error = [args count] > 2 ? [args objectAtIndex:2] : nil;
+	
+	NSString *selectedAlbumId = [[[self selectedAlbum] objectForKey:AlbumID] stringValue];
 
 	if(uploadCancelled) {
 		[self performUploadCompletionTasks:NO];
@@ -517,7 +529,11 @@ static int UploadFailureRetryCount = 3;
     [sheet orderOut:self];
 }
 
--(void)uploadMadeProgressForFile:(NSString *)pathToFile bytesWritten:(long)bytesWritten totalBytes:(long)totalBytes {
+-(void)uploadMadeProgressWithArgs:(NSArray *)args {
+//	NSString *pathToFile = [args objectAtIndex:0];
+	long bytesWritten = [[args objectAtIndex:1] longValue];
+	long totalBytes = [[args objectAtIndex:2] longValue];
+
 	float progressForFile = MIN(100.0, ceil(100.0*(float)bytesWritten/(float)totalBytes));
 	[self setFileUploadProgress:[NSNumber numberWithFloat:progressForFile]];
 
@@ -569,6 +585,10 @@ static int UploadFailureRetryCount = 3;
 	return loginSheetIsBusy;
 }
 
+-(void)setLoginSheetIsBusyWithNumber:(NSNumber *)v {
+	[self setLoginSheetIsBusy:[v boolValue]];
+}
+
 -(void)setLoginSheetIsBusy:(BOOL)v {
 	loginSheetIsBusy = v;
 }
@@ -617,6 +637,10 @@ static int UploadFailureRetryCount = 3;
 		[[self uploadSiteUrl] release];
 	
 	uploadSiteUrl = [url retain];
+}
+
+-(void)setIsBusyWithNumber:(NSNumber *)val {
+	[self setIsBusy:[val boolValue]];
 }
 
 -(BOOL)isBusy {

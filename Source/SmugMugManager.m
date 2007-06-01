@@ -8,7 +8,9 @@
 
 #import "SmugMugManager.h"
 #import "NSDataAdditions.h"
-#import "RESTCall.h"
+#import "JSONRequest.h"
+#import "Globals.h"
+#import "SmugmugAccess.h"
 
 static const CFOptionFlags DAClientNetworkEvents = 
 kCFStreamEventOpenCompleted     |
@@ -28,11 +30,10 @@ kCFStreamEventErrorOccurred;
 -(void)setPasswordHash:(NSString *)p;
 
 
--(NSURL *)RESTURL;
--(NSURL *)RESTUploadURL;
+-(NSURL *)SmugMugAccessURL;
 
--(BOOL)smResponseWasSuccessful:(RESTCall *)call;
--(void)evaluateLoginResponse:(NSXMLDocument *)d;
+-(BOOL)smResponseWasSuccessful:(SmugmugAccess *)req;
+-(void)evaluateLoginResponse:(id)response;
 
 -(NSString *)contentTypeForPath:(NSString *)path;
 -(NSData *)postBodyForImageAtPath:(NSString *)path albumId:(NSString *)albumId caption:(NSString *)caption;
@@ -47,7 +48,7 @@ kCFStreamEventErrorOccurred;
 -(void)setSelectedCategory:(NSDictionary *)d;
 -(void)createNewAlbum;
 -(void)createNewAlbumCallback:(SEL)callback;
--(void)newAlbumCreationDidComplete:(RESTCall *)rpcCall;
+-(void)newAlbumCreationDidComplete:(SmugmugAccess *)req;
 -(void)destroyUploadResources;
 
 -(NSMutableData *)responseData;
@@ -61,17 +62,17 @@ kCFStreamEventErrorOccurred;
 
 -(void)loginWithCallback:(SEL)loginDidEndSelector;
 -(void)logoutWithCallback:(SEL)logoutDidEndSelector;
--(void)logoutCompletedNowLogin:(RESTCall *)rpcCall;
--(void)loginCompletedBuildAlbumList:(RESTCall *)rpcCall;
+-(void)logoutCompletedNowLogin:(SmugmugAccess *)req;
+-(void)loginCompletedBuildAlbumList:(SmugmugAccess *)req;
 -(void)buildAlbumListWithCallback:(SEL)callback;
--(void)buildAlbumsListDidComplete:(RESTCall *)call;
+-(void)buildAlbumsListDidComplete:(SmugmugAccess *)req;
 -(void)buildCategoryListWithCallback:(SEL)callback;
--(void)categoryGetDidComplete:(RESTCall *)rpcCall;
+-(void)categoryGetDidComplete:(SmugmugAccess *)req;
 -(void)buildSubCategoryListWithCallback:(SEL)callback;
--(void)subcategoryGetDidComplete:(RESTCall *)rpcCall;
+-(void)subcategoryGetDidComplete:(SmugmugAccess *)req;
 -(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSString *)albumId;
 -(void)getImageUrlsWithCallback:(SEL)callback imageId:(NSString *)imageId;
--(void)getImageUrlsDidComplete:(RESTCall *)call;
+-(void)getImageUrlsDidComplete:(SmugmugAccess *)req;
 
 -(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey;
 
@@ -117,7 +118,7 @@ static NSString *AlbumDescriptionPref = @"AlbumDescription";
 static NSString *AlbumKeywordsPref = @"AlbumKeywords";
 static NSString *AlbumCategoryPref = @"AlbumCategory";
 
-static NSString *AlbumId = @"AlbumID";
+double UploadProgressTimerInterval = 0.125/2.0;
 
 @interface NSDictionary (SMAdditions)
 -(NSComparisonResult)compareByAlbumId:(NSDictionary *)aDict;
@@ -126,13 +127,17 @@ static NSString *AlbumId = @"AlbumID";
 @implementation NSDictionary (SMAdditions)
 -(NSComparisonResult)compareByAlbumId:(NSDictionary *)aDict {
 	
-	if([self objectForKey:AlbumId] == nil)
+	if([self objectForKey:AlbumID] == nil)
 		return NSOrderedAscending;
 	
-	if([aDict objectForKey:AlbumId] == nil)
+	if([aDict objectForKey:AlbumID] == nil)
 		return NSOrderedDescending;
 		
-	return [[aDict objectForKey:AlbumId] intValue] - [[self objectForKey:AlbumId] intValue];
+	return [[aDict objectForKey:AlbumID] intValue] - [[self objectForKey:AlbumID] intValue];
+}
+
+-(NSComparisonResult)compareByTitle:(NSDictionary *)aDict {
+	return [[self objectForKey:@"Title"] caseInsensitiveCompare:[aDict objectForKey:@"Title"]];
 }
 @end
 
@@ -163,6 +168,10 @@ static NSString *AlbumId = @"AlbumID";
 	[[self selectedCategory] release];
 
 	[super dealloc];
+}
+
+-(Class)storeAccessClass {
+	return [JSONRequest class];
 }
 
 #pragma mark Miscellaneous Get/Set Methods
@@ -272,8 +281,8 @@ static NSString *AlbumId = @"AlbumID";
 	return @"SmugMugExport";
 }
 
--(NSURL *)RESTURL {
-	return [NSURL URLWithString:@"https://api.smugmug.com/hack/rest/1.1.1/"];
+-(NSURL *)SmugMugAccessURL {
+	return [NSURL URLWithString:@"https://api.smugmug.com/hack/json/1.2.0/"];
 }
 
 -(NSString *)postUploadURL {
@@ -346,8 +355,8 @@ static NSString *AlbumId = @"AlbumID";
 	[self logoutWithCallback:@selector(logoutCompletedNowLogin:)];
 }
 
--(void)logoutCompletedNowLogin:(RESTCall *)call {
-	if(call == nil || ([call wasSuccessful] && [self smResponseWasSuccessful:call])) {
+-(void)logoutCompletedNowLogin:(SmugmugAccess *)req {
+	if(req == nil || ([req wasSuccessful] && [self smResponseWasSuccessful:req])) {
 		[self setIsLoggedIn:NO];
 	}
 
@@ -359,9 +368,9 @@ static NSString *AlbumId = @"AlbumID";
 	[self logoutWithCallback:@selector(logoutCallback:)];
 }
 
--(void)loginCompletedBuildAlbumList:(RESTCall *)call {
-	if ([self smResponseWasSuccessful:call]) {
-		[self evaluateLoginResponse:[call document]];
+-(void)loginCompletedBuildAlbumList:(SmugmugAccess *)req {
+	if ([self smResponseWasSuccessful:req]) {
+		[self evaluateLoginResponse:[req decodedResponse]];
 		[self buildAlbumListWithCallback:@selector(buildAlbumsListDidComplete:)];
 	} else {
 		[self setIsLoggedIn:NO];
@@ -370,123 +379,74 @@ static NSString *AlbumId = @"AlbumID";
 	}	
 }
 
--(void)evaluateLoginResponse:(NSXMLDocument *)d {
-	NSXMLElement *root = [d rootElement];
-	NSError *error = nil;
-	NSString *sessId = [[[root nodesForXPath:@"//Login/SessionID" error:&error] objectAtIndex:0] stringValue];
-	NSString *passHash = [[[root nodesForXPath:@"//Login/PasswordHash" error:&error] objectAtIndex:0] stringValue];
-	NSString *uid = [[[root nodesForXPath:@"//Login/UserID" error:&error] objectAtIndex:0] stringValue];
+-(void)evaluateLoginResponse:(id)response {
+	NSString *sessId = [[[response objectForKey:@"Login"] objectForKey:@"Session"] objectForKey:@"id"];
+	NSString *passHash = [[response objectForKey:@"Login"] objectForKey:@"PasswordHash"];
+	NSNumber *uid = [[[response objectForKey:@"Login"] objectForKey:@"User"] objectForKey:@"id"];
+	
 				
-	NSAssert(sessId != nil && passHash != nil && uid != nil, NSLocalizedString(@"Unexpected XML response for login", @"Error string when the xml returned by the login method is malformed."));
+	NSAssert(sessId != nil && passHash != nil && uid != nil, NSLocalizedString(@"Unexpected response for login", @"Error string when the response returned by the login method is malformed."));
+
 	[self setSessionID:sessId];
 	[self setPasswordHash:passHash];
-	[self setUserID:uid];
+	[self setUserID:[uid stringValue]];
 }
 
 -(void)buildAlbumListWithCallback:(SEL)callback {
-	RESTCall *call = [RESTCall RESTCall];
-	[call invokeMethodWithURL:[self RESTURL] 
+	SmugmugAccess *req = [[self storeAccessClass] request];
+	[req invokeMethodWithURL:[self SmugMugAccessURL] 
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.albums.get", [self sessionID], nil]
 			  responseCallback:callback
 				responseTarget:self];
 }
 
-/*
- <?xml version="1.0" encoding="utf-8"?>
- <rsp stat="ok">
- <method>smugmug.albums.get</method>
- <Albums>
-	 <Album id="1973549">
-		 <Title>Our Wedding</Title>
-		 <Category id="23">
-			<Title>Weddings</Title>
-		 </Category>
-	 </Album>
-	 <Album id="1986684">
-		 <Title>Molly &amp; Tom's Wedding</Title>
-		 <Category id="23">
-			<Title>Weddings</Title>
-		 </Category>
-	 </Album>
-	 <Album id="1884785">
-		 <Title>honeymoon</Title>
-		 <Category id="33">
-			<Title>Vacation</Title>
-		 </Category>
-	 </Album>
- </Albums>
- </rsp>
- */
--(void)initializeAlbumsFromResponse:(NSXMLDocument *)doc {
-
-	/*
-	 int "AlbumID"
-	 String "Title"
-	 String "Category"
-	 int "CategoryID"
-	 String "SubCategory" optional
-	 int "SubCategoryID" optional
-	 */
-	NSXMLElement *root = [doc rootElement];
-	NSError *error = nil;
-	NSArray *albumNodes = [root nodesForXPath:@"//Albums/Album" error:&error ];
-	NSXMLNode *node;
-	NSEnumerator *nodeEnumertor = [albumNodes objectEnumerator];
-	NSMutableArray *returnedAlbums = [NSMutableArray array];
-	while(node = [nodeEnumertor nextObject]) {
-		NSXMLNode *albumAttr = [(NSXMLElement *)node attributeForName:@"id"];
-		NSString *albumId = [albumAttr stringValue];
-		NSString *albumTitle = [[[(NSXMLElement *)node elementsForName:@"Title"] objectAtIndex:0] stringValue];
-
-		NSAssert(albumId != nil && albumTitle != nil, NSLocalizedString(@"Unexpected XML response for album get", @"Error string when the xml returned by the album get method is malformed."));
-		
-		[returnedAlbums addObject:[NSDictionary dictionaryWithObjectsAndKeys:albumId, @"AlbumID", albumTitle, @"Title", nil]];
-	}
-	
+-(void)initializeAlbumsFromResponse:(id)response {
+	NSMutableArray *returnedAlbums = [NSMutableArray arrayWithArray:[[response objectForKey:@"Albums"] allValues]];
 	[returnedAlbums sortUsingSelector:@selector(compareByAlbumId:)];
-	[self performSelectorOnMainThread:@selector(setAlbums:)	withObject:[NSArray arrayWithArray:returnedAlbums] waitUntilDone:false];
+	
+	[self performSelectorOnMainThread:@selector(setAlbums:)	
+							   withObject:[NSArray arrayWithArray:returnedAlbums] waitUntilDone:false];	
 }
 
 -(void)notifyDelegateOfLoginCompleted:(NSNumber *)wasSuccessful {
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(loginDidComplete:)])
-		[[self delegate] loginDidComplete:[wasSuccessful boolValue]];
+		[[self delegate] performSelectorOnMainThread:@selector(loginDidComplete:) withObject:wasSuccessful waitUntilDone:NO];
 }
 
--(void)buildAlbumsListDidComplete:(RESTCall *)call {
+-(void)buildAlbumsListDidComplete:(SmugmugAccess *)req {
 
-	if([self smResponseWasSuccessful:call])
-		[self initializeAlbumsFromResponse:[call document]];
+	if([self smResponseWasSuccessful:req])
+		[self initializeAlbumsFromResponse:[req decodedResponse]];
 
 	[self setIsLoggingIn:NO];
 	[self setIsLoggedIn:YES];
 
-	[self performSelectorOnMainThread:@selector(notifyDelegateOfLoginCompleted:) withObject:[NSNumber numberWithBool:[self smResponseWasSuccessful:call]] waitUntilDone:NO];
+	[self performSelectorOnMainThread:@selector(notifyDelegateOfLoginCompleted:) withObject:[NSNumber numberWithBool:[self smResponseWasSuccessful:req]] waitUntilDone:NO];
 }
 
 -(void)loginWithCallback:(SEL)loginDidEndSelector {
 	[self setIsLoggingIn:YES];
-	RESTCall *call = [RESTCall RESTCall];
+	SmugmugAccess *request = [[self storeAccessClass] request];
 
-	[call invokeMethodWithURL:[self RESTURL] 
+	[request invokeMethodWithURL:[self SmugMugAccessURL] 
 						  keys:[NSArray arrayWithObjects:@"method", @"EmailAddress",@"Password", @"APIKey", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.login.withPassword", [self username], [self password], [self apiKey], nil]
 			  responseCallback:loginDidEndSelector
 				responseTarget:self];
 }
 
--(BOOL)smResponseWasSuccessful:(RESTCall *)call {
-	if(![call wasSuccessful])
+-(BOOL)smResponseWasSuccessful:(SmugmugAccess *)req {
+	if(![req wasSuccessful])
 		return NO;
-
-	NSXMLElement *root = [[call document] rootElement];
-	return [[[root attributeForName:@"stat"] stringValue] isEqualToString:@"ok"];
+	
+	return [[[req decodedResponse] objectForKey:@"stat"] isEqualToString:@"ok"];
 }
 
--(void)loginCompleted:(RESTCall *)call {
-	if([self smResponseWasSuccessful:call]) {
-		[self evaluateLoginResponse:[call document]];
+-(void)loginCompleted:(SmugmugAccess *)req {
+	if([self smResponseWasSuccessful:req]) {
+		[self evaluateLoginResponse:[req decodedResponse]];
 	}
 }
 
@@ -496,8 +456,8 @@ static NSString *AlbumId = @"AlbumID";
 		return;
 	}
 
-	RESTCall *call = [RESTCall RESTCall];	
-	[call invokeMethodWithURL:[self RESTURL] 
+	SmugmugAccess *req = [[self storeAccessClass] request];	
+	[req invokeMethodWithURL:[self SmugMugAccessURL] 
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.logout", [self sessionID], nil]
 			  responseCallback:logoutDidEndSelector
@@ -507,16 +467,16 @@ static NSString *AlbumId = @"AlbumID";
 -(void)notifyDelegaeOfLogout:(NSNumber *)wasSuccessful {
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(logoutDidComplete:)])
-		[[self delegate] logoutDidComplete:[wasSuccessful boolValue]];
+		[[self delegate] performSelectorOnMainThread:@selector(logoutDidComplete:) withObject:wasSuccessful waitUntilDone:NO];
 }
 
--(void)logoutCallback:(RESTCall *)call {
+-(void)logoutCallback:(SmugmugAccess *)req {
 
 	[self setIsLoggedIn:NO];
 
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(logoutDidComplete:)])
-		[[self delegate] performSelectorOnMainThread:@selector(logoutDidComplete:) withObject:[NSNumber numberWithBool:[self smResponseWasSuccessful:call]] waitUntilDone:NO];
+		[[self delegate] performSelectorOnMainThread:@selector(logoutDidComplete:) withObject:[NSNumber numberWithBool:[self smResponseWasSuccessful:req]] waitUntilDone:NO];
 }
 
 #pragma mark Misc SM Info Methods
@@ -526,31 +486,21 @@ static NSString *AlbumId = @"AlbumID";
 }
 
 -(void)getImageUrlsWithCallback:(SEL)callback imageId:(NSString *)imageId {
-	RESTCall *call = [RESTCall RESTCall];
-	[call invokeMethodWithURL:[self RESTURL]
+	SmugmugAccess *req = [[self storeAccessClass] request];
+	[req invokeMethodWithURL:[self SmugMugAccessURL]
 						 keys:[NSArray arrayWithObjects:@"method", @"SessionID", @"ImageID", nil]
 					   values:[NSArray arrayWithObjects:@"smugmug.images.getURLs", [self sessionID], imageId, nil]
 			 responseCallback:callback
 			   responseTarget:self];
 }
 
--(void)getImageUrlsDidComplete:(RESTCall *)call {
-	if([self smResponseWasSuccessful:call]) {
-		NSXMLElement *root = [[call  document] rootElement];
-		
-		NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-		NSError *error = nil;
-		NSArray *urlNodes = [root nodesForXPath:@"/rsp/ImageURLs/Image/*" error:&error];
-		NSEnumerator *nodeEnumerator = [urlNodes objectEnumerator];
-		NSXMLNode *node = nil;
-		while(node = [nodeEnumerator nextObject]) {
-			[dict setObject:[node stringValue] forKey:[node name]];
-		}
+-(void)getImageUrlsDidComplete:(SmugmugAccess *)req {
+	if([self smResponseWasSuccessful:req]) {
+		NSDictionary *dict = [[req decodedResponse] objectForKey:@"Image"];
 		 
 		if([self delegate] != nil &&
 			[[self delegate] respondsToSelector:@selector(imageUrlFetchDidComplete:)])
-
-		[[self delegate] performSelectorOnMainThread:@selector(imageUrlFetchDidComplete:) withObject:dict waitUntilDone:NO];
+			[[self delegate] performSelectorOnMainThread:@selector(imageUrlFetchDidComplete:) withObject:dict waitUntilDone:NO];
 	}
 }
 
@@ -559,37 +509,23 @@ static NSString *AlbumId = @"AlbumID";
 }
 
 -(void)buildCategoryListWithCallback:(SEL)callback {
-	RESTCall *call = [RESTCall RESTCall];
-	[call invokeMethodWithURL:[self RESTURL]
+	SmugmugAccess *req = [[self storeAccessClass] request];
+	[req invokeMethodWithURL:[self SmugMugAccessURL]
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.categories.get", [self sessionID], nil]
 			  responseCallback:callback
 				responseTarget:self];
 }
 
--(void)initializeCategoriesWithDocument:(NSXMLDocument *)doc {
-	NSXMLElement *root = [doc rootElement];
-	NSError *error = nil;
-	NSArray *categoryNodes = [root nodesForXPath:@"//Categories/Category" error:&error ];
-
-	NSXMLNode *node;
-	NSEnumerator *nodeEnumertor = [categoryNodes objectEnumerator];
-	NSMutableArray *returnedCategories = [NSMutableArray array];
-	while(node = [nodeEnumertor nextObject]) {
-		NSString *categoryId = [[(NSXMLElement *)node attributeForName:@"id"] stringValue];
-		NSString *categoryTitle = [[[(NSXMLElement *)node elementsForName:@"Title"] objectAtIndex:0] stringValue];
-
-		NSAssert(categoryId != nil && categoryTitle != nil, NSLocalizedString(@"Unexpected XML response for category get", @"Error string when the xml returned by the category get method is malformed."));
-
-		[returnedCategories addObject:[NSDictionary dictionaryWithObjectsAndKeys:categoryId, @"CategoryID", categoryTitle, @"Title", nil]];
-	}
-
+-(void)initializeCategoriesWithResponse:(id)response {
+	NSMutableArray *returnedCategories = [NSMutableArray arrayWithArray:[[response objectForKey:@"Categories"] allValues]];
+	[returnedCategories sortUsingSelector:@selector(compareByTitle:)];
 	[self performSelectorOnMainThread:@selector(setCategories:)	withObject:[NSArray arrayWithArray:returnedCategories] waitUntilDone:false];
 }
 
--(void)categoryGetDidComplete:(RESTCall *)call {
-	if([self smResponseWasSuccessful:call])
-		[self initializeCategoriesWithDocument:[call document]];
+-(void)categoryGetDidComplete:(SmugmugAccess *)req {
+	if([self smResponseWasSuccessful:req])
+		[self initializeCategoriesWithResponse:[req decodedResponse]];
 	
 }
 
@@ -598,37 +534,23 @@ static NSString *AlbumId = @"AlbumID";
 }
 
 -(void)buildSubCategoryListWithCallback:(SEL)callback {
-	RESTCall *call = [RESTCall RESTCall];
-	[call invokeMethodWithURL:[self RESTURL]
+	SmugmugAccess *req = [[self storeAccessClass] request];
+	[req invokeMethodWithURL:[self SmugMugAccessURL]
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.subcategories.getAll", [self sessionID], nil]
 			  responseCallback:callback
 				responseTarget:self];
 }
 
--(void)initializeSubcategoriesWithDocument:(NSXMLDocument *)doc {
-	NSXMLElement *root = [doc rootElement];
-	NSError *error = nil;
-	NSArray *subcategoryNodes = [root nodesForXPath:@"//SubCategories/SubCategory" error:&error ];
-
-	NSXMLNode *node;
-	NSEnumerator *nodeEnumertor = [subcategoryNodes objectEnumerator];
-	NSMutableArray *returnedSubCategories = [NSMutableArray array];
-	while(node = [nodeEnumertor nextObject]) {
-		NSString *categoryId = [[(NSXMLElement *)node attributeForName:@"id"] stringValue];
-		NSString *categoryTitle = [[[(NSXMLElement *)node elementsForName:@"Title"] objectAtIndex:0] stringValue];
-			
-		NSAssert(categoryId != nil && categoryTitle != nil, NSLocalizedString(@"Unexpected XML response for category get", @"Error string when the xml returned by the subcategory get method is malformed."));
-		
-		[returnedSubCategories addObject:[NSDictionary dictionaryWithObjectsAndKeys:categoryId, @"CategoryID", categoryTitle, @"Title", nil]];
-	}
-
+-(void)initializeSubcategoriesWithResponse:(id)response {
+	NSMutableArray *returnedSubCategories = [NSMutableArray arrayWithArray:[[response objectForKey:@"SubCategories"] allValues]];
+	[returnedSubCategories sortUsingSelector:@selector(compareByTitle:)];
 	[self performSelectorOnMainThread:@selector(setSubcategories:)	withObject:[NSArray arrayWithArray:returnedSubCategories] waitUntilDone:false];	
 }
 
--(void)subcategoryGetDidComplete:(RESTCall *)call {
-	if([self smResponseWasSuccessful:call])
-		[self initializeSubcategoriesWithDocument:[call document]];
+-(void)subcategoryGetDidComplete:(SmugmugAccess *)req {
+	if([self smResponseWasSuccessful:req])
+		[self initializeSubcategoriesWithResponse:[req decodedResponse]];
 }
 
 #pragma mark Delete Album Methods
@@ -643,8 +565,8 @@ static NSString *AlbumId = @"AlbumID";
 }
 
 -(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSString *)albumId {
-	RESTCall *call = [RESTCall RESTCall];
-	[call invokeMethodWithURL:[self RESTURL]
+	SmugmugAccess *req = [[self storeAccessClass] request];
+	[req invokeMethodWithURL:[self SmugMugAccessURL]
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", @"AlbumID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.albums.delete", [self sessionID], albumId, nil]
 			  responseCallback:callback
@@ -654,29 +576,29 @@ static NSString *AlbumId = @"AlbumID";
 -(void)notifyDelegateOfAlbumSyncCompletion:(NSNumber *)wasSuccessful {
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(deleteAlbumDidComplete:)])
-		[[self delegate] deleteAlbumDidComplete:[wasSuccessful boolValue]];	
+		[[self delegate] performSelectorOnMainThread:@selector(deleteAlbumDidComplete:) withObject:wasSuccessful waitUntilDone:NO];
 }
 
 -(void)notifyDelegateOfAlbumCompletion:(NSNumber *)wasSuccessful {
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(createNewAlbumDidComplete:)])
-		[[self delegate] createNewAlbumDidComplete:[wasSuccessful boolValue]];
+		[[self delegate] performSelectorOnMainThread:@selector(createNewAlbumDidComplete:) withObject:wasSuccessful waitUntilDone:NO];
 }
 
--(void)albumDeleteDidEnd:(RESTCall *)call {
-	if([self smResponseWasSuccessful:call]) {
+-(void)albumDeleteDidEnd:(SmugmugAccess *)req {
+	if([self smResponseWasSuccessful:req]) {
 		[self buildAlbumListWithCallback:@selector(postAlbumDeleteAlbumSyncDidComplete:)];
 	} else {
 		[self notifyDelegateOfAlbumCompletion:[NSNumber numberWithBool:NO]];
 	}
 }
 
--(void)postAlbumDeleteAlbumSyncDidComplete:(RESTCall *)call {
+-(void)postAlbumDeleteAlbumSyncDidComplete:(SmugmugAccess *)req {
 
-	if([self smResponseWasSuccessful:call])
-		[self initializeAlbumsFromResponse:[call document]];
+	if([self smResponseWasSuccessful:req])
+		[self initializeAlbumsFromResponse:[req decodedResponse]];
 
-	[self notifyDelegateOfAlbumSyncCompletion:[NSNumber numberWithBool:[self smResponseWasSuccessful:call]]];
+	[self notifyDelegateOfAlbumSyncCompletion:[NSNumber numberWithBool:[self smResponseWasSuccessful:req]]];
 }
 
 #pragma mark New Album Creation Methods
@@ -691,12 +613,12 @@ static NSString *AlbumId = @"AlbumID";
 }
 
 -(void)createNewAlbumCallback:(SEL)callback {
-	RESTCall *call = [RESTCall RESTCall];
+	SmugmugAccess *req = [[self storeAccessClass] request];
 	
 	int selectedCategoryIndex = [selectedCategoryIndices firstIndex];
 	NSDictionary *basicNewAlbumPrefs = [self newAlbumOptionalPrefDictionary];
 	NSMutableDictionary *newAlbumProerties = [NSMutableDictionary dictionaryWithDictionary:basicNewAlbumPrefs];
-	[newAlbumProerties setObject:[[[self categories] objectAtIndex:selectedCategoryIndex] objectForKey:@"CategoryID"]
+	[newAlbumProerties setObject:[[[self categories] objectAtIndex:selectedCategoryIndex] objectForKey:CategoryID]
 						  forKey:@"CategoryID"];
 	[newAlbumProerties setObject:@"smugmug.albums.create" forKey:@"method"];
 	[newAlbumProerties setObject:[self sessionID] forKey:@"SessionID"];
@@ -704,7 +626,7 @@ static NSString *AlbumId = @"AlbumID";
 	NSMutableArray *orderedKeys = [NSMutableArray arrayWithObjects:@"method", @"SessionID", @"Title", @"CategoryID", nil];
 	[orderedKeys addObjectsFromArray:[basicNewAlbumPrefs allKeys]];
 
-	[call invokeMethodWithURL:[self RESTURL]
+	[req invokeMethodWithURL:[self SmugMugAccessURL]
 						  keys:orderedKeys
 					 valueDict:newAlbumProerties
 			  responseCallback:callback
@@ -758,9 +680,9 @@ static NSString *AlbumId = @"AlbumID";
 	return nil;
 }
 
--(void)newAlbumCreationDidComplete:(RESTCall *)call {
+-(void)newAlbumCreationDidComplete:(SmugmugAccess *)req {
 
-	if([self smResponseWasSuccessful:call])
+	if([self smResponseWasSuccessful:req])
 		[self buildAlbumListWithCallback:@selector(postAlbumCreateAlbumSyncDidComplete:)];
 	else {
 		[self performSelectorOnMainThread:@selector(notifyDelegateOfAlbumCompletion:) withObject:[NSNumber numberWithBool:NO] waitUntilDone:NO];
@@ -768,11 +690,11 @@ static NSString *AlbumId = @"AlbumID";
 }
 
 
--(void)postAlbumCreateAlbumSyncDidComplete:(RESTCall *)call {
-	if([self smResponseWasSuccessful:call])
-		[self initializeAlbumsFromResponse:[call document]];
+-(void)postAlbumCreateAlbumSyncDidComplete:(SmugmugAccess *)req {
+	if([self smResponseWasSuccessful:req])
+		[self initializeAlbumsFromResponse:[req decodedResponse]];
 
-	[self performSelectorOnMainThread:@selector(notifyDelegateOfAlbumCompletion:) withObject:[NSNumber numberWithBool:[self smResponseWasSuccessful:call]] waitUntilDone:NO];
+	[self performSelectorOnMainThread:@selector(notifyDelegateOfAlbumCompletion:) withObject:[NSNumber numberWithBool:[self smResponseWasSuccessful:req]] waitUntilDone:NO];
 }
 
 -(void)clearAlbumCreationState {
@@ -817,7 +739,7 @@ static NSString *AlbumId = @"AlbumID";
 
 -(void)beingUploadProgressTracking {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSTimer *uploadProgressTimer  = [NSTimer timerWithTimeInterval:0.125 target:self selector:@selector(trackUploadProgress:) userInfo:nil repeats:YES];
+	NSTimer *uploadProgressTimer  = [NSTimer timerWithTimeInterval:UploadProgressTimerInterval target:self selector:@selector(trackUploadProgress:) userInfo:nil repeats:YES];
 
 	[[NSRunLoop currentRunLoop] addTimer:uploadProgressTimer forMode:NSModalPanelRunLoopMode];
 
@@ -849,8 +771,8 @@ static NSString *AlbumId = @"AlbumID";
 
 -(void)notifyDelegateOfUploadProgress:(NSArray *)args {
 	if([self delegate] != nil &&
-	   [[self delegate] respondsToSelector:@selector(uploadMadeProgressForFile:bytesWritten:totalBytes:)])
-		[[self delegate] uploadMadeProgressForFile:[args objectAtIndex:0] bytesWritten:[[args objectAtIndex:1] longValue] totalBytes:[[args objectAtIndex:2] longValue]];
+	   [[self delegate] respondsToSelector:@selector(uploadMadeProgressWithArgs:)])
+		[[self delegate] uploadMadeProgressWithArgs:args];
 }
 
 -(void)appendToResponse {
@@ -869,11 +791,9 @@ static NSString *AlbumId = @"AlbumID";
 }
 
 -(void)notifyDelegateOfUploadCompletion:(NSArray *)args {
-	NSString *error = [args count] > 2 ? [args objectAtIndex:2] : nil;
-	
 	if([self delegate] != nil &&
-	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:imageId:withError:)])
-		[[self delegate] uploadDidCompleteForFile:[args objectAtIndex:0] imageId:[args objectAtIndex:1] withError:error];
+	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteWithArgs:)])
+		[[self delegate] uploadDidCompleteWithArgs:args];
 }
 
 -(void)stopUpload {
@@ -905,7 +825,7 @@ static NSString *AlbumId = @"AlbumID";
 
 -(void)transferComplete {
 
-	NSError *error = nil;
+	NSError *error = nil;	
 	NSXMLDocument *response = [[[NSXMLDocument alloc] initWithData:[self responseData] options:0 error:&error] autorelease];
 	NSString *errorString = nil;
 
@@ -927,12 +847,10 @@ static NSString *AlbumId = @"AlbumID";
 	[self destroyUploadResources];
 }
 
--(void)notifyDelegateOfUploadError:(NSArray *)args {
-	NSString *error = [args count] > 2 ? [args objectAtIndex:2] : nil;
-
+-(void)notifyDelegateOfUploadError:(NSArray *)args {	
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:imageId:withError:)]) {
-		[[self delegate] uploadDidCompleteForFile:[args objectAtIndex:0] imageId:[args objectAtIndex:1] withError:error];
+		[[self delegate] performSelectorOnMainThread:@selector(uploadDidCompleteWithArgs:) withObject:args waitUntilDone:NO];
 	}	
 }
 

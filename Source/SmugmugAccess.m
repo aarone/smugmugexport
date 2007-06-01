@@ -1,75 +1,17 @@
 //
-//  RESTCall.m
+//  SmugmugAccess.m
 //  SmugMugExport
 //
-//  Created by Aaron Evans on 12/30/06.
-//  Copyright 2006 Aaron Evans. All rights reserved.
+//  Created by Aaron Evans on 5/31/07.
+//  Copyright 2007 Aaron Evans. All rights reserved.
 //
 
-#import "RESTCall.h"
+#import "SmugmugAccess.h"
 
-NSString *UserAgent = @"iPhoto SmugMugExport";
+#import "NSURLAdditions.h"
+#import "NSURLRequestAdditions.h"
 
-@interface NSURLRequest (NSURLRequestSMAdditions)
-+(NSURLRequest *)smRequestWithURL:(NSURL *)aUrl;
-@end
-
-@implementation NSURLRequest (NSURLRequestSMAdditions)
-+(NSURLRequest *)smRequestWithURL:(NSURL *)aUrl {
-	NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:aUrl];
-	[req setValue:UserAgent forHTTPHeaderField:@"User-Agent"];
-	return req;
-}
-@end
-
-@interface NSString (NSStringURLAdditions)
--(NSString *)urlEscapedString;
-@end
-
-@implementation NSString (NSStringURLAdditions)
--(NSString *)urlEscapedString {
-	NSString *escapedString = (NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault,
-																				  (CFStringRef)self,
-																				  NULL,
-																				  CFSTR("?=&+'"),
-																				  kCFStringEncodingUTF8);
-	return [escapedString autorelease];
-}
-@end
-
-@interface NSURL (RESTURLAdditions)
--(NSURL *)URLByAppendingParameterListWithNames:(NSArray *)names values:(NSArray *)values;
-@end
-
-@implementation NSURL (RESTURLAdditions)
--(NSURL *)URLByAppendingParameterListWithNames:(NSArray *)names values:(NSArray *)values {
-	NSMutableString *parameterList = [NSMutableString stringWithString:@"?"];
-
-	int i;
-	for(i=0;i<[names count];i++) {
-		NSString *aKey = [names objectAtIndex:i];
-		id aVal = [values objectAtIndex:i];
-		if([aVal isKindOfClass:[NSString class]])
-			[parameterList appendFormat:@"%@=%@", aKey, [(NSString *)aVal urlEscapedString]];
-		else if([aVal respondsToSelector:@selector(stringValue)])
-			[parameterList appendFormat:@"%@=%@", aKey, [[(NSNumber *)aVal stringValue] urlEscapedString]];
-		else 
-			[parameterList appendFormat:@"%@=%@", aKey, aVal];
-
-		if(i<[names count]-1)
-			[parameterList appendString:@"&"];
-	}
-
-	NSMutableString *newUrl = [NSMutableString stringWithString:[self absoluteString]];
-	if(![newUrl hasSuffix:@"/"])
-		[newUrl appendString:@"/"];
-
-	[newUrl appendString:parameterList];
-	return [NSURL URLWithString:newUrl];
-}
-@end
-
-@interface RESTCall (Private)
+@interface SmugmugAccess (Private)
 -(NSURLConnection *)connection;
 -(void)setConnection:(NSURLConnection *)c;
 -(NSMutableData *)response;
@@ -80,30 +22,28 @@ NSString *UserAgent = @"iPhoto SmugMugExport";
 -(void)setCallback:(SEL)c;
 -(id)target;
 -(void)setTarget:(id)t;
--(void)setDocument:(NSXMLDocument *)d;
 -(void)setErrror:(NSError *)err;
 @end
 
-@implementation RESTCall
+@implementation SmugmugAccess
 
 -(id)init {
 	if(![super init])
 		return nil;
 	
 	[self setWasSuccessful:NO];
-
+	
 	return self;
 }
 
-+(RESTCall *)RESTCall {
++(SmugmugAccess *)request {
 	return [[[[self class] alloc] init] autorelease];
 }
 
 -(void)dealloc {
-	[[self document] release];
 	[[self connection] release];
 	[[self error] release];
-
+	
 	[super dealloc];
 }
 
@@ -157,17 +97,6 @@ NSString *UserAgent = @"iPhoto SmugMugExport";
 	target = t; // no retain, just like a delegate
 }
 
--(NSXMLDocument *)document {
-	return document;
-}
-
--(void)setDocument:(NSXMLDocument *)d {
-	if([self document] != nil)
-		[[self document] release];
-	
-	document = [d retain];
-}
-
 -(NSError *)error {
 	return error;
 }
@@ -181,22 +110,22 @@ NSString *UserAgent = @"iPhoto SmugMugExport";
 
 -(void)invokeMethodWithUrl:(NSURL *)url {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
+	
 	NSURLRequest *req = [NSURLRequest smRequestWithURL:url];
 	[self setResponse:[NSMutableData data]];
-
+	
 	[self setConnection:[NSURLConnection connectionWithRequest:req delegate:self]]; // begin request
-
+	
 	while ( [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
 									 beforeDate:[NSDate distantFuture]] );
-
+	
 	[pool release];
 }
 
 -(void)invokeMethod:(NSURL *)url responseCallback:(SEL)c responseTarget:(id)t {
 	[self setCallback:c];
 	[self setTarget:t];
-
+	
 	[NSThread detachNewThreadSelector:@selector(invokeMethodWithUrl:) toTarget:self withObject:url];
 }
 
@@ -207,7 +136,7 @@ NSString *UserAgent = @"iPhoto SmugMugExport";
 }
 
 -(void)invokeMethodWithURL:(NSURL *)baseURL keys:(NSArray *)keys valueDict:(NSDictionary *)keyValDict responseCallback:(SEL)callbackSel responseTarget:(id)responseTarget {
-
+	
 	NSMutableArray *values = [NSMutableArray array];
 	NSEnumerator *keyEnumerator = [keys objectEnumerator];
 	NSString *aKey;
@@ -241,10 +170,6 @@ NSString *UserAgent = @"iPhoto SmugMugExport";
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-	NSString *responseString = [[[NSString alloc] initWithData:[self response] encoding:NSUTF8StringEncoding] autorelease];
-	NSError *err = nil;
-	NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithXMLString:responseString options:0 error:&err] autorelease];
-	[self setDocument:doc];
 	[self setWasSuccessful:YES];
 	[self setError:nil];
 	[[self target] performSelector:callback withObject:self];
@@ -254,6 +179,10 @@ NSString *UserAgent = @"iPhoto SmugMugExport";
 	[self setWasSuccessful:NO];
 	[self setError:e];
 	[[self target] performSelector:callback withObject:self];
+}
+
+-(id)decodedResponse {
+	return nil;
 }
 
 @end
