@@ -14,8 +14,7 @@
  * communicate with SmugMug.
  */
 @interface AccountManager : NSObject {
-	KeychainManager *keychainManager;
-	BOOL rememberPasswordInKeychain;
+
 }
 
 +(AccountManager *)accountManager;

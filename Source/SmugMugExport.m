@@ -11,6 +11,7 @@
 #import "ExportPluginProtocol.h"
 #import "ExportMgr.h"
 #import "AccountManager.h"
+#import "Globals.h"
 
 @interface SmugMugExport (Private)
 -(ExportMgr *)exportManager;
@@ -88,6 +89,7 @@ NSString *SMESelectedTabIdDefaultsKey = @"SMESelectedTabId";
 NSString *SMEAccountsDefaultsKey = @"SMEAccounts";
 NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 NSString *SMOpenInBrowserAfterUploadCompletion = @"SMOpenInBrowserAfterUploadCompletion";
+NSString *SMStorePasswordInKeychain = @"SMStorePasswordInKeychain";
 
 static int UploadFailureRetryCount = 3;
 
@@ -138,6 +140,7 @@ static int UploadFailureRetryCount = 3;
 	[defaultsDict setObject:ExistingAlbumTabIdentifier forKey:SMESelectedTabIdDefaultsKey];
 	[defaultsDict setObject:[NSArray array] forKey:SMEAccountsDefaultsKey];
 	[defaultsDict setObject:@"yes" forKey:SMOpenInBrowserAfterUploadCompletion];
+	[defaultsDict setObject:@"yes" forKey:SMStorePasswordInKeychain];
 	[[NSUserDefaults standardUserDefaults] registerDefaults:defaultsDict];
 }
 

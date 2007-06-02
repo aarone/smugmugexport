@@ -26,6 +26,7 @@ NSString *KeychainItemKind = @"application password";
 -(void)modifyAccountInKeychain:(NSString *)account newPassword:(NSString *)newPassword;
 -(NSString *)selectedAccount;
 -(void)setSelectedAccount:(NSString *)anAccount;
+-(BOOL)rememberPasswordInKeychain;
 @end
 
 @implementation AccountManager
@@ -72,10 +73,10 @@ NSString *KeychainItemKind = @"application password";
 }
 
 -(void)addAccount:(NSString *)account withPassword:(NSString *)password {
-	if([[self accounts] containsObject:account] && rememberPasswordInKeychain) {
+	if([[self accounts] containsObject:account] && [self rememberPasswordInKeychain]) {
 		[self modifyAccountInKeychain:account newPassword:password];
 	} else {
-		if(rememberPasswordInKeychain)
+		if([self rememberPasswordInKeychain])
 			[self addAccountToKeychain:account password:password];
 		[self addAccount:account];		
 	}
@@ -128,10 +129,10 @@ NSString *KeychainItemKind = @"application password";
 }
 
 -(BOOL)rememberPasswordInKeychain {
-	if([[NSUserDefaults standardUserDefaults] objectForKey:@"rememberPasswordInKeychain"] == nil)
+	if([[NSUserDefaults standardUserDefaults] objectForKey:SMStorePasswordInKeychain] == nil)
 		return NO;
 	
-	return [[[NSUserDefaults standardUserDefaults] objectForKey:@"rememberPasswordInKeychain"] boolValue];
+	return [[[NSUserDefaults standardUserDefaults] objectForKey:SMStorePasswordInKeychain] boolValue];
 }
 
 @end

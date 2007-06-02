@@ -112,8 +112,6 @@
 		938E26E00C0F49480059F26B /* SmugmugAccess.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SmugmugAccess.m; path = Source/SmugmugAccess.m; sourceTree = "<group>"; };
 		938E27460C0F4DE10059F26B /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSStringAdditions.h; path = Source/NSStringAdditions.h; sourceTree = "<group>"; };
 		938E27470C0F4DE10059F26B /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSStringAdditions.m; path = Source/NSStringAdditions.m; sourceTree = "<group>"; };
-		93A152400C104B2500DFCB4F /* RESTCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RESTCall.h; path = Source/RESTCall.h; sourceTree = "<group>"; };
-		93A152410C104B2500DFCB4F /* RESTCall.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RESTCall.m; path = Source/RESTCall.m; sourceTree = "<group>"; };
 		93BD6F170AD84A49007CE525 /* SmugMugExport.iPhotoExporter */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SmugMugExport.iPhotoExporter; sourceTree = BUILT_PRODUCTS_DIR; };
 		93BD6F180AD84A49007CE525 /* SmugMugExport-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = "SmugMugExport-Info.plist"; path = "Resources/SmugMugExport-Info.plist"; sourceTree = "<group>"; };
 		D2F7E65807B2D6F200F64583 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
@@ -251,8 +249,6 @@
 		938E26DE0C0F49180059F26B /* Remote Access */ = {
 			isa = PBXGroup;
 			children = (
-				93A152400C104B2500DFCB4F /* RESTCall.h */,
-				93A152410C104B2500DFCB4F /* RESTCall.m */,
 				938E26980C0F476E0059F26B /* JSONRequest.h */,
 				938E26990C0F476E0059F26B /* JSONRequest.m */,
 				938E26DF0C0F49480059F26B /* SmugmugAccess.h */,
