@@ -12,6 +12,7 @@
 #import "ExportMgr.h"
 #import "AccountManager.h"
 #import "Globals.h"
+#import "SmugMugUserDefaults.h"
 
 @interface SmugMugExport (Private)
 -(ExportMgr *)exportManager;
@@ -90,6 +91,10 @@ NSString *SMEAccountsDefaultsKey = @"SMEAccounts";
 NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 NSString *SMOpenInBrowserAfterUploadCompletion = @"SMOpenInBrowserAfterUploadCompletion";
 NSString *SMStorePasswordInKeychain = @"SMStorePasswordInKeychain";
+NSString *SMSelectedScalingTag = @"SMSelectedScalingTag";
+NSString *SMUseKeywordsAsTags = @"SMUseKeywordsAsTags";
+NSString *SMImageScaleWidth = @"SMImageScaleWidth";
+NSString *SMImageScaleHeight = @"SMImageScaleHeight";
 
 static int UploadFailureRetryCount = 3;
 
@@ -115,7 +120,6 @@ static int UploadFailureRetryCount = 3;
 }
 
 -(void)dealloc {
-
 	[[self uploadSiteUrl] release];
 	[[self smugMugManager] release];
 	[[self username] release];
@@ -130,31 +134,30 @@ static int UploadFailureRetryCount = 3;
 	[[self imageUploadProgressText] release];
 
 	[super dealloc];
+
+}
+
+-(SmugMugUserDefaults *)defaults {
+	return [SmugMugUserDefaults smugMugDefaults];
 }
 
 +(void)initialize {
-	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.accounts"] triggerChangeNotificationsForDependentKey:@"accounts"];
-	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.selectedAccount"] triggerChangeNotificationsForDependentKey:@"selectedAccount"];
-
 	NSMutableDictionary *defaultsDict = [NSMutableDictionary dictionary];
 	[defaultsDict setObject:ExistingAlbumTabIdentifier forKey:SMESelectedTabIdDefaultsKey];
 	[defaultsDict setObject:[NSArray array] forKey:SMEAccountsDefaultsKey];
 	[defaultsDict setObject:@"yes" forKey:SMOpenInBrowserAfterUploadCompletion];
 	[defaultsDict setObject:@"yes" forKey:SMStorePasswordInKeychain];
-	[[NSUserDefaults standardUserDefaults] registerDefaults:defaultsDict];
+	[defaultsDict setObject:@"no" forKey:SMUseKeywordsAsTags];
+	[defaultsDict setObject:[NSNumber numberWithInt:0] forKey:SMSelectedScalingTag];
+	
+	[[SmugMugUserDefaults smugMugDefaults] registerDefaults:defaultsDict];
+	
+	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.accounts"] triggerChangeNotificationsForDependentKey:@"accounts"];
+	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.selectedAccount"] triggerChangeNotificationsForDependentKey:@"selectedAccount"];
 }
 
 -(void)awakeFromNib {
-	[[NSUserDefaults standardUserDefaults] addObserver:self
-											forKeyPath:SMESelectedTabIdDefaultsKey
-											   options:0
-											   context:NULL];
 }
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-//	[self resizeWindow];
-}
-
 
 -(BOOL)sheetIsDisplayed {
 	return [[self newAlbumSheet] isVisible] ||
@@ -307,7 +310,27 @@ static int UploadFailureRetryCount = 3;
 		[self presentError:NSLocalizedString(@"Logout failed.", @"Error message to display when logout fails.")];
 }
 
+#pragma mark Preferences
 
+-(NSPanel *)preferencesPanel {
+	return preferencesPanel;
+}
+
+-(IBAction)showPreferences:(id)sender {
+	[NSApp beginSheet:[self preferencesPanel]
+	   modalForWindow:[[self exportManager] window]
+		modalDelegate:self
+	   didEndSelector:@selector(preferencesSheetDidEnd:returnCode:contextInfo:)
+		  contextInfo:nil];
+}
+
+-(void)preferencesSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	[[self preferencesPanel] orderOut:self];
+}
+
+-(IBAction)closePreferencesSheet:(id)sender {
+	[NSApp endSheet:[self preferencesPanel]];
+}
 
 #pragma mark Add Album
 
@@ -419,7 +442,9 @@ static int UploadFailureRetryCount = 3;
 	   we open the gallery in the browser. Otherwise, this happens when the upload
 		completes
 		*/
-	if(![self isUploading] && [self uploadSiteUrl] != nil) {
+	if(![self isUploading] && 
+	   [self uploadSiteUrl] != nil &&
+	   [[[SmugMugUserDefaults smugMugDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue]) {
 		[[NSWorkspace sharedWorkspace] openURL:[self uploadSiteUrl]];
 	}
 }
@@ -458,8 +483,12 @@ static int UploadFailureRetryCount = 3;
 	[self resetUploadRetryCount];
 	[self setUploadSiteUrl:nil];
 	[self setSiteUrlHasBeenFetched:NO];
+	
 	[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
 								 albumWithID:selectedAlbumId
+									   title:[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]]
+									comments:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
+									keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]
 									 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
 }
 
@@ -467,8 +496,9 @@ static int UploadFailureRetryCount = 3;
 	[NSApp endSheet:uploadPanel];
 	[[self exportManager] cancelExportBeforeBeginning];
 	[self setIsUploading:NO];
+
 	// if this really bothers you you can set your preferences to not open the page in the browser
-	if(![[NSUserDefaults standardUserDefaults] boolForKey:SMOpenInBrowserAfterUploadCompletion])
+	if(![[[SmugMugUserDefaults smugMugDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue])
 		return;
 
 	if([self uploadSiteUrl] != nil)
@@ -499,9 +529,13 @@ static int UploadFailureRetryCount = 3;
 	if(error != nil && [self uploadRetryCount] < UploadFailureRetryCount) {
 		[self incrementUploadRetryCount];
 		[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Retrying upload of image %d of %d", @"Retry upload progress"), [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
+		
 		[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
 									 albumWithID:selectedAlbumId
-										 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
+										   title:[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]]
+										comments:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
+										keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]
+										 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];		
 		return;
 	} else if (error != nil) {
 		[self performUploadCompletionTasks:NO];
@@ -524,7 +558,10 @@ static int UploadFailureRetryCount = 3;
 
 		[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
 									 albumWithID:selectedAlbumId
-										 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
+										   title:[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]]
+										comments:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
+										keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]
+										 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];		
 	}
 }
 

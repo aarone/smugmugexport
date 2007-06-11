@@ -65,7 +65,12 @@
 -(NSString *)password;
 -(void)setPassword:(NSString *)p;
 
--(void)uploadImageAtPath:(NSString *)path albumWithID:(NSString *)albumId caption:(NSString *)caption;
+-(void)uploadImageAtPath:(NSString *)path 
+			 albumWithID:(NSString *)albumId 
+				   title:(NSString *)title
+				comments:(NSString *)comments
+				keywords:(NSArray *)keywords
+				 caption:(NSString *)caption;
 -(void)stopUpload;
 
 -(void)fetchImageUrls:(NSString *)imageId;

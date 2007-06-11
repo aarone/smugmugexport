@@ -9,6 +9,7 @@
 #import "AccountManager.h"
 #import "KeychainManager.h"
 #import "Globals.h"
+#import "SmugMugUserDefaults.h"
 
 NSString *KeychainItemName = @"SmugMug Exporter";
 NSString *KeychainItemKind = @"application password";
@@ -96,16 +97,16 @@ NSString *KeychainItemKind = @"application password";
 }
 
 -(NSArray *)accounts {
-	return [[NSUserDefaults standardUserDefaults] objectForKey:SMEAccountsDefaultsKey];
+	return [[SmugMugUserDefaults smugMugDefaults] objectForKey:SMEAccountsDefaultsKey];
 }
 
 -(void)setAccounts:(NSArray *)a {
-	[[NSUserDefaults standardUserDefaults] setObject:a forKey:SMEAccountsDefaultsKey];
+	[[SmugMugUserDefaults smugMugDefaults] setObject:a forKey:SMEAccountsDefaultsKey];
 }
 
 -(NSString *)selectedAccount {
 
-	NSString *anAccount = [[NSUserDefaults standardUserDefaults] objectForKey:SMESelectedAccountDefaultsKey];
+	NSString *anAccount = [[SmugMugUserDefaults smugMugDefaults] objectForKey:SMESelectedAccountDefaultsKey];
 
 	if([[self accounts] containsObject:anAccount])
 		return anAccount;
@@ -118,7 +119,7 @@ NSString *KeychainItemKind = @"application password";
 
 -(void)setSelectedAccount:(NSString *)anAccount {
 	[self willChangeValueForKey:@"selectedAccount"];
-	[[NSUserDefaults standardUserDefaults] setObject:anAccount forKey:SMESelectedAccountDefaultsKey];
+	[[SmugMugUserDefaults smugMugDefaults] setObject:anAccount forKey:SMESelectedAccountDefaultsKey];
 	[self didChangeValueForKey:@"selectedAccount"];
 }
 
@@ -129,10 +130,10 @@ NSString *KeychainItemKind = @"application password";
 }
 
 -(BOOL)rememberPasswordInKeychain {
-	if([[NSUserDefaults standardUserDefaults] objectForKey:SMStorePasswordInKeychain] == nil)
+	if([[SmugMugUserDefaults smugMugDefaults] objectForKey:SMStorePasswordInKeychain] == nil)
 		return NO;
 	
-	return [[[NSUserDefaults standardUserDefaults] objectForKey:SMStorePasswordInKeychain] boolValue];
+	return [[[SmugMugUserDefaults smugMugDefaults] objectForKey:SMStorePasswordInKeychain] boolValue];
 }
 
 @end

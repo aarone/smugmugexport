@@ -21,6 +21,7 @@
 	IBOutlet NSArrayController *albumsArrayController;
 	IBOutlet NSPanel *newAlbumSheet;
 	IBOutlet NSArrayController *categoriesArrayController; 
+	IBOutlet NSPanel *preferencesPanel;
 
 	 // this is the username bound to the textfield, account manager holds the real username
 	NSString *username; 
@@ -60,6 +61,10 @@
 
 #pragma mark Misc
 -(IBAction)donate:(id)sender;
+
+#pragma mark Preferences
+-(IBAction)showPreferences:(id)sender;
+-(IBAction)closePreferencesSheet:(id)sender;
 
 #pragma mark Album Creation Actions
 -(IBAction)addNewAlbum:(id)sender;

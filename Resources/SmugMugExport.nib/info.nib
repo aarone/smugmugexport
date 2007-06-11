@@ -6,12 +6,31 @@
 	<string>50 109 528 335 0 0 1680 1028 </string>
 	<key>IBFramework Version</key>
 	<string>446.1</string>
+	<key>IBGroupedObjects</key>
+	<dict>
+		<key>1</key>
+		<array>
+			<string>361</string>
+			<string>363</string>
+			<string>362</string>
+			<string>359</string>
+			<string>360</string>
+		</array>
+		<key>2</key>
+		<array>
+			<string>361</string>
+			<string>363</string>
+			<string>362</string>
+			<string>359</string>
+			<string>360</string>
+		</array>
+	</dict>
+	<key>IBLastGroupID</key>
+	<string>3</string>
 	<key>IBOpenObjects</key>
 	<array>
-		<integer>61</integer>
-		<integer>189</integer>
+		<integer>342</integer>
 		<integer>5</integer>
-		<integer>18</integer>
 	</array>
 	<key>IBSystem Version</key>
 	<string>8P2137</string>

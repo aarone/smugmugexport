@@ -11,6 +11,8 @@
 #import "JSONRequest.h"
 #import "Globals.h"
 #import "SmugmugAccess.h"
+#import "SmugMugUserDefaults.h"
+#import <QuartzCore/CIImage.h>
 
 static const CFOptionFlags DAClientNetworkEvents = 
 kCFStreamEventOpenCompleted     |
@@ -36,7 +38,12 @@ kCFStreamEventErrorOccurred;
 -(void)evaluateLoginResponse:(id)response;
 
 -(NSString *)contentTypeForPath:(NSString *)path;
--(NSData *)postBodyForImageAtPath:(NSString *)path albumId:(NSString *)albumId caption:(NSString *)caption;
+-(NSData *)postBodyForImageAtPath:(NSString *)path 
+						  albumId:(NSString *)albumId 
+							title:(NSString *)title 
+						 comments:(NSString *)comments 
+						 keywords:(NSArray *)keywords 
+						  caption:(NSString *)caption;
 -(void)appendToResponse;
 -(void)transferComplete;
 -(void)errorOccurred;
@@ -705,9 +712,14 @@ double UploadProgressTimerInterval = 0.125/2.0;
 
 #pragma mark Upload Methods
 
--(void)uploadImageAtPath:(NSString *)path albumWithID:(NSString *)albumId caption:(NSString *)caption {
+-(void)uploadImageAtPath:(NSString *)path 
+			 albumWithID:(NSString *)albumId 
+				   title:(NSString *)title
+				comments:(NSString *)comments
+				keywords:(NSArray *)keywords
+				 caption:(NSString *)caption {
 	
-	NSData *postData = [self postBodyForImageAtPath:path albumId:albumId caption:caption];
+	NSData *postData = [self postBodyForImageAtPath:path albumId:albumId title:title comments:comments keywords:keywords caption:caption];
 
 	CFHTTPMessageRef myRequest;
 	myRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, CFSTR("POST"), (CFURLRef)[NSURL URLWithString:[self postUploadURL]], kCFHTTPVersion1_1);
@@ -868,10 +880,99 @@ double UploadProgressTimerInterval = 0.125/2.0;
 	return data;
 }
 
--(NSData *)postBodyForImageAtPath:(NSString *)path albumId:(NSString *)albumId caption:(NSString *)caption {
-	NSData *imageData = [NSData dataWithContentsOfFile:path];
-	NSAssert(imageData != nil, @"cannot create image from data");
+-(NSData *)imageDataForPath:(NSString *)pathToImage {
+	
+	NSString *application = nil;
+	NSString *filetype = nil;
+	BOOL result = [[NSWorkspace sharedWorkspace] getInfoForFile:pathToImage
+													application:&application
+														   type:&filetype];
+	if(result == NO) {
+		NSLog(@"Error getting file type for file (%@).  This image will not be exported.", pathToImage);
+		return nil;
+	}
+	
+	BOOL isJpeg = [[filetype lowercaseString] isEqual:@"jpg"];
+	
+	if(!isJpeg && ShouldScaleImages())
+		NSLog(@"The image (%@) is not a jpeg and cannot be scaled by this program (yet).", pathToImage);
+		
+	if(isJpeg && ShouldScaleImages()) {
+		int maxWidth = [[[SmugMugUserDefaults smugMugDefaults] objectForKey:SMImageScaleWidth] intValue];
+		int maxHeight = [[[SmugMugUserDefaults smugMugDefaults] objectForKey:SMImageScaleHeight] intValue];
 
+		// allow no input and treat it like infinity
+		if(maxWidth == 0)
+			maxWidth = INT_MAX;
+		if(maxHeight == 0)
+			maxHeight = INT_MAX;
+		
+		// we use core image (gpu) to do scaling (because it's more fun than using the cpu)
+		CIImage *img = [CIImage imageWithData:[NSData dataWithContentsOfFile:pathToImage]];
+
+		CGRect imageExtent = [img extent];
+		int inputImageWidth = imageExtent.size.width;
+		int inputImageHeight = imageExtent.size.height;
+		
+		if(inputImageWidth < maxWidth && inputImageHeight < maxHeight) {
+			return [NSData dataWithContentsOfFile:pathToImage];	
+		}
+		
+		float scaleFactor = 1.0;
+		if( inputImageWidth > maxWidth || inputImageHeight > maxHeight ) {
+			int heightDifferential = inputImageWidth - maxWidth;
+			int widthDifferential = inputImageHeight - maxHeight;
+			// scale the dimension with the greatest difference
+			scaleFactor = (heightDifferential > widthDifferential) ? 
+				(float)maxHeight/(float)inputImageHeight : 
+				(float)maxWidth/(float)inputImageWidth;
+		}
+		
+		NSAssert(scaleFactor > 0.0 && scaleFactor <= 1.0, @"This is a bug.  The scaling factor should never be negative.");
+		
+		// get the image rep
+		NSBitmapImageRep *rep = [NSBitmapImageRep imageRepWithData:[NSData dataWithContentsOfFile:pathToImage]];
+		
+		// we copy the properties that relate to jpegs
+		NSSet *propertiesToTransfer = [NSSet setWithObjects:NSImageEXIFData, NSImageColorSyncProfileData, 
+			NSImageProgressive, nil];
+		NSMutableDictionary *outgoingImageProperties = [NSMutableDictionary dictionary];
+		[outgoingImageProperties setObject:[NSNumber numberWithFloat:0.9] forKey:NSImageCompressionFactor];
+		NSEnumerator *propertyEnumerator = [propertiesToTransfer objectEnumerator];
+		id key;
+		while(key = [propertyEnumerator nextObject]) {
+			id inVal = [rep valueForProperty:key];
+			if(inVal != nil)
+				[outgoingImageProperties setObject:inVal forKey:key];
+		}
+		
+		// do the scale here
+		CGAffineTransform trans = CGAffineTransformMakeScale(scaleFactor, scaleFactor);
+		CIImage* outputImage = [img imageByApplyingTransform:trans];
+		
+		int outputWidth = [outputImage extent].size.width;
+		int outputHeight = [outputImage extent].size.height;
+		
+		NSImage *resizedImage = [[NSImage alloc] initWithSize: NSMakeSize(outputWidth, outputHeight)];
+		[resizedImage addRepresentation:[NSCIImageRep imageRepWithCIImage:outputImage]];
+
+		NSBitmapImageRep *renderedImage = [NSBitmapImageRep imageRepWithData:[resizedImage TIFFRepresentation]];
+
+		NSData *photoData = [renderedImage representationUsingType:NSJPEGFileType properties:outgoingImageProperties];
+		[resizedImage release];
+		return photoData;
+	}
+	
+	// the default operation
+	return [NSData dataWithContentsOfFile:pathToImage];	
+}
+
+-(NSData *)postBodyForImageAtPath:(NSString *)path albumId:(NSString *)albumId title:(NSString *)title
+						 comments:(NSString *)comments keywords:(NSArray *)keywords caption:(NSString *)caption {
+	
+	NSData *imageData = [self imageDataForPath:path];
+	NSAssert(imageData != nil, @"cannot create image from data");
+	
 	NSMutableData *postBody = [NSMutableData data];
 	[postBody appendData:[[NSString stringWithFormat:@"--%@\r\n",Boundary] dataUsingEncoding:NSUTF8StringEncoding]];
 
@@ -889,7 +990,7 @@ double UploadProgressTimerInterval = 0.125/2.0;
 	[postBody appendData:imageData];
 	[postBody appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n",Boundary] dataUsingEncoding:NSUTF8StringEncoding]];
 
-	return postBody;	
+	return postBody;
 }
 
 -(NSString *)contentTypeForPath:(NSString *)path {

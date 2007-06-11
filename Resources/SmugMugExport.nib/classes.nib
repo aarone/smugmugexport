@@ -7,11 +7,13 @@
                 cancelLoginSheet = id; 
                 cancelNewAlbumSheet = id; 
                 cancelUpload = id; 
+                closePreferencesSheet = id; 
                 createAlbum = id; 
                 donate = id; 
                 performLoginFromSheet = id; 
                 removeAlbum = id; 
                 showLoginSheet = id; 
+                showPreferences = id; 
             }; 
             CLASS = SmugMugExport; 
             LANGUAGE = ObjC; 
@@ -23,6 +25,7 @@
                 lastView = id; 
                 loginPanel = NSPanel; 
                 newAlbumSheet = NSPanel; 
+                preferencesPanel = NSPanel; 
                 settingsBox = NSBox; 
                 uploadPanel = NSPanel; 
             }; 
@@ -35,6 +38,7 @@
             OUTLETS = {categoryArrayController = NSArrayController; delegate = id; }; 
             SUPERCLASS = NSObject; 
         }, 
+        {CLASS = SmugMugUserDefaults; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {
             CLASS = SmugmugExport; 
             LANGUAGE = ObjC; 
