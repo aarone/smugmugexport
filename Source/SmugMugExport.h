@@ -43,6 +43,7 @@
 	BOOL uploadCancelled;
 	BOOL errorAlertSheetIsVisisble;
 	BOOL siteUrlHasBeenFetched;
+	BOOL browserOpenedInGallery;
 	int uploadRetryCount;
 	int imagesUploaded;
 

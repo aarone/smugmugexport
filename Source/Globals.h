@@ -11,4 +11,4 @@ extern NSString *AlbumID;
 extern NSString *CategoryID;
 extern NSString *SubCategoryID;
 
-#define ShouldScaleImages() ([[[SmugMugUserDefaults smugMugDefaults] objectForKey:SMSelectedScalingTag] intValue] != 0)
+#define ShouldScaleImages() ([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMSelectedScalingTag] intValue] != 0)

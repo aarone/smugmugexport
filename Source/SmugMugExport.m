@@ -12,7 +12,7 @@
 #import "ExportMgr.h"
 #import "AccountManager.h"
 #import "Globals.h"
-#import "SmugMugUserDefaults.h"
+#import "NSUserDefaultsAdditions.h"
 
 @interface SmugMugExport (Private)
 -(ExportMgr *)exportManager;
@@ -59,7 +59,8 @@
 -(void)presentError:(NSString *)errorText;
 -(BOOL)isUploading;
 -(void)setIsUploading:(BOOL)v;
-
+-(BOOL)browserOpenedInGallery;
+-(void)setBrowserOpenedInGallery:(BOOL)v;	
 
 -(NSString *)imageUploadProgressText;
 -(void)setImageUploadProgressText:(NSString *)text;
@@ -73,6 +74,8 @@
 -(NSURL *)uploadSiteUrl;
 -(void)setUploadSiteUrl:(NSURL *)url;
 @end
+
+NSLock *GalleryOpenLock = nil;
 
 // Globals
 NSString *AlbumID = @"id";
@@ -138,7 +141,7 @@ static int UploadFailureRetryCount = 3;
 }
 
 -(SmugMugUserDefaults *)defaults {
-	return [SmugMugUserDefaults smugMugDefaults];
+	return [NSUserDefaults smugMugUserDefaults];
 }
 
 +(void)initialize {
@@ -150,10 +153,12 @@ static int UploadFailureRetryCount = 3;
 	[defaultsDict setObject:@"no" forKey:SMUseKeywordsAsTags];
 	[defaultsDict setObject:[NSNumber numberWithInt:0] forKey:SMSelectedScalingTag];
 	
-	[[SmugMugUserDefaults smugMugDefaults] registerDefaults:defaultsDict];
+	[[NSUserDefaults smugMugUserDefaults] registerDefaults:defaultsDict];
 	
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.accounts"] triggerChangeNotificationsForDependentKey:@"accounts"];
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.selectedAccount"] triggerChangeNotificationsForDependentKey:@"selectedAccount"];
+	
+	GalleryOpenLock = [[NSLock alloc] init];
 }
 
 -(void)awakeFromNib {
@@ -442,11 +447,15 @@ static int UploadFailureRetryCount = 3;
 	   we open the gallery in the browser. Otherwise, this happens when the upload
 		completes
 		*/
+	[GalleryOpenLock lock];
 	if(![self isUploading] && 
 	   [self uploadSiteUrl] != nil &&
-	   [[[SmugMugUserDefaults smugMugDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue]) {
+	   ![self browserOpenedInGallery] &&
+	   [[[NSUserDefaults smugMugUserDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue]) {
 		[[NSWorkspace sharedWorkspace] openURL:[self uploadSiteUrl]];
+		[self setBrowserOpenedInGallery:YES];
 	}
+	[GalleryOpenLock unlock];
 }
 
 #pragma mark Category Get
@@ -463,6 +472,7 @@ static int UploadFailureRetryCount = 3;
 		return;
 
 	uploadCancelled = NO;
+	[self setBrowserOpenedInGallery:NO];
 	[self setImagesUploaded:0];
 	[self setFileUploadProgress:[NSNumber numberWithInt:0]];
 	[self setSessionUploadProgress:[NSNumber numberWithInt:0]];
@@ -497,12 +507,19 @@ static int UploadFailureRetryCount = 3;
 	[[self exportManager] cancelExportBeforeBeginning];
 	[self setIsUploading:NO];
 
+	[GalleryOpenLock lock];
 	// if this really bothers you you can set your preferences to not open the page in the browser
-	if(![[[SmugMugUserDefaults smugMugDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue])
+	if(![[[NSUserDefaults smugMugUserDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue]) {
+		[GalleryOpenLock unlock];
 		return;
-
-	if([self uploadSiteUrl] != nil)
+	}
+	
+	if([self uploadSiteUrl] != nil && ![self browserOpenedInGallery]) {
+		[self setBrowserOpenedInGallery:YES];
 		[[NSWorkspace sharedWorkspace] openURL:uploadSiteUrl];
+	}
+	[GalleryOpenLock unlock];
+	
 }
 
 -(void)uploadDidCompleteWithArgs:(NSArray *)args {
@@ -697,6 +714,14 @@ static int UploadFailureRetryCount = 3;
 
 -(void)setLoginAttempted:(BOOL)v {
 	loginAttempted = v;
+}
+
+-(BOOL)browserOpenedInGallery {
+	return browserOpenedInGallery;
+}
+
+-(void)setBrowserOpenedInGallery:(BOOL)v {
+	browserOpenedInGallery = v;
 }
 
 -(BOOL)isUploading {

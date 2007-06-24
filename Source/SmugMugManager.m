@@ -11,7 +11,7 @@
 #import "JSONRequest.h"
 #import "Globals.h"
 #import "SmugmugAccess.h"
-#import "SmugMugUserDefaults.h"
+#import "NSUserDefaultsAdditions.h"
 #import <QuartzCore/CIImage.h>
 
 static const CFOptionFlags DAClientNetworkEvents = 
@@ -409,7 +409,7 @@ double UploadProgressTimerInterval = 0.125/2.0;
 }
 
 -(void)initializeAlbumsFromResponse:(id)response {
-	NSMutableArray *returnedAlbums = [NSMutableArray arrayWithArray:[[response objectForKey:@"Albums"] allValues]];
+	NSMutableArray *returnedAlbums = [NSMutableArray arrayWithArray:[response objectForKey:@"Albums"]];
 	[returnedAlbums sortUsingSelector:@selector(compareByAlbumId:)];
 	
 	[self performSelectorOnMainThread:@selector(setAlbums:)	
@@ -525,7 +525,7 @@ double UploadProgressTimerInterval = 0.125/2.0;
 }
 
 -(void)initializeCategoriesWithResponse:(id)response {
-	NSMutableArray *returnedCategories = [NSMutableArray arrayWithArray:[[response objectForKey:@"Categories"] allValues]];
+	NSMutableArray *returnedCategories = [NSMutableArray arrayWithArray:[response objectForKey:@"Categories"]];
 	[returnedCategories sortUsingSelector:@selector(compareByTitle:)];
 	[self performSelectorOnMainThread:@selector(setCategories:)	withObject:[NSArray arrayWithArray:returnedCategories] waitUntilDone:false];
 }
@@ -550,7 +550,7 @@ double UploadProgressTimerInterval = 0.125/2.0;
 }
 
 -(void)initializeSubcategoriesWithResponse:(id)response {
-	NSMutableArray *returnedSubCategories = [NSMutableArray arrayWithArray:[[response objectForKey:@"SubCategories"] allValues]];
+	NSMutableArray *returnedSubCategories = [NSMutableArray arrayWithArray:[response objectForKey:@"SubCategories"]];
 	[returnedSubCategories sortUsingSelector:@selector(compareByTitle:)];
 	[self performSelectorOnMainThread:@selector(setSubcategories:)	withObject:[NSArray arrayWithArray:returnedSubCategories] waitUntilDone:false];	
 }
@@ -898,8 +898,8 @@ double UploadProgressTimerInterval = 0.125/2.0;
 		NSLog(@"The image (%@) is not a jpeg and cannot be scaled by this program (yet).", pathToImage);
 		
 	if(isJpeg && ShouldScaleImages()) {
-		int maxWidth = [[[SmugMugUserDefaults smugMugDefaults] objectForKey:SMImageScaleWidth] intValue];
-		int maxHeight = [[[SmugMugUserDefaults smugMugDefaults] objectForKey:SMImageScaleHeight] intValue];
+		int maxWidth = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleWidth] intValue];
+		int maxHeight = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleHeight] intValue];
 
 		// allow no input and treat it like infinity
 		if(maxWidth == 0)
@@ -984,8 +984,11 @@ double UploadProgressTimerInterval = 0.125/2.0;
 
 	if(caption != nil)
 		[postBody appendData:[self postDataWithName:@"Caption" postContents:caption]];
-
-	[postBody appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"Image\"; filename=\"%@\"\r\n", [path lastPathComponent]] dataUsingEncoding:NSUTF8StringEncoding]];
+	
+	// NSString *filename = [path lastPathComponent];
+	NSMutableString *filename = [NSMutableString stringWithString:title];
+	[filename replaceOccurrencesOfString:@"\""	withString:@"\\\"" options:0 range: NSMakeRange(0, [title length])];
+	[postBody appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"Image\"; filename=\"%@\"\r\n", filename] dataUsingEncoding:NSUTF8StringEncoding]];
 	[postBody appendData:[[NSString stringWithString:@"Content-Type: image/jpeg\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
 	[postBody appendData:imageData];
 	[postBody appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n",Boundary] dataUsingEncoding:NSUTF8StringEncoding]];
