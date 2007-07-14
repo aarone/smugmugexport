@@ -9,7 +9,6 @@
 #import "SmugmugAccess.h"
 
 #import "NSURLAdditions.h"
-#import "NSURLRequestAdditions.h"
 
 @interface SmugmugAccess (Private)
 -(NSURLConnection *)connection;
@@ -24,6 +23,20 @@
 -(void)setTarget:(id)t;
 -(void)setErrror:(NSError *)err;
 @end
+
+@interface NSURLRequest (NSURLRequestAdditions)
++(NSURLRequest *)smRequestWithURL:(NSURL *)aUrl;
+@end
+
+
+@implementation NSURLRequest (NSURLRequestAdditions)
++(NSURLRequest *)smRequestWithURL:(NSURL *)aUrl {
+	NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:aUrl];
+	[req setValue:[SmugmugAccess userAgent] forHTTPHeaderField:@"User-Agent"];
+	return req;
+}
+@end
+
 
 @implementation SmugmugAccess
 
@@ -45,6 +58,10 @@
 	[[self error] release];
 	
 	[super dealloc];
+}
+
++(NSString *)userAgent {
+	return [NSString stringWithFormat:@"iPhoto SmugMugExport/%@", [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:@"CFBundleVersion"]];
 }
 
 -(NSMutableData *)response {

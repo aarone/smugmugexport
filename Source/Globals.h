@@ -5,8 +5,8 @@ extern NSString *SMSelectedScalingTag;
 extern NSString *SMUseKeywordsAsTags;
 extern NSString *SMImageScaleWidth;
 extern NSString *SMImageScaleHeight;
+extern NSString *SMShowAlbumDeleteAlert;
 
-extern NSString *UserAgent;
 extern NSString *AlbumID;
 extern NSString *CategoryID;
 extern NSString *SubCategoryID;

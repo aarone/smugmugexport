@@ -28,7 +28,6 @@
 		938E26930C0F46FA0059F26B /* NSScanner_Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E268F0C0F46FA0059F26B /* NSScanner_Extensions.m */; };
 		938E269B0C0F476E0059F26B /* JSONRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26990C0F476E0059F26B /* JSONRequest.m */; };
 		938E26AB0C0F47EA0059F26B /* NSURLAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26A90C0F47EA0059F26B /* NSURLAdditions.m */; };
-		938E26BF0C0F48500059F26B /* NSURLRequestAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26BD0C0F48500059F26B /* NSURLRequestAdditions.m */; };
 		938E26E20C0F49480059F26B /* SmugmugAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26E00C0F49480059F26B /* SmugmugAccess.m */; };
 		938E27490C0F4DE10059F26B /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E27470C0F4DE10059F26B /* NSStringAdditions.m */; };
 		93BD6F2F0AD84AAC007CE525 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
@@ -355,7 +354,6 @@
 				938E26930C0F46FA0059F26B /* NSScanner_Extensions.m in Sources */,
 				938E269B0C0F476E0059F26B /* JSONRequest.m in Sources */,
 				938E26AB0C0F47EA0059F26B /* NSURLAdditions.m in Sources */,
-				938E26BF0C0F48500059F26B /* NSURLRequestAdditions.m in Sources */,
 				938E26E20C0F49480059F26B /* SmugmugAccess.m in Sources */,
 				938E27490C0F4DE10059F26B /* NSStringAdditions.m in Sources */,
 				935A1A4F0C1CC09700043E12 /* SmugMugUserDefaults.m in Sources */,

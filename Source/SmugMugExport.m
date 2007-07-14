@@ -86,7 +86,6 @@ NSString *SubCategoryID = @"id";
 NSString *ExistingAlbumTabIdentifier = @"existingAlbum";
 NSString *NewAlbumTabIdentifier = @"newAlbum";
 NSString *NewAccountLabel = @"New Account...";
-NSString *UserAgent = @"iPhoto SmugMugExport";
 
 // defaults keys
 NSString *SMESelectedTabIdDefaultsKey = @"SMESelectedTabId";
@@ -98,6 +97,7 @@ NSString *SMSelectedScalingTag = @"SMSelectedScalingTag";
 NSString *SMUseKeywordsAsTags = @"SMUseKeywordsAsTags";
 NSString *SMImageScaleWidth = @"SMImageScaleWidth";
 NSString *SMImageScaleHeight = @"SMImageScaleHeight";
+NSString *SMShowAlbumDeleteAlert = @"SMShowAlbumDeleteAlert";
 
 static int UploadFailureRetryCount = 3;
 
@@ -109,7 +109,7 @@ static int UploadFailureRetryCount = 3;
 	
 	exportManager = exportMgr;	
 	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
-
+	
 	[self setAccountManager:[AccountManager accountManager]];
 	[self performSelectorOnMainThread:@selector(setSmugMugManager:)  withObject:[SmugMugManager smugmugManager] waitUntilDone:YES];
 	[[self smugMugManager] setDelegate:self];
@@ -151,10 +151,10 @@ static int UploadFailureRetryCount = 3;
 	[defaultsDict setObject:@"yes" forKey:SMOpenInBrowserAfterUploadCompletion];
 	[defaultsDict setObject:@"yes" forKey:SMStorePasswordInKeychain];
 	[defaultsDict setObject:@"no" forKey:SMUseKeywordsAsTags];
+	[defaultsDict setObject:@"yes" forKey:SMShowAlbumDeleteAlert];
 	[defaultsDict setObject:[NSNumber numberWithInt:0] forKey:SMSelectedScalingTag];
 	
 	[[NSUserDefaults smugMugUserDefaults] registerDefaults:defaultsDict];
-	
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.accounts"] triggerChangeNotificationsForDependentKey:@"accounts"];
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.selectedAccount"] triggerChangeNotificationsForDependentKey:@"selectedAccount"];
 	
@@ -402,17 +402,21 @@ static int UploadFailureRetryCount = 3;
 		NSBeep();
 		return;
 	}
-
-	NSBeginAlertSheet(NSLocalizedString(@"Delete Album", @"Delete Album Sheet Title"),
-					  NSLocalizedString(@"Delete", @"Default button title for album delete sheet"),
-					  NSLocalizedString(@"Cancel", @"Alternate button title for album delete sheet"),
-					  nil,
-					  [[self exportManager] window],
-					  self,
-					  @selector(deleteAlbumSheetDidEnd:returnCode:contextInfo:),
-					  @selector(sheetDidDismiss:returnCode:contextInfo:),
-					  NULL,
-					  NSLocalizedString(@"Are you sure you want to delete this album?  All photos in this album will be deleted from SmmugMug.", @"Warning text to display in the delete album alert sheet."));
+	
+	if([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMShowAlbumDeleteAlert] boolValue]) {
+		NSBeginAlertSheet(NSLocalizedString(@"Delete Album", @"Delete Album Sheet Title"),
+						  NSLocalizedString(@"Delete", @"Default button title for album delete sheet"),
+						  NSLocalizedString(@"Cancel", @"Alternate button title for album delete sheet"),
+						  nil,
+						  [[self exportManager] window],
+						  self,
+						  @selector(deleteAlbumSheetDidEnd:returnCode:contextInfo:),
+						  @selector(sheetDidDismiss:returnCode:contextInfo:),
+						  NULL,
+						  NSLocalizedString(@"Are you sure you want to delete this album?  All photos in this album will be deleted from SmmugMug.", @"Warning text to display in the delete album alert sheet."));		
+	} else {
+		[[self smugMugManager] deleteAlbum:[[self selectedAlbum] objectForKey:AlbumID]];
+	}
 }
 
 

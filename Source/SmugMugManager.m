@@ -186,8 +186,6 @@ double UploadProgressTimerInterval = 0.125/2.0;
 	return newAlbumPreferences;
 }
 
-
-
 -(void)setSelectedCategory:(NSDictionary *)d {
 	if([self selectedCategory] != nil)
 		[[self selectedCategory] release];
@@ -724,7 +722,7 @@ double UploadProgressTimerInterval = 0.125/2.0;
 	CFHTTPMessageRef myRequest;
 	myRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, CFSTR("POST"), (CFURLRef)[NSURL URLWithString:[self postUploadURL]], kCFHTTPVersion1_1);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-Type"), (CFStringRef)[NSString stringWithFormat:@"multipart/form-data; boundary=%@", Boundary]);
-	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("User-Agent"), (CFStringRef)UserAgent);
+	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("User-Agent"), (CFStringRef)[SmugmugAccess userAgent]);
 	
 	CFHTTPMessageSetBody(myRequest, (CFDataRef)postData);
 

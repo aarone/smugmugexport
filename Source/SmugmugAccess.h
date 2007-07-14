@@ -59,4 +59,5 @@
 
 -(id)decodedResponse;
 
++(NSString *)userAgent;
 @end
