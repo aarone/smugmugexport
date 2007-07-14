@@ -13,12 +13,6 @@ SmugMugExport is an iPhoto plugin that can upload photos from iPhoto to SmugMug.
 
 more info: http://smugmug.com
 
-** Installation **
- 1. unzip the downloaded file (you've probably already done that)
- 2. select iPhoto in the finder and select "get info"
- 3. Select the Plug-Ins area of the info window
- 4. Select Add.. and select the folder created in step 1 with the suffix 'iPhotoExporter'
-
 ** License **
 SmugMugExport is released under the BSD license:
   http://www.opensource.org/licenses/bsd-license.php

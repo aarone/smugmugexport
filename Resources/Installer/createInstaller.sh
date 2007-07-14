@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DST=../build/SmugMugExport.pkg
+DST=../../build/SmugMugExport.pkg
 PROJ=SmugMugExport.pmproj
 PKG_MAKER=PackageMaker
 
