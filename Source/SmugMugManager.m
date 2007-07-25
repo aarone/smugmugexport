@@ -46,7 +46,10 @@ kCFStreamEventErrorOccurred;
 						  caption:(NSString *)caption;
 -(void)appendToResponse;
 -(void)transferComplete;
--(void)errorOccurred;
+
+-(NSString *)domainStringForError:(CFStreamError *)err;
+-(void)errorOccurred:(CFStreamError *)err;
+	
 -(NSString *)postUploadURL;
 -(void)setIsLoggingIn:(BOOL)v;
 -(void)setIsLoggedIn:(BOOL)v;
@@ -93,10 +96,11 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 		case kCFStreamEventEndEncountered:
 			[(SmugMugManager *)clientCallBackInfo transferComplete];
 			break;
-		case kCFStreamEventErrorOccurred:
-			[(SmugMugManager *)clientCallBackInfo errorOccurred];
+		case kCFStreamEventErrorOccurred: {
+			CFStreamError err = CFReadStreamGetError(stream);
+			[(SmugMugManager *)clientCallBackInfo errorOccurred:&err];
 			break;
-		default:
+		} default:
 			break;
 	}
 }
@@ -859,13 +863,39 @@ double UploadProgressTimerInterval = 0.125/2.0;
 
 -(void)notifyDelegateOfUploadError:(NSArray *)args {	
 	if([self delegate] != nil &&
-	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteForFile:imageId:withError:)]) {
+	   [[self delegate] respondsToSelector:@selector(uploadDidCompleteWithArgs:)]) {
 		[[self delegate] performSelectorOnMainThread:@selector(uploadDidCompleteWithArgs:) withObject:args waitUntilDone:NO];
 	}	
 }
 
--(void)errorOccurred {
-	NSArray *args = [NSArray arrayWithObjects:currentPathForUpload, [NSNull null], NSLocalizedString(@"Upload Failed", @"The upload was interrupted in progress."), nil];
+-(NSString *)domainStringForError:(CFStreamError *)err {
+
+	if (err->domain == kCFStreamErrorDomainCustom) {
+		return NSLocalizedString(@"Custom error", @"Custom error");
+	} else if (err->domain == kCFStreamErrorDomainPOSIX) {
+		return NSLocalizedString(@"POSIX error", @"POSIX error");
+	} else if (err->domain == kCFStreamErrorDomainMacOSStatus) {
+		return [NSString stringWithFormat:@"OS error" @"OS error"];
+	} else if (err->domain == kCFStreamErrorDomainNetDB) {
+		return NSLocalizedString(@"NetDB error", @"NetDB error");
+	} else if (err->domain == kCFStreamErrorDomainMach) {
+		return NSLocalizedString(@"Mach error", @"Mach error");
+	} else if (err->domain == kCFStreamErrorDomainHTTP) {
+		return NSLocalizedString(@"HTTP error", @"HTTP error");
+	}  else if (err->domain == kCFStreamErrorDomainSOCKS) {
+		return NSLocalizedString(@"SOCKS error", @"SOCKS error");
+	} else if (err->domain == kCFStreamErrorDomainSystemConfiguration) {
+		return NSLocalizedString(@"System Configuration error", @"System Configuration error");
+	} else if (err->domain == kCFStreamErrorDomainSSL) {
+		return NSLocalizedString(@"System Configuration error", @"System Configuration error");
+	}
+
+	return NSLocalizedString(@"Unknown domain", @"Default stream error domain.");
+}
+
+-(void)errorOccurred: (CFStreamError *)err {
+	NSString *errorText = [NSString stringWithFormat:@"%@ : %d", [self domainStringForError:err], err->error];
+	NSArray *args = [NSArray arrayWithObjects:currentPathForUpload, [NSNull null], errorText, nil];
 	[self performSelectorOnMainThread:@selector(notifyDelegateOfUploadError:) withObject:args waitUntilDone:NO];
 	[self destroyUploadResources];
 }

@@ -93,8 +93,6 @@
 		938E26990C0F476E0059F26B /* JSONRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JSONRequest.m; path = Source/JSONRequest.m; sourceTree = "<group>"; };
 		938E26A80C0F47EA0059F26B /* NSURLAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSURLAdditions.h; path = Source/NSURLAdditions.h; sourceTree = "<group>"; };
 		938E26A90C0F47EA0059F26B /* NSURLAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSURLAdditions.m; path = Source/NSURLAdditions.m; sourceTree = "<group>"; };
-		938E26BC0C0F48500059F26B /* NSURLRequestAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSURLRequestAdditions.h; path = Source/NSURLRequestAdditions.h; sourceTree = "<group>"; };
-		938E26BD0C0F48500059F26B /* NSURLRequestAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSURLRequestAdditions.m; path = Source/NSURLRequestAdditions.m; sourceTree = "<group>"; };
 		938E26DF0C0F49480059F26B /* SmugmugAccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugmugAccess.h; path = Source/SmugmugAccess.h; sourceTree = "<group>"; };
 		938E26E00C0F49480059F26B /* SmugmugAccess.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SmugmugAccess.m; path = Source/SmugmugAccess.m; sourceTree = "<group>"; };
 		938E27460C0F4DE10059F26B /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSStringAdditions.h; path = Source/NSStringAdditions.h; sourceTree = "<group>"; };
@@ -259,8 +257,6 @@
 				9321644E0B2F78B000624A8D /* NSDataAdditions.m */,
 				938E26A80C0F47EA0059F26B /* NSURLAdditions.h */,
 				938E26A90C0F47EA0059F26B /* NSURLAdditions.m */,
-				938E26BC0C0F48500059F26B /* NSURLRequestAdditions.h */,
-				938E26BD0C0F48500059F26B /* NSURLRequestAdditions.m */,
 				938E27460C0F4DE10059F26B /* NSStringAdditions.h */,
 				938E27470C0F4DE10059F26B /* NSStringAdditions.m */,
 				935A1A840C1CC2CC00043E12 /* NSUserDefaultsAdditions.h */,

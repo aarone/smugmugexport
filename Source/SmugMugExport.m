@@ -527,10 +527,9 @@ static int UploadFailureRetryCount = 3;
 }
 
 -(void)uploadDidCompleteWithArgs:(NSArray *)args {
-
 //	NSString *aFullPathToImage = [args objectAtIndex:0];
 	NSString *imageId = [args objectAtIndex:1];
-	NSError *error = [args count] > 2 ? [args objectAtIndex:2] : nil;
+	NSString *error = [args count] > 2 ? [args objectAtIndex:2] : nil;
 	
 	NSString *selectedAlbumId = [[[self selectedAlbum] objectForKey:AlbumID] stringValue];
 
@@ -539,15 +538,16 @@ static int UploadFailureRetryCount = 3;
 		return; // stop uploading
 	}
 
-	@synchronized(self) {
-		if(!siteUrlHasBeenFetched) {
-			[self setSiteUrlHasBeenFetched:NO];
-			[[self smugMugManager] fetchImageUrls:imageId];
+	if(error == nil) {
+		@synchronized(self) {
+			if(!siteUrlHasBeenFetched) {
+				[self setSiteUrlHasBeenFetched:NO];
+				[[self smugMugManager] fetchImageUrls:imageId];
+			}
 		}
-	}
-	
-	// if an error occurred, retry up to UploadFailureRetryCount times
-	if(error != nil && [self uploadRetryCount] < UploadFailureRetryCount) {
+	} else  if(error != nil && [self uploadRetryCount] < UploadFailureRetryCount) {
+		// if an error occurred, retry up to UploadFailureRetryCount times
+
 		[self incrementUploadRetryCount];
 		[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Retrying upload of image %d of %d", @"Retry upload progress"), [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
 		
@@ -559,11 +559,14 @@ static int UploadFailureRetryCount = 3;
 										 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];		
 		return;
 	} else if (error != nil) {
+		// our max retries have been hit, stop uploading
 		[self performUploadCompletionTasks:NO];
-		[self presentError:NSLocalizedString(@"Image upload failed.", @"Error message to display when upload fails.")];
+		NSString *errorString = NSLocalizedString(@"Image upload failed (%@).", @"Error message to display when upload fails.");
+		[self presentError:[NSString stringWithFormat:errorString, error]];
 		return;
 	}
 
+	// onto the next image
 	[self resetUploadRetryCount];
 	[self setImagesUploaded:[self imagesUploaded] + 1];
 	[self setSessionUploadProgress:[NSNumber numberWithFloat:100.0*((float)[self imagesUploaded])/((float)[[self exportManager] imageCount])]];
@@ -929,6 +932,7 @@ static int UploadFailureRetryCount = 3;
 }
 
 -(void)viewWillBeDeactivated {
+	loginAttempted = NO;
 //	[[self smugMugManager] logout];
 }
 
