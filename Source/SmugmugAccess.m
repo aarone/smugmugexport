@@ -9,6 +9,7 @@
 #import "SmugmugAccess.h"
 
 #import "NSURLAdditions.h"
+#import "Globals.h"
 
 @interface SmugmugAccess (Private)
 -(NSURLConnection *)connection;
@@ -127,6 +128,10 @@
 
 -(void)invokeMethodWithUrl:(NSURL *)url {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
+	if(NetworkTracingEnabled) {
+		NSLog(@"request: %@", [url absoluteString]);
+	}
 	
 	NSURLRequest *req = [NSURLRequest smRequestWithURL:url];
 	[self setResponse:[NSMutableData data]];

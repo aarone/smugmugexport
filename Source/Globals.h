@@ -12,3 +12,4 @@ extern NSString *CategoryID;
 extern NSString *SubCategoryID;
 
 #define ShouldScaleImages() ([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMSelectedScalingTag] intValue] != 0)
+#define NetworkTracingEnabled NO

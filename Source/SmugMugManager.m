@@ -53,6 +53,8 @@ kCFStreamEventErrorOccurred;
 -(NSString *)postUploadURL;
 -(void)setIsLoggingIn:(BOOL)v;
 -(void)setIsLoggedIn:(BOOL)v;
+-(BOOL)isAlbumCreationInProgress;
+-(void)setIsAlbumCreationInProgress:(BOOL)v;	
 -(NSDictionary *)defaultNewAlbumPreferences;
 -(NSDictionary *)selectedCategory;
 -(void)setSelectedCategory:(NSDictionary *)d;
@@ -130,6 +132,7 @@ static NSString *AlbumKeywordsPref = @"AlbumKeywords";
 static NSString *AlbumCategoryPref = @"AlbumCategory";
 
 double UploadProgressTimerInterval = 0.125/2.0;
+static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
 @interface NSDictionary (SMAdditions)
 -(NSComparisonResult)compareByAlbumId:(NSDictionary *)aDict;
@@ -162,6 +165,7 @@ double UploadProgressTimerInterval = 0.125/2.0;
 	if(![super init])
 		return nil;
 
+	[self setIsAlbumCreationInProgress:NO];
 	[self setNewAlbumPreferences:[NSMutableDictionary dictionaryWithDictionary:[self defaultNewAlbumPreferences]]]; 
 	
 	return self;
@@ -271,15 +275,15 @@ double UploadProgressTimerInterval = 0.125/2.0;
 	password = [p retain];
 }
 
--(void)setAlbums:(NSArray *)a {
-	if([self albums] != nil)
-		[[self albums] release];
-	
-	albums = [a retain];
-}
-
 -(NSArray *)albums {
 	return albums;
+}
+
+-(void)setAlbums:(NSArray *)a {
+	if(albums != nil) {
+		[[self albums] release];
+	}
+	albums = [a retain];
 }
 
 -(NSString *)apiKey {
@@ -336,6 +340,14 @@ double UploadProgressTimerInterval = 0.125/2.0;
 
 -(BOOL)isLoggingIn {
 	return isLoggingIn;
+}
+
+-(BOOL)isAlbumCreationInProgress {
+	return isAlbumCreationInProgress;
+}
+
+-(void)setIsAlbumCreationInProgress:(BOOL)v {
+	isAlbumCreationInProgress = v;
 }
 
 -(void)setDelegate:(id)d {
@@ -401,8 +413,22 @@ double UploadProgressTimerInterval = 0.125/2.0;
 	[self setUserID:[uid stringValue]];
 }
 
+/* 
+ * This method is called to build the list of known albums and after an album is 
+ * added or deleted.  See the workaround below.
+ */
 -(void)buildAlbumListWithCallback:(SEL)callback {
 	SmugmugAccess *req = [[self storeAccessClass] request];
+
+	/*
+	 * If we add or delete an album and then refresh the list using this method,
+	 * we occaisonally get a list returned that includes the deleted album or 
+	 * doesn't include the album that was just added.  My suspicion is that this
+	 * is because I'm refreshing the list too quickly after modifying the album
+	 * list.  To workaround this, we insert a delay here and hope for the best.
+	 */
+	
+	[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:AlbumRefreshDelay]];
 	[req invokeMethodWithURL:[self SmugMugAccessURL] 
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.albums.get", [self sessionID], nil]
@@ -613,12 +639,13 @@ double UploadProgressTimerInterval = 0.125/2.0;
 #pragma mark New Album Creation Methods
 
 -(void)createNewAlbum {
-	
-	// don't try to create an album if we're not logged in or there is no album title
-	if(![self isLoggedIn] || IsEmpty([[self newAlbumPreferences] objectForKey:AlbumTitlePref]))
+	// don't try to create an album if we're not logged in or there is no album title or if we're already trying to create an album
+	if(![self isLoggedIn] || [self isAlbumCreationInProgress] || IsEmpty([[self newAlbumPreferences] objectForKey:AlbumTitlePref]))
 		[self performSelectorOnMainThread:@selector(notifyDelegateOfAlbumCompletion:) withObject:[NSNumber numberWithBool:NO] waitUntilDone:NO];
-	else
+	else {
+		[self setIsAlbumCreationInProgress:YES];
 		[self createNewAlbumCallback:@selector(newAlbumCreationDidComplete:)];
+	}
 }
 
 -(void)createNewAlbumCallback:(SEL)callback {
@@ -690,7 +717,8 @@ double UploadProgressTimerInterval = 0.125/2.0;
 }
 
 -(void)newAlbumCreationDidComplete:(SmugmugAccess *)req {
-
+	[self setIsAlbumCreationInProgress:NO];
+	
 	if([self smResponseWasSuccessful:req])
 		[self buildAlbumListWithCallback:@selector(postAlbumCreateAlbumSyncDidComplete:)];
 	else {
@@ -723,6 +751,10 @@ double UploadProgressTimerInterval = 0.125/2.0;
 	
 	NSData *postData = [self postBodyForImageAtPath:path albumId:albumId title:title comments:comments keywords:keywords caption:caption];
 
+	if(NetworkTracingEnabled) {
+		NSLog(@"Posting image to %@", [self postUploadURL]);
+	}
+	
 	CFHTTPMessageRef myRequest;
 	myRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, CFSTR("POST"), (CFURLRef)[NSURL URLWithString:[self postUploadURL]], kCFHTTPVersion1_1);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-Type"), (CFStringRef)[NSString stringWithFormat:@"multipart/form-data; boundary=%@", Boundary]);

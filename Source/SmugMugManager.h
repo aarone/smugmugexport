@@ -36,12 +36,13 @@
 	NSArray *subcategories;
 	NSMutableDictionary *newAlbumPreferences;
 	NSDictionary *selectedCategory;
-
+	
 	NSString *currentPathForUpload;
 	long uploadSize;
 	BOOL isUploading;
 	BOOL isLoggingIn;
 	BOOL isLoggedIn;
+	BOOL isAlbumCreationInProgress;
 	long nextProgressThreshold;
 	NSIndexSet *selectedCategoryIndices;
 }

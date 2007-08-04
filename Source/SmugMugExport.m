@@ -47,6 +47,8 @@
 -(void)setStatusText:(NSString *)t;
 -(BOOL)isBusy;
 -(void)setIsBusy:(BOOL)v;
+-(BOOL)isDeletingAlbum;
+-(void)setIsDeletingAlbum:(BOOL)v;	
 -(void)login;
 -(NSImage *)currentThumbnail;
 -(void)setCurrentThumbnail:(NSImage *)d;
@@ -59,6 +61,7 @@
 -(void)presentError:(NSString *)errorText;
 -(BOOL)isUploading;
 -(void)setIsUploading:(BOOL)v;
+-(void)beginAlbumDelete;
 -(BOOL)browserOpenedInGallery;
 -(void)setBrowserOpenedInGallery:(BOOL)v;	
 
@@ -369,13 +372,13 @@ static int UploadFailureRetryCount = 3;
 
 -(void)newAlbumDidEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	[sheet orderOut:self];
-	
 }
 
 -(void)createNewAlbumDidComplete:(NSNumber *)wasSuccessful {
-	
+
 	if([wasSuccessful boolValue]) {
 		[NSApp endSheet:[self newAlbumSheet]];
+		[albumsArrayController setSelectionIndex:0]; // default to selecting the new album which should be album 0
 	} else {
 		// album creation occurs in a sheet, don't try to show an error dialog in another sheet...
 		NSBeep();
@@ -415,10 +418,16 @@ static int UploadFailureRetryCount = 3;
 						  NULL,
 						  NSLocalizedString(@"Are you sure you want to delete this album?  All photos in this album will be deleted from SmmugMug.", @"Warning text to display in the delete album alert sheet."));		
 	} else {
-		[[self smugMugManager] deleteAlbum:[[self selectedAlbum] objectForKey:AlbumID]];
+		[self beginAlbumDelete];
 	}
 }
 
+-(void)beginAlbumDelete {
+	[self setIsBusy:YES];
+	[self setIsDeletingAlbum:YES];
+	[self setStatusText:NSLocalizedString(@"Deleting Album...", @"Delete album status")];
+	[[self smugMugManager] deleteAlbum:[[self selectedAlbum] objectForKey:AlbumID]];
+}	
 
 -(void)sheetDidDismiss:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo {
 	
@@ -426,14 +435,19 @@ static int UploadFailureRetryCount = 3;
 
 -(void)deleteAlbumSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo {
 
-	if(returnCode == NSAlertDefaultReturn)
-		[[self smugMugManager] deleteAlbum:[[self selectedAlbum] objectForKey:AlbumID]];
-
+	if(returnCode == NSAlertDefaultReturn) {
+		[self beginAlbumDelete];
+	}
 }
 
 -(void)deleteAlbumDidComplete:(NSNumber *)wasSuccessful {
 	if(![wasSuccessful boolValue])
-		[self presentError:NSLocalizedString(@"Album deletion failed.", @"Error message to display when album delete fails.")];
+		[self presentError:NSLocalizedString(@"Album deletion failed.", 
+											 @"Error message to display when album delete fails.")];
+	
+	[self setIsBusy:NO];
+	[self setIsDeletingAlbum:NO];
+	[self setStatusText:@""];	
 }
 
 #pragma mark Image Url Fetching
@@ -713,6 +727,14 @@ static int UploadFailureRetryCount = 3;
 
 -(void)setIsBusy:(BOOL)v {
 	isBusy = v;
+}
+
+-(BOOL)isDeletingAlbum {
+	return isDeletingAlbum;
+}
+
+-(void)setIsDeletingAlbum:(BOOL)v {
+	isDeletingAlbum = v;
 }
 
 -(BOOL)loginAttempted {

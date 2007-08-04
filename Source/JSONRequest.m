@@ -8,6 +8,7 @@
 
 #import "JSONRequest.h"
 #import "CJSONDeserializer.h"
+#import "Globals.h"
 
 @implementation JSONRequest
 
@@ -17,6 +18,11 @@
 
 -(id)decodedResponse {
 	NSString *responseString = [[[NSString alloc] initWithData:[self response] encoding:NSUTF8StringEncoding] autorelease];
+	
+	if(NetworkTracingEnabled) {
+		NSLog(@"response: %@", responseString);
+	}
+	
 	return [[CJSONDeserializer deserializer] deserialize:responseString];
 }
 
