@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9307230B0C1AFC5D00112753 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 930723050C1AFC5D00112753 /* Quartz.framework */; };
+		930961400C66A0C7002B8DAA /* SmugMugAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = 9309613E0C66A0C7002B8DAA /* SmugMugAccess.m */; };
 		930DE5BC0B4831B2008120ED /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 930DE5BB0B4831B2008120ED /* libcrypto.dylib */; };
 		930DE5F30B4831D2008120ED /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 930DE5BE0B4831D2008120ED /* Security.framework */; };
 		932164520B2F78B000624A8D /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9321644E0B2F78B000624A8D /* NSDataAdditions.m */; };
@@ -28,7 +29,6 @@
 		938E26930C0F46FA0059F26B /* NSScanner_Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E268F0C0F46FA0059F26B /* NSScanner_Extensions.m */; };
 		938E269B0C0F476E0059F26B /* JSONRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26990C0F476E0059F26B /* JSONRequest.m */; };
 		938E26AB0C0F47EA0059F26B /* NSURLAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26A90C0F47EA0059F26B /* NSURLAdditions.m */; };
-		938E26E20C0F49480059F26B /* SmugmugAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26E00C0F49480059F26B /* SmugmugAccess.m */; };
 		938E27490C0F4DE10059F26B /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E27470C0F4DE10059F26B /* NSStringAdditions.m */; };
 		93BD6F2F0AD84AAC007CE525 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
 /* End PBXBuildFile section */
@@ -51,6 +51,8 @@
 		089C167FFE841241C02AAC07 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		930723050C1AFC5D00112753 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = /System/Library/Frameworks/Quartz.framework; sourceTree = "<absolute>"; };
+		9309613D0C66A0C7002B8DAA /* SmugMugAccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugMugAccess.h; path = Source/SmugMugAccess.h; sourceTree = "<group>"; };
+		9309613E0C66A0C7002B8DAA /* SmugMugAccess.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SmugMugAccess.m; path = Source/SmugMugAccess.m; sourceTree = "<group>"; };
 		930DE5BB0B4831B2008120ED /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
 		930DE5BE0B4831D2008120ED /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		9321644D0B2F78B000624A8D /* NSDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSDataAdditions.h; path = Source/NSDataAdditions.h; sourceTree = "<group>"; };
@@ -93,8 +95,6 @@
 		938E26990C0F476E0059F26B /* JSONRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JSONRequest.m; path = Source/JSONRequest.m; sourceTree = "<group>"; };
 		938E26A80C0F47EA0059F26B /* NSURLAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSURLAdditions.h; path = Source/NSURLAdditions.h; sourceTree = "<group>"; };
 		938E26A90C0F47EA0059F26B /* NSURLAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSURLAdditions.m; path = Source/NSURLAdditions.m; sourceTree = "<group>"; };
-		938E26DF0C0F49480059F26B /* SmugmugAccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugmugAccess.h; path = Source/SmugmugAccess.h; sourceTree = "<group>"; };
-		938E26E00C0F49480059F26B /* SmugmugAccess.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SmugmugAccess.m; path = Source/SmugmugAccess.m; sourceTree = "<group>"; };
 		938E27460C0F4DE10059F26B /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSStringAdditions.h; path = Source/NSStringAdditions.h; sourceTree = "<group>"; };
 		938E27470C0F4DE10059F26B /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSStringAdditions.m; path = Source/NSStringAdditions.m; sourceTree = "<group>"; };
 		93BD6F170AD84A49007CE525 /* SmugMugExport.iPhotoExporter */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SmugMugExport.iPhotoExporter; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -240,8 +240,8 @@
 			children = (
 				938E26980C0F476E0059F26B /* JSONRequest.h */,
 				938E26990C0F476E0059F26B /* JSONRequest.m */,
-				938E26DF0C0F49480059F26B /* SmugmugAccess.h */,
-				938E26E00C0F49480059F26B /* SmugmugAccess.m */,
+				9309613D0C66A0C7002B8DAA /* SmugMugAccess.h */,
+				9309613E0C66A0C7002B8DAA /* SmugMugAccess.m */,
 			);
 			name = "Remote Access";
 			sourceTree = "<group>";
@@ -350,10 +350,10 @@
 				938E26930C0F46FA0059F26B /* NSScanner_Extensions.m in Sources */,
 				938E269B0C0F476E0059F26B /* JSONRequest.m in Sources */,
 				938E26AB0C0F47EA0059F26B /* NSURLAdditions.m in Sources */,
-				938E26E20C0F49480059F26B /* SmugmugAccess.m in Sources */,
 				938E27490C0F4DE10059F26B /* NSStringAdditions.m in Sources */,
 				935A1A4F0C1CC09700043E12 /* SmugMugUserDefaults.m in Sources */,
 				935A1A870C1CC2CC00043E12 /* NSUserDefaultsAdditions.m in Sources */,
+				930961400C66A0C7002B8DAA /* SmugMugAccess.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

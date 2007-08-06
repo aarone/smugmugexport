@@ -1,18 +1,18 @@
 //
-//  SmugmugAccess.m
+//  SmugMugAccess.m
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 5/31/07.
 //  Copyright 2007 Aaron Evans. All rights reserved.
 //
 
-#import "SmugmugAccess.h"
+#import "SmugMugAccess.h"
 
 #import "NSURLAdditions.h"
 #import "Globals.h"
 #import "NSUserDefaultsAdditions.h"
 
-@interface SmugmugAccess (Private)
+@interface SmugMugAccess (Private)
 -(NSURLConnection *)connection;
 -(void)setConnection:(NSURLConnection *)c;
 -(NSMutableData *)response;
@@ -34,13 +34,13 @@
 @implementation NSURLRequest (NSURLRequestAdditions)
 +(NSURLRequest *)smRequestWithURL:(NSURL *)aUrl {
 	NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:aUrl];
-	[req setValue:[SmugmugAccess userAgent] forHTTPHeaderField:@"User-Agent"];
+	[req setValue:[SmugMugAccess userAgent] forHTTPHeaderField:@"User-Agent"];
 	return req;
 }
 @end
 
 
-@implementation SmugmugAccess
+@implementation SmugMugAccess
 
 -(id)init {
 	if(![super init])
@@ -51,7 +51,7 @@
 	return self;
 }
 
-+(SmugmugAccess *)request {
++(SmugMugAccess *)request {
 	return [[[[self class] alloc] init] autorelease];
 }
 

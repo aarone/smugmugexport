@@ -1,5 +1,5 @@
 //
-//  SmugmugAccess.h
+//  SmugMugAccess.h
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 5/31/07.
@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface SmugmugAccess : NSObject {
+@interface SmugMugAccess : NSObject {
 	NSURLConnection *connection;
 	NSMutableData *response;
 	SEL callback;

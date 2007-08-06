@@ -7,9 +7,9 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "SmugmugAccess.h"
+#import "SmugMugAccess.h"
 
-@interface JSONRequest : SmugmugAccess {
+@interface JSONRequest : SmugMugAccess {
 	
 }
 

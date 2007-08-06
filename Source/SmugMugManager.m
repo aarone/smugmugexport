@@ -10,7 +10,7 @@
 #import "NSDataAdditions.h"
 #import "JSONRequest.h"
 #import "Globals.h"
-#import "SmugmugAccess.h"
+#import "SmugMugAccess.h"
 #import "NSUserDefaultsAdditions.h"
 #import <QuartzCore/CIImage.h>
 
@@ -34,7 +34,7 @@ kCFStreamEventErrorOccurred;
 
 -(NSURL *)SmugMugAccessURL;
 
--(BOOL)smResponseWasSuccessful:(SmugmugAccess *)req;
+-(BOOL)smResponseWasSuccessful:(SmugMugAccess *)req;
 -(void)evaluateLoginResponse:(id)response;
 
 -(NSString *)contentTypeForPath:(NSString *)path;
@@ -58,7 +58,7 @@ kCFStreamEventErrorOccurred;
 -(void)setSelectedCategory:(NSDictionary *)d;
 -(void)createNewAlbum;
 -(void)createNewAlbumCallback:(SEL)callback;
--(void)newAlbumCreationDidComplete:(SmugmugAccess *)req;
+-(void)newAlbumCreationDidComplete:(SmugMugAccess *)req;
 -(void)destroyUploadResources;
 
 -(NSMutableData *)responseData;
@@ -72,17 +72,17 @@ kCFStreamEventErrorOccurred;
 
 -(void)loginWithCallback:(SEL)loginDidEndSelector;
 -(void)logoutWithCallback:(SEL)logoutDidEndSelector;
--(void)logoutCompletedNowLogin:(SmugmugAccess *)req;
--(void)loginCompletedBuildAlbumList:(SmugmugAccess *)req;
+-(void)logoutCompletedNowLogin:(SmugMugAccess *)req;
+-(void)loginCompletedBuildAlbumList:(SmugMugAccess *)req;
 -(void)buildAlbumListWithCallback:(SEL)callback;
--(void)buildAlbumsListDidComplete:(SmugmugAccess *)req;
+-(void)buildAlbumsListDidComplete:(SmugMugAccess *)req;
 -(void)buildCategoryListWithCallback:(SEL)callback;
--(void)categoryGetDidComplete:(SmugmugAccess *)req;
+-(void)categoryGetDidComplete:(SmugMugAccess *)req;
 -(void)buildSubCategoryListWithCallback:(SEL)callback;
--(void)subcategoryGetDidComplete:(SmugmugAccess *)req;
+-(void)subcategoryGetDidComplete:(SmugMugAccess *)req;
 -(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSString *)albumId;
 -(void)getImageUrlsWithCallback:(SEL)callback imageId:(NSString *)imageId;
--(void)getImageUrlsDidComplete:(SmugmugAccess *)req;
+-(void)getImageUrlsDidComplete:(SmugMugAccess *)req;
 
 -(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey;
 
@@ -365,7 +365,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	[self logoutWithCallback:@selector(logoutCompletedNowLogin:)];
 }
 
--(void)logoutCompletedNowLogin:(SmugmugAccess *)req {
+-(void)logoutCompletedNowLogin:(SmugMugAccess *)req {
 	if(req == nil || ([req wasSuccessful] && [self smResponseWasSuccessful:req])) {
 		[self setIsLoggedIn:NO];
 	}
@@ -378,7 +378,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	[self logoutWithCallback:@selector(logoutCallback:)];
 }
 
--(void)loginCompletedBuildAlbumList:(SmugmugAccess *)req {
+-(void)loginCompletedBuildAlbumList:(SmugMugAccess *)req {
 	if ([self smResponseWasSuccessful:req]) {
 		[self evaluateLoginResponse:[req decodedResponse]];
 		[self buildAlbumListWithCallback:@selector(buildAlbumsListDidComplete:)];
@@ -407,7 +407,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
  * added or deleted.  See the workaround below.
  */
 -(void)buildAlbumListWithCallback:(SEL)callback {
-	SmugmugAccess *req = [[self storeAccessClass] request];
+	SmugMugAccess *req = [[self storeAccessClass] request];
 
 	/*
 	 * If we add or delete an album and then refresh the list using this method,
@@ -440,7 +440,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 		[[self delegate] performSelectorOnMainThread:@selector(loginDidComplete:) withObject:wasSuccessful waitUntilDone:NO];
 }
 
--(void)buildAlbumsListDidComplete:(SmugmugAccess *)req {
+-(void)buildAlbumsListDidComplete:(SmugMugAccess *)req {
 
 	if([self smResponseWasSuccessful:req])
 		[self initializeAlbumsFromResponse:[req decodedResponse]];
@@ -453,7 +453,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
 -(void)loginWithCallback:(SEL)loginDidEndSelector {
 	[self setIsLoggingIn:YES];
-	SmugmugAccess *request = [[self storeAccessClass] request];
+	SmugMugAccess *request = [[self storeAccessClass] request];
 
 	[request invokeMethodWithURL:[self SmugMugAccessURL] 
 						  keys:[NSArray arrayWithObjects:@"method", @"EmailAddress",@"Password", @"APIKey", nil]
@@ -462,14 +462,14 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 				responseTarget:self];
 }
 
--(BOOL)smResponseWasSuccessful:(SmugmugAccess *)req {
+-(BOOL)smResponseWasSuccessful:(SmugMugAccess *)req {
 	if(![req wasSuccessful])
 		return NO;
 	
 	return [[[req decodedResponse] objectForKey:@"stat"] isEqualToString:@"ok"];
 }
 
--(void)loginCompleted:(SmugmugAccess *)req {
+-(void)loginCompleted:(SmugMugAccess *)req {
 	if([self smResponseWasSuccessful:req]) {
 		[self evaluateLoginResponse:[req decodedResponse]];
 	}
@@ -481,7 +481,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 		return;
 	}
 
-	SmugmugAccess *req = [[self storeAccessClass] request];	
+	SmugMugAccess *req = [[self storeAccessClass] request];	
 	[req invokeMethodWithURL:[self SmugMugAccessURL] 
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.logout", [self sessionID], nil]
@@ -495,7 +495,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 		[[self delegate] performSelectorOnMainThread:@selector(logoutDidComplete:) withObject:wasSuccessful waitUntilDone:NO];
 }
 
--(void)logoutCallback:(SmugmugAccess *)req {
+-(void)logoutCallback:(SmugMugAccess *)req {
 
 	[self setIsLoggedIn:NO];
 
@@ -511,7 +511,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)getImageUrlsWithCallback:(SEL)callback imageId:(NSString *)imageId {
-	SmugmugAccess *req = [[self storeAccessClass] request];
+	SmugMugAccess *req = [[self storeAccessClass] request];
 	[req invokeMethodWithURL:[self SmugMugAccessURL]
 						 keys:[NSArray arrayWithObjects:@"method", @"SessionID", @"ImageID", nil]
 					   values:[NSArray arrayWithObjects:@"smugmug.images.getURLs", [self sessionID], imageId, nil]
@@ -519,7 +519,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 			   responseTarget:self];
 }
 
--(void)getImageUrlsDidComplete:(SmugmugAccess *)req {
+-(void)getImageUrlsDidComplete:(SmugMugAccess *)req {
 	if([self smResponseWasSuccessful:req]) {
 		NSDictionary *dict = [[req decodedResponse] objectForKey:@"Image"];
 		 
@@ -534,7 +534,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)buildCategoryListWithCallback:(SEL)callback {
-	SmugmugAccess *req = [[self storeAccessClass] request];
+	SmugMugAccess *req = [[self storeAccessClass] request];
 	[req invokeMethodWithURL:[self SmugMugAccessURL]
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.categories.get", [self sessionID], nil]
@@ -548,7 +548,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	[self performSelectorOnMainThread:@selector(setCategories:)	withObject:[NSArray arrayWithArray:returnedCategories] waitUntilDone:false];
 }
 
--(void)categoryGetDidComplete:(SmugmugAccess *)req {
+-(void)categoryGetDidComplete:(SmugMugAccess *)req {
 	if([self smResponseWasSuccessful:req])
 		[self initializeCategoriesWithResponse:[req decodedResponse]];
 	
@@ -559,7 +559,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)buildSubCategoryListWithCallback:(SEL)callback {
-	SmugmugAccess *req = [[self storeAccessClass] request];
+	SmugMugAccess *req = [[self storeAccessClass] request];
 	[req invokeMethodWithURL:[self SmugMugAccessURL]
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.subcategories.getAll", [self sessionID], nil]
@@ -573,7 +573,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	[self performSelectorOnMainThread:@selector(setSubcategories:)	withObject:[NSArray arrayWithArray:returnedSubCategories] waitUntilDone:false];	
 }
 
--(void)subcategoryGetDidComplete:(SmugmugAccess *)req {
+-(void)subcategoryGetDidComplete:(SmugMugAccess *)req {
 	if([self smResponseWasSuccessful:req])
 		[self initializeSubcategoriesWithResponse:[req decodedResponse]];
 }
@@ -590,7 +590,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSString *)albumId {
-	SmugmugAccess *req = [[self storeAccessClass] request];
+	SmugMugAccess *req = [[self storeAccessClass] request];
 	[req invokeMethodWithURL:[self SmugMugAccessURL]
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", @"AlbumID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.albums.delete", [self sessionID], albumId, nil]
@@ -610,7 +610,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 		[[self delegate] performSelectorOnMainThread:@selector(createNewAlbumDidComplete:) withObject:wasSuccessful waitUntilDone:NO];
 }
 
--(void)albumDeleteDidEnd:(SmugmugAccess *)req {
+-(void)albumDeleteDidEnd:(SmugMugAccess *)req {
 	if([self smResponseWasSuccessful:req]) {
 		[self buildAlbumListWithCallback:@selector(postAlbumDeleteAlbumSyncDidComplete:)];
 	} else {
@@ -618,7 +618,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	}
 }
 
--(void)postAlbumDeleteAlbumSyncDidComplete:(SmugmugAccess *)req {
+-(void)postAlbumDeleteAlbumSyncDidComplete:(SmugMugAccess *)req {
 
 	if([self smResponseWasSuccessful:req])
 		[self initializeAlbumsFromResponse:[req decodedResponse]];
@@ -638,7 +638,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)createNewAlbumCallback:(SEL)callback {
-	SmugmugAccess *req = [[self storeAccessClass] request];
+	SmugMugAccess *req = [[self storeAccessClass] request];
 	
 	int selectedCategoryIndex = [selectedCategoryIndices firstIndex];
 	NSDictionary *basicNewAlbumPrefs = [self newAlbumOptionalPrefDictionary];
@@ -705,7 +705,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	return nil;
 }
 
--(void)newAlbumCreationDidComplete:(SmugmugAccess *)req {
+-(void)newAlbumCreationDidComplete:(SmugMugAccess *)req {
 	if([self smResponseWasSuccessful:req])
 		[self buildAlbumListWithCallback:@selector(postAlbumCreateAlbumSyncDidComplete:)];
 	else {
@@ -714,7 +714,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 
--(void)postAlbumCreateAlbumSyncDidComplete:(SmugmugAccess *)req {
+-(void)postAlbumCreateAlbumSyncDidComplete:(SmugMugAccess *)req {
 	if([self smResponseWasSuccessful:req])
 		[self initializeAlbumsFromResponse:[req decodedResponse]];
 
@@ -745,7 +745,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	CFHTTPMessageRef myRequest;
 	myRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, CFSTR("POST"), (CFURLRef)[NSURL URLWithString:[self postUploadURL]], kCFHTTPVersion1_1);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-Type"), (CFStringRef)[NSString stringWithFormat:@"multipart/form-data; boundary=%@", Boundary]);
-	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("User-Agent"), (CFStringRef)[SmugmugAccess userAgent]);
+	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("User-Agent"), (CFStringRef)[SmugMugAccess userAgent]);
 	
 	CFHTTPMessageSetBody(myRequest, (CFDataRef)postData);
 
