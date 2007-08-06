@@ -441,7 +441,7 @@ static int UploadFailureRetryCount = 3;
 						  @selector(deleteAlbumSheetDidEnd:returnCode:contextInfo:),
 						  @selector(sheetDidDismiss:returnCode:contextInfo:),
 						  NULL,
-						  NSLocalizedString(@"Are you sure you want to delete this album?  All photos in this album will be deleted from SmmugMug.", @"Warning text to display in the delete album alert sheet."));		
+						  NSLocalizedString(@"Are you sure you want to delete this album?  All photos in this album will be deleted from SmugMug.", @"Warning text to display in the delete album alert sheet."));		
 	} else {
 		[self beginAlbumDelete];
 	}
