@@ -267,6 +267,11 @@ static int UploadFailureRetryCount = 3;
 	   didEndSelector:@selector(loginDidEndSheet:returnCode:contextInfo:)
 		  contextInfo:nil];
 
+	if([[loginPanel firstResponder] respondsToSelector:@selector(setString:)]) {
+		// hack to get insertion point to appear in textfield
+		[(NSTextView *)[loginPanel firstResponder] setString:@""];
+	}
+		
 	// mark that we've shown the user the login sheet at least once
 	[self setLoginAttempted:YES];
 }
@@ -370,8 +375,10 @@ static int UploadFailureRetryCount = 3;
 	   didEndSelector:@selector(newAlbumDidEndSheet:returnCode:contextInfo:)
 		  contextInfo:nil];
 
-	// mark that we've shown the user the login sheet at least once
-	[self setLoginAttempted:YES];	
+	if([[[self newAlbumSheet] firstResponder] respondsToSelector:@selector(setString:)]) {
+		// hack to get insertion point to appear in textfield
+		[(NSTextView *)[[self newAlbumSheet] firstResponder] setString:@""];
+	}
 }
 
 -(IBAction)cancelNewAlbumSheet:(id)sender {
