@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		9307230B0C1AFC5D00112753 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 930723050C1AFC5D00112753 /* Quartz.framework */; };
 		930961400C66A0C7002B8DAA /* SmugMugAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = 9309613E0C66A0C7002B8DAA /* SmugMugAccess.m */; };
-		930DE5BC0B4831B2008120ED /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 930DE5BB0B4831B2008120ED /* libcrypto.dylib */; };
+		930961BB0C66A164002B8DAA /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 930961BA0C66A164002B8DAA /* libcrypto.dylib */; };
 		930DE5F30B4831D2008120ED /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 930DE5BE0B4831D2008120ED /* Security.framework */; };
 		932164520B2F78B000624A8D /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9321644E0B2F78B000624A8D /* NSDataAdditions.m */; };
 		932164600B2F78BF00624A8D /* SmugMugExport.m in Sources */ = {isa = PBXBuildFile; fileRef = 932164580B2F78BF00624A8D /* SmugMugExport.m */; };
@@ -53,7 +53,7 @@
 		930723050C1AFC5D00112753 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = /System/Library/Frameworks/Quartz.framework; sourceTree = "<absolute>"; };
 		9309613D0C66A0C7002B8DAA /* SmugMugAccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugMugAccess.h; path = Source/SmugMugAccess.h; sourceTree = "<group>"; };
 		9309613E0C66A0C7002B8DAA /* SmugMugAccess.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SmugMugAccess.m; path = Source/SmugMugAccess.m; sourceTree = "<group>"; };
-		930DE5BB0B4831B2008120ED /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
+		930961BA0C66A164002B8DAA /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
 		930DE5BE0B4831D2008120ED /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		9321644D0B2F78B000624A8D /* NSDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSDataAdditions.h; path = Source/NSDataAdditions.h; sourceTree = "<group>"; };
 		9321644E0B2F78B000624A8D /* NSDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSDataAdditions.m; path = Source/NSDataAdditions.m; sourceTree = "<group>"; };
@@ -76,7 +76,6 @@
 		932164B00B2F7BBC00624A8D /* SmugmugExport_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugmugExport_Prefix.pch; path = Source/SmugmugExport_Prefix.pch; sourceTree = "<group>"; };
 		9321657F0B2F921D00624A8D /* KeychainManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KeychainManager.h; path = Source/KeychainManager.h; sourceTree = "<group>"; };
 		932165800B2F921E00624A8D /* KeychainManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KeychainManager.m; path = Source/KeychainManager.m; sourceTree = "<group>"; };
-		932165EA0B2F97C100624A8D /* libicucore.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicucore.dylib; path = /usr/lib/libicucore.dylib; sourceTree = "<absolute>"; };
 		935A19690C1C642A00043E12 /* SmugMugUserDefaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugMugUserDefaults.h; path = Source/SmugMugUserDefaults.h; sourceTree = "<group>"; };
 		935A1A4E0C1CC09700043E12 /* SmugMugUserDefaults.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SmugMugUserDefaults.m; path = Source/SmugMugUserDefaults.m; sourceTree = "<group>"; };
 		935A1A840C1CC2CC00043E12 /* NSUserDefaultsAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSUserDefaultsAdditions.h; path = Source/NSUserDefaultsAdditions.h; sourceTree = "<group>"; };
@@ -108,9 +107,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				93BD6F2F0AD84AAC007CE525 /* Cocoa.framework in Frameworks */,
-				930DE5BC0B4831B2008120ED /* libcrypto.dylib in Frameworks */,
 				930DE5F30B4831D2008120ED /* Security.framework in Frameworks */,
 				9307230B0C1AFC5D00112753 /* Quartz.framework in Frameworks */,
+				930961BB0C66A164002B8DAA /* libcrypto.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -136,8 +135,7 @@
 			children = (
 				930723050C1AFC5D00112753 /* Quartz.framework */,
 				930DE5BE0B4831D2008120ED /* Security.framework */,
-				930DE5BB0B4831B2008120ED /* libcrypto.dylib */,
-				932165EA0B2F97C100624A8D /* libicucore.dylib */,
+				930961BA0C66A164002B8DAA /* libcrypto.dylib */,
 				1058C7ACFEA557BF11CA2CBB /* Linked Frameworks */,
 				1058C7AEFEA557BF11CA2CBB /* Other Frameworks */,
 			);
