@@ -6,10 +6,13 @@ extern NSString *SMUseKeywordsAsTags;
 extern NSString *SMImageScaleWidth;
 extern NSString *SMImageScaleHeight;
 extern NSString *SMShowAlbumDeleteAlert;
+extern NSString *SMEnableNetworkTracing;
+extern NSString *SMEnableAlbumFetchDelay;
 
 extern NSString *AlbumID;
 extern NSString *CategoryID;
 extern NSString *SubCategoryID;
 
 #define ShouldScaleImages() ([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMSelectedScalingTag] intValue] != 0)
-#define NetworkTracingEnabled NO
+#define IsNetworkTracingEnabled() ([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEnableNetworkTracing] boolValue])
+#define EnableAlbumFetchDelay() ([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEnableAlbumFetchDelay] boolValue])

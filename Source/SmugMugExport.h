@@ -44,6 +44,7 @@
 	BOOL siteUrlHasBeenFetched;
 	BOOL browserOpenedInGallery;
 	BOOL isDeletingAlbum;
+	BOOL isCreatingAlbum;
 	int uploadRetryCount;
 	int imagesUploaded;
 

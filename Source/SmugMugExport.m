@@ -64,7 +64,8 @@
 -(void)beginAlbumDelete;
 -(BOOL)browserOpenedInGallery;
 -(void)setBrowserOpenedInGallery:(BOOL)v;	
-
+-(BOOL)isCreatingAlbum;
+-(void)setIsCreatingAlbum:(BOOL)v;
 -(NSString *)imageUploadProgressText;
 -(void)setImageUploadProgressText:(NSString *)text;
 -(NSPanel *)newAlbumSheet;
@@ -101,6 +102,8 @@ NSString *SMUseKeywordsAsTags = @"SMUseKeywordsAsTags";
 NSString *SMImageScaleWidth = @"SMImageScaleWidth";
 NSString *SMImageScaleHeight = @"SMImageScaleHeight";
 NSString *SMShowAlbumDeleteAlert = @"SMShowAlbumDeleteAlert";
+NSString *SMEnableNetworkTracing = @"SMEnableNetworkTracing";
+NSString *SMEnableAlbumFetchDelay = @"SMEnableAlbumFetchDelay";
 
 static int UploadFailureRetryCount = 3;
 
@@ -122,6 +125,8 @@ static int UploadFailureRetryCount = 3;
 	[self setImagesUploaded:0];
 	[self resetUploadRetryCount];
 	[self setIsUploading:NO];
+	[self setIsCreatingAlbum:NO];
+	
 	return self;
 }
 
@@ -155,6 +160,9 @@ static int UploadFailureRetryCount = 3;
 	[defaultsDict setObject:@"yes" forKey:SMStorePasswordInKeychain];
 	[defaultsDict setObject:@"no" forKey:SMUseKeywordsAsTags];
 	[defaultsDict setObject:@"yes" forKey:SMShowAlbumDeleteAlert];
+	[defaultsDict setObject:@"no" forKey:SMEnableNetworkTracing];
+	[defaultsDict setObject:@"yes" forKey:SMEnableAlbumFetchDelay];
+	
 	[defaultsDict setObject:[NSNumber numberWithInt:0] forKey:SMSelectedScalingTag];
 	
 	[[NSUserDefaults smugMugUserDefaults] registerDefaults:defaultsDict];
@@ -374,8 +382,17 @@ static int UploadFailureRetryCount = 3;
 	[sheet orderOut:self];
 }
 
+-(BOOL)isCreatingAlbum {
+	return isCreatingAlbum;
+}
+
+-(void)setIsCreatingAlbum:(BOOL)v {
+	isCreatingAlbum = v;
+}
+
 -(void)createNewAlbumDidComplete:(NSNumber *)wasSuccessful {
 
+	[self setIsCreatingAlbum:NO];
 	if([wasSuccessful boolValue]) {
 		[NSApp endSheet:[self newAlbumSheet]];
 		[albumsArrayController setSelectionIndex:0]; // default to selecting the new album which should be album 0
@@ -389,6 +406,7 @@ static int UploadFailureRetryCount = 3;
 
 
 -(IBAction)createAlbum:(id)sender {
+	[self setIsCreatingAlbum:YES];
 	[[self smugMugManager] createNewAlbum];
 }
 

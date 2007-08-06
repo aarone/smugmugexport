@@ -53,8 +53,6 @@ kCFStreamEventErrorOccurred;
 -(NSString *)postUploadURL;
 -(void)setIsLoggingIn:(BOOL)v;
 -(void)setIsLoggedIn:(BOOL)v;
--(BOOL)isAlbumCreationInProgress;
--(void)setIsAlbumCreationInProgress:(BOOL)v;	
 -(NSDictionary *)defaultNewAlbumPreferences;
 -(NSDictionary *)selectedCategory;
 -(void)setSelectedCategory:(NSDictionary *)d;
@@ -165,7 +163,6 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	if(![super init])
 		return nil;
 
-	[self setIsAlbumCreationInProgress:NO];
 	[self setNewAlbumPreferences:[NSMutableDictionary dictionaryWithDictionary:[self defaultNewAlbumPreferences]]]; 
 	
 	return self;
@@ -342,14 +339,6 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	return isLoggingIn;
 }
 
--(BOOL)isAlbumCreationInProgress {
-	return isAlbumCreationInProgress;
-}
-
--(void)setIsAlbumCreationInProgress:(BOOL)v {
-	isAlbumCreationInProgress = v;
-}
-
 -(void)setDelegate:(id)d {
 	delegate = d;
 }
@@ -427,8 +416,9 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	 * is because I'm refreshing the list too quickly after modifying the album
 	 * list.  To workaround this, we insert a delay here and hope for the best.
 	 */
+	if(EnableAlbumFetchDelay())
+		[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:AlbumRefreshDelay]];
 	
-	[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:AlbumRefreshDelay]];
 	[req invokeMethodWithURL:[self SmugMugAccessURL] 
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.albums.get", [self sessionID], nil]
@@ -640,10 +630,9 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
 -(void)createNewAlbum {
 	// don't try to create an album if we're not logged in or there is no album title or if we're already trying to create an album
-	if(![self isLoggedIn] || [self isAlbumCreationInProgress] || IsEmpty([[self newAlbumPreferences] objectForKey:AlbumTitlePref]))
+	if(![self isLoggedIn] || IsEmpty([[self newAlbumPreferences] objectForKey:AlbumTitlePref]))
 		[self performSelectorOnMainThread:@selector(notifyDelegateOfAlbumCompletion:) withObject:[NSNumber numberWithBool:NO] waitUntilDone:NO];
 	else {
-		[self setIsAlbumCreationInProgress:YES];
 		[self createNewAlbumCallback:@selector(newAlbumCreationDidComplete:)];
 	}
 }
@@ -717,8 +706,6 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)newAlbumCreationDidComplete:(SmugmugAccess *)req {
-	[self setIsAlbumCreationInProgress:NO];
-	
 	if([self smResponseWasSuccessful:req])
 		[self buildAlbumListWithCallback:@selector(postAlbumCreateAlbumSyncDidComplete:)];
 	else {
@@ -751,7 +738,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	
 	NSData *postData = [self postBodyForImageAtPath:path albumId:albumId title:title comments:comments keywords:keywords caption:caption];
 
-	if(NetworkTracingEnabled) {
+	if(IsNetworkTracingEnabled()) {
 		NSLog(@"Posting image to %@", [self postUploadURL]);
 	}
 	

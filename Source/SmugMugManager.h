@@ -42,7 +42,6 @@
 	BOOL isUploading;
 	BOOL isLoggingIn;
 	BOOL isLoggedIn;
-	BOOL isAlbumCreationInProgress;
 	long nextProgressThreshold;
 	NSIndexSet *selectedCategoryIndices;
 }
