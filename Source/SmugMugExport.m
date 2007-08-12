@@ -72,6 +72,7 @@
 -(NSPanel *)uploadPanel;
 -(NSPanel *)loginPanel;
 -(BOOL)sheetIsDisplayed;
+-(void)uploadNextImage;
 
 -(BOOL)siteUrlHasBeenFetched;
 -(void)setSiteUrlHasBeenFetched:(BOOL)v;
@@ -528,7 +529,6 @@ static int UploadFailureRetryCount = 3;
 	   didEndSelector:@selector(didEndSheet:returnCode:contextInfo:)
 		  contextInfo:nil];
 
-	NSString *selectedAlbumId = [[[self selectedAlbum] objectForKey:AlbumID] stringValue];
 	NSString *thumbnailPath = [exportManager thumbnailPathAtIndex:[self imagesUploaded]];
 	NSImage *img = [[[NSImage alloc] initWithData:[NSData dataWithContentsOfFile: thumbnailPath]] autorelease];
 	[img setScalesWhenResized:YES];
@@ -537,13 +537,29 @@ static int UploadFailureRetryCount = 3;
 	[self setUploadSiteUrl:nil];
 	[self setSiteUrlHasBeenFetched:NO];
 	
-	[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
-								 albumWithID:selectedAlbumId
-									   title:[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]]
-									comments:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
-									keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]
-									 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
+	[self uploadNextImage];
 }
+
+-(void)uploadNextImage {
+	
+	NSString *selectedAlbumId = [[[self selectedAlbum] objectForKey:AlbumID] stringValue];
+	if([[self exportManager] respondsToSelector:@selector(imageCaptionAtIndex:)]) {
+		// iPhoto <=6
+		[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
+									 albumWithID:selectedAlbumId
+										   title:[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]]
+										comments:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
+										keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]];		
+	} else {
+		// iPhoto 7
+		[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
+									 albumWithID:selectedAlbumId
+										   title:[[self exportManager] imageTitleAtIndex:[self imagesUploaded]]
+										comments:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
+										keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]];
+	}	
+}
+
 
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful {
 	[NSApp endSheet:uploadPanel];
@@ -570,8 +586,6 @@ static int UploadFailureRetryCount = 3;
 	NSString *imageId = [args objectAtIndex:1];
 	NSString *error = [args count] > 2 ? [args objectAtIndex:2] : nil;
 	
-	NSString *selectedAlbumId = [[[self selectedAlbum] objectForKey:AlbumID] stringValue];
-
 	if(uploadCancelled) {
 		[self performUploadCompletionTasks:NO];
 		return; // stop uploading
@@ -590,12 +604,8 @@ static int UploadFailureRetryCount = 3;
 		[self incrementUploadRetryCount];
 		[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Retrying upload of image %d of %d", @"Retry upload progress"), [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
 		
-		[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
-									 albumWithID:selectedAlbumId
-										   title:[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]]
-										comments:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
-										keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]
-										 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];		
+
+		[self uploadNextImage];		
 		return;
 	} else if (error != nil) {
 		// our max retries have been hit, stop uploading
@@ -619,12 +629,7 @@ static int UploadFailureRetryCount = 3;
 		[img setScalesWhenResized:YES];
 		[self setCurrentThumbnail:img];
 
-		[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
-									 albumWithID:selectedAlbumId
-										   title:[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]]
-										comments:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
-										keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]
-										 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];		
+		[self uploadNextImage];		
 	}
 }
 
@@ -1007,6 +1012,10 @@ static int UploadFailureRetryCount = 3;
 
 -(void)clickExport {
 	NSLog(@"SmugMugExport -- clickExport");
+}
+
+- (BOOL)handlesMovieFiles {
+	return NO;
 }
 
 @end

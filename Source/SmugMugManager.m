@@ -42,8 +42,7 @@ kCFStreamEventErrorOccurred;
 						  albumId:(NSString *)albumId 
 							title:(NSString *)title 
 						 comments:(NSString *)comments 
-						 keywords:(NSArray *)keywords 
-						  caption:(NSString *)caption;
+						 keywords:(NSArray *)keywords;
 -(void)appendToResponse;
 -(void)transferComplete;
 
@@ -733,10 +732,9 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 			 albumWithID:(NSString *)albumId 
 				   title:(NSString *)title
 				comments:(NSString *)comments
-				keywords:(NSArray *)keywords
-				 caption:(NSString *)caption {
+				keywords:(NSArray *)keywords {
 	
-	NSData *postData = [self postBodyForImageAtPath:path albumId:albumId title:title comments:comments keywords:keywords caption:caption];
+	NSData *postData = [self postBodyForImageAtPath:path albumId:albumId title:title comments:comments keywords:keywords];
 
 	if(IsNetworkTracingEnabled()) {
 		NSLog(@"Posting image to %@", [self postUploadURL]);
@@ -1015,7 +1013,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(NSData *)postBodyForImageAtPath:(NSString *)path albumId:(NSString *)albumId title:(NSString *)title
-						 comments:(NSString *)comments keywords:(NSArray *)keywords caption:(NSString *)caption {
+						 comments:(NSString *)comments keywords:(NSArray *)keywords  {
 	
 	NSData *imageData = [self imageDataForPath:path];
 	NSAssert(imageData != nil, @"cannot create image from data");
@@ -1029,8 +1027,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	[postBody appendData:[self postDataWithName:@"ByteCount" postContents:[NSString stringWithFormat:@"%d", [imageData length]]]];
 	[postBody appendData:[self postDataWithName:@"MD5Sum" postContents:[imageData md5HexString]]];
 
-	if(caption != nil)
-		[postBody appendData:[self postDataWithName:@"Caption" postContents:caption]];
+	if(comments != nil)
+		[postBody appendData:[self postDataWithName:@"Caption" postContents:comments]];
 	
 	// NSString *filename = [path lastPathComponent];
 	NSMutableString *filename = [NSMutableString stringWithString:title];

@@ -26,34 +26,39 @@
 - (id)recAtIndex:(unsigned int)fp8;
 - (void)scanForExporters;
 - (unsigned int)imageCount;
+- (BOOL)imageIsEditedAtIndex:(unsigned int)fp8;
 - (BOOL)imageIsPortraitAtIndex:(unsigned int)fp8;
 - (id)imagePathAtIndex:(unsigned int)fp8;
 - (id)sourcePathAtIndex:(unsigned int)fp8;
 - (struct _NSSize)imageSizeAtIndex:(unsigned int)fp8;
 - (unsigned long)imageFormatAtIndex:(unsigned int)fp8;
 - (unsigned long)originalImageFormatAtIndex:(unsigned int)fp8;
-- (unsigned char)originalIsRawAtIndex:(unsigned int)fp8;
-- (unsigned char)originalIsMovieAtIndex:(unsigned int)fp8;
-- (id)imageCaptionAtIndex:(unsigned int)fp8;
+- (BOOL)originalIsRawAtIndex:(unsigned int)fp8;
+- (BOOL)originalIsMovieAtIndex:(unsigned int)fp8;
+- (id)imageTitleAtIndex:(unsigned int)fp8;
+
+// only for iPhoto 6
+-(id)imageCaptionAtIndex:(unsigned int)fp8;
+
 - (id)imageCommentsAtIndex:(unsigned int)fp8;
 - (float)imageRotationAtIndex:(unsigned int)fp8;
 - (id)thumbnailPathAtIndex:(unsigned int)fp8;
 - (float)imageAspectRatioAtIndex:(unsigned int)fp8;
 - (unsigned long long)imageFileSizeAtIndex:(unsigned int)fp8;
 - (id)imageDateAtIndex:(unsigned int)fp8;
-- (id)imageArchiveDateAtIndex:(unsigned int)fp8;
-- (id)imageModifiedDateAtIndex:(unsigned int)fp8;
-- (int)imageRankingAtIndex:(unsigned int)fp8;
+- (int)imageRatingAtIndex:(unsigned int)fp8;
+- (id)imageTiffPropertiesAtIndex:(unsigned int)fp8;
+- (id)imageExifPropertiesAtIndex:(unsigned int)fp8;
 - (id)imageKeywordsAtIndex:(unsigned int)fp8;
-- (id)albumComments;
+- (id)imageFileNameAtIndex:(unsigned int)fp8;
 - (void)commitImageRotation;
-- (id)selectedAlbums;
-- (id)albumName;
-- (id)albumMusicPath;
 - (unsigned int)albumCount;
-- (unsigned int)albumPositionOfImageAtIndex:(unsigned int)fp8;
+- (id)albumNameAtIndex:(unsigned int)fp8;
+- (id)albumMusicPathAtIndex:(unsigned int)fp8;
+- (id)albumCommentsAtIndex:(unsigned int)fp8;
+- (id)albumsOfImageAtIndex:(unsigned int)fp8;
+- (unsigned int)positionOfImageAtIndex:(unsigned int)fp8 inAlbum:(unsigned int)fp12;
 - (struct IPPhotoInfo *)photoAtIndex:(unsigned int)fp8;
-- (id)currentAlbum;
 - (void)enableControls;
 - (void)disableControls;
 - (id)window;
@@ -62,6 +67,7 @@
 - (void)cancelExport;
 - (void)cancelExportBeforeBeginning;
 - (id)directoryPath;
+- (unsigned int)sessionID;
 - (id)temporaryDirectory;
 - (BOOL)doesFileExist:(id)fp8;
 - (BOOL)doesDirectoryExist:(id)fp8;
@@ -102,5 +108,8 @@
 - (BOOL)thumbnailer:(void *)fp8 createThumbnail:(id)fp12 dest:(id)fp16;
 - (struct _NSSize)lastImageSize:(void *)fp8;
 - (struct _NSSize)lastThumbnailSize:(void *)fp8;
+- (BOOL)exportImageAtIndex:(unsigned int)fp8 dest:(id)fp12 options:(void *)fp16;
+- (struct _NSSize)lastExportedImageSize;
+- (BOOL)_checkForChangedDateLayout;
 
 @end

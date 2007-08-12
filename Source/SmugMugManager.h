@@ -69,8 +69,7 @@
 			 albumWithID:(NSString *)albumId 
 				   title:(NSString *)title
 				comments:(NSString *)comments
-				keywords:(NSArray *)keywords
-				 caption:(NSString *)caption;
+				keywords:(NSArray *)keywords;
 -(void)stopUpload;
 
 -(void)fetchImageUrls:(NSString *)imageId;
