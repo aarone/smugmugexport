@@ -7,8 +7,15 @@
 //
 
 #import "NSBitmapImageRepAdditions.h"
+#import "NSUserDefaultsAdditions.h"
+#import "Globals.h"
 
-
+/*
+ * there are two problems with this category that I'd like to fix someday:
+ *  1) it's only been tested with jpegs and only returns jpegs
+ *  2) it accesses a default value for scaling quality that should probably be
+ *     an argument to the methods
+ */
 @implementation NSBitmapImageRep (NSBitmapImageRepAdditions)
 
 -(NSData *)scaledRepToMaxWidth:(float)maxWidth maxHeight:(float)maxHeight {
@@ -36,7 +43,12 @@
 	NSSet *propertiesToTransfer = [NSSet setWithObjects:NSImageEXIFData, NSImageColorSyncProfileData, 
 		NSImageProgressive, nil];
 	NSMutableDictionary *outgoingImageProperties = [NSMutableDictionary dictionary];
-	[outgoingImageProperties setObject:[NSNumber numberWithFloat:0.9] forKey:NSImageCompressionFactor];
+	
+	NSNumber *scalingFactor = [[NSUserDefaults smugMugUserDefaults] objectForKey:SMJpegQualityFactor];
+	if(scalingFactor == nil || [scalingFactor floatValue] < 0 || [scalingFactor floatValue] > 1.0)
+		scalingFactor = [NSNumber numberWithFloat:DefaultJpegScalingFactor];
+	
+	[outgoingImageProperties setObject:scalingFactor forKey:NSImageCompressionFactor];
 	NSEnumerator *propertyEnumerator = [propertiesToTransfer objectEnumerator];
 	id key;
 	while(key = [propertyEnumerator nextObject]) {

@@ -30,8 +30,8 @@
 		938E26AB0C0F47EA0059F26B /* NSURLAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26A90C0F47EA0059F26B /* NSURLAdditions.m */; };
 		938E27490C0F4DE10059F26B /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E27470C0F4DE10059F26B /* NSStringAdditions.m */; };
 		93BD6F2F0AD84AAC007CE525 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
-		93EE85AC0C807E430028A598 /* NSBitmapImageRepAdditions.h in Private Frameworks */ = {isa = PBXBuildFile; fileRef = 93EE85AA0C807E430028A598 /* NSBitmapImageRepAdditions.h */; };
-		93EE85AD0C807E430028A598 /* NSBitmapImageRepAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EE85AB0C807E430028A598 /* NSBitmapImageRepAdditions.m */; };
+		93EE86860C8085850028A598 /* NSBitmapImageRepAdditions.h in Private Frameworks */ = {isa = PBXBuildFile; fileRef = 93EE86840C8085850028A598 /* NSBitmapImageRepAdditions.h */; };
+		93EE86870C8085850028A598 /* NSBitmapImageRepAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EE86850C8085850028A598 /* NSBitmapImageRepAdditions.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -41,7 +41,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				93EE85AC0C807E430028A598 /* NSBitmapImageRepAdditions.h in Private Frameworks */,
+				93EE86860C8085850028A598 /* NSBitmapImageRepAdditions.h in Private Frameworks */,
 			);
 			name = "Private Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -99,8 +99,8 @@
 		938E27470C0F4DE10059F26B /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSStringAdditions.m; path = Source/NSStringAdditions.m; sourceTree = "<group>"; };
 		93BD6F170AD84A49007CE525 /* SmugMugExport.iPhotoExporter */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SmugMugExport.iPhotoExporter; sourceTree = BUILT_PRODUCTS_DIR; };
 		93BD6F180AD84A49007CE525 /* SmugMugExport-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = "SmugMugExport-Info.plist"; path = "Resources/SmugMugExport-Info.plist"; sourceTree = "<group>"; };
-		93EE85AA0C807E430028A598 /* NSBitmapImageRepAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSBitmapImageRepAdditions.h; sourceTree = "<group>"; };
-		93EE85AB0C807E430028A598 /* NSBitmapImageRepAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSBitmapImageRepAdditions.m; sourceTree = "<group>"; };
+		93EE86840C8085850028A598 /* NSBitmapImageRepAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSBitmapImageRepAdditions.h; path = Source/NSBitmapImageRepAdditions.h; sourceTree = "<group>"; };
+		93EE86850C8085850028A598 /* NSBitmapImageRepAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSBitmapImageRepAdditions.m; path = Source/NSBitmapImageRepAdditions.m; sourceTree = "<group>"; };
 		D2F7E65807B2D6F200F64583 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
@@ -252,6 +252,8 @@
 		9394BC8D0ADDBF390066CD67 /* Categories */ = {
 			isa = PBXGroup;
 			children = (
+				93EE86840C8085850028A598 /* NSBitmapImageRepAdditions.h */,
+				93EE86850C8085850028A598 /* NSBitmapImageRepAdditions.m */,
 				9321644D0B2F78B000624A8D /* NSDataAdditions.h */,
 				9321644E0B2F78B000624A8D /* NSDataAdditions.m */,
 				938E26A80C0F47EA0059F26B /* NSURLAdditions.h */,
@@ -260,8 +262,6 @@
 				938E27470C0F4DE10059F26B /* NSStringAdditions.m */,
 				935A1A840C1CC2CC00043E12 /* NSUserDefaultsAdditions.h */,
 				935A1A850C1CC2CC00043E12 /* NSUserDefaultsAdditions.m */,
-				93EE85AA0C807E430028A598 /* NSBitmapImageRepAdditions.h */,
-				93EE85AB0C807E430028A598 /* NSBitmapImageRepAdditions.m */,
 			);
 			name = Categories;
 			sourceTree = "<group>";
@@ -355,7 +355,7 @@
 				935A1A4F0C1CC09700043E12 /* SmugMugUserDefaults.m in Sources */,
 				935A1A870C1CC2CC00043E12 /* NSUserDefaultsAdditions.m in Sources */,
 				930961400C66A0C7002B8DAA /* SmugMugAccess.m in Sources */,
-				93EE85AD0C807E430028A598 /* NSBitmapImageRepAdditions.m in Sources */,
+				93EE86870C8085850028A598 /* NSBitmapImageRepAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

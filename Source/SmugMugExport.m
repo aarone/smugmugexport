@@ -105,8 +105,10 @@ NSString *SMImageScaleHeight = @"SMImageScaleHeight";
 NSString *SMShowAlbumDeleteAlert = @"SMShowAlbumDeleteAlert";
 NSString *SMEnableNetworkTracing = @"SMEnableNetworkTracing";
 NSString *SMEnableAlbumFetchDelay = @"SMEnableAlbumFetchDelay";
+NSString *SMJpegQualityFactor = @"SMJpegQualityFactor";
 
 static int UploadFailureRetryCount = 3;
+const float DefaultJpegScalingFactor = 0.9;
 
 @implementation SmugMugExport
 
@@ -163,7 +165,7 @@ static int UploadFailureRetryCount = 3;
 	[defaultsDict setObject:@"yes" forKey:SMShowAlbumDeleteAlert];
 	[defaultsDict setObject:@"no" forKey:SMEnableNetworkTracing];
 	[defaultsDict setObject:@"yes" forKey:SMEnableAlbumFetchDelay];
-	
+	[defaultsDict setObject:[NSNumber numberWithFloat:DefaultJpegScalingFactor] forKey:SMJpegQualityFactor];
 	[defaultsDict setObject:[NSNumber numberWithInt:0] forKey:SMSelectedScalingTag];
 	
 	[[NSUserDefaults smugMugUserDefaults] registerDefaults:defaultsDict];
