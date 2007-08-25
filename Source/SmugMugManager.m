@@ -12,7 +12,7 @@
 #import "Globals.h"
 #import "SmugMugAccess.h"
 #import "NSUserDefaultsAdditions.h"
-#import <QuartzCore/CIImage.h>
+#import "NSBitmapImageRepAdditions.h"
 
 static const CFOptionFlags DAClientNetworkEvents = 
 kCFStreamEventOpenCompleted     |
@@ -941,71 +941,24 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	
 	if(!isJpeg && ShouldScaleImages())
 		NSLog(@"The image (%@) is not a jpeg and cannot be scaled by this program (yet).", pathToImage);
-		
+	
 	if(isJpeg && ShouldScaleImages()) {
 		int maxWidth = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleWidth] intValue];
 		int maxHeight = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleHeight] intValue];
-
+		
 		// allow no input and treat it like infinity
 		if(maxWidth == 0)
 			maxWidth = INT_MAX;
 		if(maxHeight == 0)
 			maxHeight = INT_MAX;
 		
-		// we use core image (gpu) to do scaling (because it's more fun than using the cpu)
-		CIImage *img = [CIImage imageWithData:[NSData dataWithContentsOfFile:pathToImage]];
-
-		CGRect imageExtent = [img extent];
-		int inputImageWidth = imageExtent.size.width;
-		int inputImageHeight = imageExtent.size.height;
+		NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc] initWithData:[NSData dataWithContentsOfFile:pathToImage]] autorelease];
+		// scale
+		if([rep pixelsWide] > maxWidth || [rep pixelsHigh] > maxHeight)
+			return [rep scaledRepToMaxWidth:maxWidth maxHeight:maxHeight];
 		
-		if(inputImageWidth < maxWidth && inputImageHeight < maxHeight) {
-			return [NSData dataWithContentsOfFile:pathToImage];	
-		}
-		
-		float scaleFactor = 1.0;
-		if( inputImageWidth > maxWidth || inputImageHeight > maxHeight ) {
-			int heightDifferential = inputImageWidth - maxWidth;
-			int widthDifferential = inputImageHeight - maxHeight;
-			// scale the dimension with the greatest difference
-			scaleFactor = (heightDifferential > widthDifferential) ? 
-				(float)maxHeight/(float)inputImageHeight : 
-				(float)maxWidth/(float)inputImageWidth;
-		}
-		
-		NSAssert(scaleFactor > 0.0 && scaleFactor <= 1.0, @"This is a bug.  The scaling factor should never be negative.");
-		
-		// get the image rep
-		NSBitmapImageRep *rep = [NSBitmapImageRep imageRepWithData:[NSData dataWithContentsOfFile:pathToImage]];
-		
-		// we copy the properties that relate to jpegs
-		NSSet *propertiesToTransfer = [NSSet setWithObjects:NSImageEXIFData, NSImageColorSyncProfileData, 
-			NSImageProgressive, nil];
-		NSMutableDictionary *outgoingImageProperties = [NSMutableDictionary dictionary];
-		[outgoingImageProperties setObject:[NSNumber numberWithFloat:0.9] forKey:NSImageCompressionFactor];
-		NSEnumerator *propertyEnumerator = [propertiesToTransfer objectEnumerator];
-		id key;
-		while(key = [propertyEnumerator nextObject]) {
-			id inVal = [rep valueForProperty:key];
-			if(inVal != nil)
-				[outgoingImageProperties setObject:inVal forKey:key];
-		}
-		
-		// do the scale here
-		CGAffineTransform trans = CGAffineTransformMakeScale(scaleFactor, scaleFactor);
-		CIImage* outputImage = [img imageByApplyingTransform:trans];
-		
-		int outputWidth = [outputImage extent].size.width;
-		int outputHeight = [outputImage extent].size.height;
-		
-		NSImage *resizedImage = [[NSImage alloc] initWithSize: NSMakeSize(outputWidth, outputHeight)];
-		[resizedImage addRepresentation:[NSCIImageRep imageRepWithCIImage:outputImage]];
-
-		NSBitmapImageRep *renderedImage = [NSBitmapImageRep imageRepWithData:[resizedImage TIFFRepresentation]];
-
-		NSData *photoData = [renderedImage representationUsingType:NSJPEGFileType properties:outgoingImageProperties];
-		[resizedImage release];
-		return photoData;
+		// no scale
+		return [NSData dataWithContentsOfFile:pathToImage];
 	}
 	
 	// the default operation

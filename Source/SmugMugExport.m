@@ -318,7 +318,7 @@ static int UploadFailureRetryCount = 3;
 	[NSApp endSheet:loginPanel];
 	
 	[[self smugMugManager] buildCategoryList];
-//	[[self smugMugManager] buildSubCategoryList];
+	[[self smugMugManager] buildSubCategoryList];
 }
 
 

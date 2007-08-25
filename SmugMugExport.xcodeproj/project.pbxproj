@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9307230B0C1AFC5D00112753 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 930723050C1AFC5D00112753 /* Quartz.framework */; };
 		930961400C66A0C7002B8DAA /* SmugMugAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = 9309613E0C66A0C7002B8DAA /* SmugMugAccess.m */; };
 		930961BB0C66A164002B8DAA /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 930961BA0C66A164002B8DAA /* libcrypto.dylib */; };
 		930DE5F30B4831D2008120ED /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 930DE5BE0B4831D2008120ED /* Security.framework */; };
@@ -31,6 +30,8 @@
 		938E26AB0C0F47EA0059F26B /* NSURLAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26A90C0F47EA0059F26B /* NSURLAdditions.m */; };
 		938E27490C0F4DE10059F26B /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E27470C0F4DE10059F26B /* NSStringAdditions.m */; };
 		93BD6F2F0AD84AAC007CE525 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
+		93EE85AC0C807E430028A598 /* NSBitmapImageRepAdditions.h in Private Frameworks */ = {isa = PBXBuildFile; fileRef = 93EE85AA0C807E430028A598 /* NSBitmapImageRepAdditions.h */; };
+		93EE85AD0C807E430028A598 /* NSBitmapImageRepAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EE85AB0C807E430028A598 /* NSBitmapImageRepAdditions.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -40,6 +41,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				93EE85AC0C807E430028A598 /* NSBitmapImageRepAdditions.h in Private Frameworks */,
 			);
 			name = "Private Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -50,7 +52,6 @@
 		089C1672FE841209C02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		089C167FFE841241C02AAC07 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
-		930723050C1AFC5D00112753 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = /System/Library/Frameworks/Quartz.framework; sourceTree = "<absolute>"; };
 		9309613D0C66A0C7002B8DAA /* SmugMugAccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugMugAccess.h; path = Source/SmugMugAccess.h; sourceTree = "<group>"; };
 		9309613E0C66A0C7002B8DAA /* SmugMugAccess.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SmugMugAccess.m; path = Source/SmugMugAccess.m; sourceTree = "<group>"; };
 		930961BA0C66A164002B8DAA /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
@@ -98,6 +99,8 @@
 		938E27470C0F4DE10059F26B /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSStringAdditions.m; path = Source/NSStringAdditions.m; sourceTree = "<group>"; };
 		93BD6F170AD84A49007CE525 /* SmugMugExport.iPhotoExporter */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SmugMugExport.iPhotoExporter; sourceTree = BUILT_PRODUCTS_DIR; };
 		93BD6F180AD84A49007CE525 /* SmugMugExport-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = "SmugMugExport-Info.plist"; path = "Resources/SmugMugExport-Info.plist"; sourceTree = "<group>"; };
+		93EE85AA0C807E430028A598 /* NSBitmapImageRepAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSBitmapImageRepAdditions.h; sourceTree = "<group>"; };
+		93EE85AB0C807E430028A598 /* NSBitmapImageRepAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSBitmapImageRepAdditions.m; sourceTree = "<group>"; };
 		D2F7E65807B2D6F200F64583 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
@@ -108,7 +111,6 @@
 			files = (
 				93BD6F2F0AD84AAC007CE525 /* Cocoa.framework in Frameworks */,
 				930DE5F30B4831D2008120ED /* Security.framework in Frameworks */,
-				9307230B0C1AFC5D00112753 /* Quartz.framework in Frameworks */,
 				930961BB0C66A164002B8DAA /* libcrypto.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -133,7 +135,6 @@
 		089C1671FE841209C02AAC07 /* Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				930723050C1AFC5D00112753 /* Quartz.framework */,
 				930DE5BE0B4831D2008120ED /* Security.framework */,
 				930961BA0C66A164002B8DAA /* libcrypto.dylib */,
 				1058C7ACFEA557BF11CA2CBB /* Linked Frameworks */,
@@ -223,6 +224,10 @@
 		938E26540C0F45CB0059F26B /* CocoaJSON */ = {
 			isa = PBXGroup;
 			children = (
+				938E268C0C0F46FA0059F26B /* NSCharacterSet_Extensions.h */,
+				938E268D0C0F46FA0059F26B /* NSCharacterSet_Extensions.m */,
+				938E268E0C0F46FA0059F26B /* NSScanner_Extensions.h */,
+				938E268F0C0F46FA0059F26B /* NSScanner_Extensions.m */,
 				938E26800C0F46E50059F26B /* CJSONDeserializer.h */,
 				938E26810C0F46E50059F26B /* CJSONDeserializer.m */,
 				938E26820C0F46E50059F26B /* CJSONScanner.h */,
@@ -247,10 +252,6 @@
 		9394BC8D0ADDBF390066CD67 /* Categories */ = {
 			isa = PBXGroup;
 			children = (
-				938E268C0C0F46FA0059F26B /* NSCharacterSet_Extensions.h */,
-				938E268D0C0F46FA0059F26B /* NSCharacterSet_Extensions.m */,
-				938E268E0C0F46FA0059F26B /* NSScanner_Extensions.h */,
-				938E268F0C0F46FA0059F26B /* NSScanner_Extensions.m */,
 				9321644D0B2F78B000624A8D /* NSDataAdditions.h */,
 				9321644E0B2F78B000624A8D /* NSDataAdditions.m */,
 				938E26A80C0F47EA0059F26B /* NSURLAdditions.h */,
@@ -259,6 +260,8 @@
 				938E27470C0F4DE10059F26B /* NSStringAdditions.m */,
 				935A1A840C1CC2CC00043E12 /* NSUserDefaultsAdditions.h */,
 				935A1A850C1CC2CC00043E12 /* NSUserDefaultsAdditions.m */,
+				93EE85AA0C807E430028A598 /* NSBitmapImageRepAdditions.h */,
+				93EE85AB0C807E430028A598 /* NSBitmapImageRepAdditions.m */,
 			);
 			name = Categories;
 			sourceTree = "<group>";
@@ -316,7 +319,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		932166140B32120800624A8D /* Install */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 12;
 			files = (
 			);
 			inputPaths = (
@@ -326,7 +329,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = Resources/install.sh;
+			shellScript = "#!/bin/bash\n\nDST=/Applications/iPhoto.app/Contents/PlugIns/\nPREV_EXPORTER=$DST/SmugMugExport.iPhotoExporter\nNEW_EXPORTER=$TARGET_BUILD_DIR/SmugMugExport.iPhotoExporter\n\n\necho \"rm -Rf $PREV_EXPORTER && cp -R $NEW_EXPORTER $DST\"\nrm -Rf $PREV_EXPORTER && cp -R $NEW_EXPORTER $DST\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -352,6 +355,7 @@
 				935A1A4F0C1CC09700043E12 /* SmugMugUserDefaults.m in Sources */,
 				935A1A870C1CC2CC00043E12 /* NSUserDefaultsAdditions.m in Sources */,
 				930961400C66A0C7002B8DAA /* SmugMugAccess.m in Sources */,
+				93EE85AD0C807E430028A598 /* NSBitmapImageRepAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
