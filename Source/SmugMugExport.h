@@ -34,7 +34,10 @@
 	NSImage *currentThumbnail;
 	NSString *imageUploadProgressText; // below the thumbnail..
 	NSURL *uploadSiteUrl;
-		
+	
+	
+	NSInvocation *postLogoutInvocation; // do this after a logout is complete
+	
 	BOOL isUploading;
 	BOOL loginSheetIsBusy;
 	BOOL isBusy;

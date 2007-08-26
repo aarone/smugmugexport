@@ -44,3 +44,11 @@ extern const float DefaultJpegScalingFactor;
 #define ShouldScaleImages() ([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMSelectedScalingTag] intValue] != 0)
 #define IsNetworkTracingEnabled() ([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEnableNetworkTracing] boolValue])
 #define EnableAlbumFetchDelay() ([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEnableAlbumFetchDelay] boolValue])
+
+static inline BOOL IsEmpty(id thing) {
+    return thing == nil
+	|| ([thing respondsToSelector:@selector(length)]
+        && [(NSData *)thing length] == 0)
+	|| ([thing respondsToSelector:@selector(count)]
+        && [(NSArray *)thing count] == 0);
+}

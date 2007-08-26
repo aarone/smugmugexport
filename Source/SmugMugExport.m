@@ -73,6 +73,10 @@
 -(NSPanel *)loginPanel;
 -(BOOL)sheetIsDisplayed;
 -(void)uploadNextImage;
+-(void)openLastGalleryInBrowser;
+-(NSInvocation *)postLogoutInvocation;
+-(void)setPostLogoutInvocation:(NSInvocation *)inv;
+-(void)accountChangedTasks:(NSString *)account;
 
 -(BOOL)siteUrlHasBeenFetched;
 -(void)setSiteUrlHasBeenFetched:(BOOL)v;
@@ -134,6 +138,7 @@ const float DefaultJpegScalingFactor = 0.9;
 }
 
 -(void)dealloc {
+	[[self postLogoutInvocation] release];
 	[[self uploadSiteUrl] release];
 	[[self smugMugManager] release];
 	[[self username] release];
@@ -260,7 +265,7 @@ const float DefaultJpegScalingFactor = 0.9;
 -(IBAction)showLoginSheet:(id)sender {
 	if(![[[self exportManager] window] isVisible])
 		return;
-
+	
 	if([self sheetIsDisplayed])
 		return;
 	
@@ -279,8 +284,6 @@ const float DefaultJpegScalingFactor = 0.9;
 	[self setLoginAttempted:YES];
 }
 
-
-
 -(IBAction)cancelLoginSheet:(id)sender {
 	if([[[self accountManager] accounts] count] > 0)
 		[self setSelectedAccount:[[[self accountManager] accounts] objectAtIndex:0]];
@@ -292,6 +295,11 @@ const float DefaultJpegScalingFactor = 0.9;
 
 /** called from the login sheet.  takes username/password values from the textfields */
 -(IBAction)performLoginFromSheet:(id)sender {
+	if(IsEmpty([self username]) ||
+	   IsEmpty([self password])) {
+		NSBeep();
+	}
+	
 	[self setLoginSheetStatusMessage:NSLocalizedString(@"Logging In...", @"log in status string")];
 	[self setLoginSheetIsBusy:YES];
 	[[self smugMugManager] setUsername:[self username]];
@@ -305,7 +313,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	[self setLoginSheetIsBusy:NO];
 	[self setLoginSheetStatusMessage:@""];
 	
-	if(!wasSuccessful) {
+	if(![wasSuccessful boolValue]) {
 		[self setLoginSheetStatusMessage:NSLocalizedString(@"Login Failed", @"Status text for failed login")];
 		/* we act like we haven't atttempted a log in if the login fails.  
 		*/
@@ -332,6 +340,9 @@ const float DefaultJpegScalingFactor = 0.9;
 -(void)logoutDidComplete:(NSNumber *)wasSuccessful {
 	if(![wasSuccessful boolValue])
 		[self presentError:NSLocalizedString(@"Logout failed.", @"Error message to display when logout fails.")];
+	else if([self postLogoutInvocation] != nil) {
+		[[self postLogoutInvocation] invokeWithTarget:self];
+	}
 }
 
 #pragma mark Preferences
@@ -498,10 +509,14 @@ const float DefaultJpegScalingFactor = 0.9;
 	   [self uploadSiteUrl] != nil &&
 	   ![self browserOpenedInGallery] &&
 	   [[[NSUserDefaults smugMugUserDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue]) {
-		[[NSWorkspace sharedWorkspace] openURL:[self uploadSiteUrl]];
-		[self setBrowserOpenedInGallery:YES];
+		[self openLastGalleryInBrowser];
 	}
 	[GalleryOpenLock unlock];
+}
+
+-(void)openLastGalleryInBrowser {
+	[[NSWorkspace sharedWorkspace] openURL:[self uploadSiteUrl]];
+	[self setBrowserOpenedInGallery:YES];
 }
 
 #pragma mark Category Get
@@ -517,6 +532,11 @@ const float DefaultJpegScalingFactor = 0.9;
 	if([self sheetIsDisplayed]) // this should be impossible
 		return;
 
+	if(![[self smugMugManager] isLoggedIn]) {
+		NSBeep();
+		return;
+	}
+	
 	uploadCancelled = NO;
 	[self setBrowserOpenedInGallery:NO];
 	[self setImagesUploaded:0];
@@ -676,15 +696,47 @@ const float DefaultJpegScalingFactor = 0.9;
 	return [[accountManager accounts] arrayByAddingObject:NewAccountLabel];
 }
 
+/* the user selected an account in the drop down */
 -(void)setSelectedAccount:(NSString *)account {
+	
+	// a placeholder account; do nothing
 	if([account isEqualToString:NewAccountLabel]) {
 		[self showLoginSheet:self];
 		return;
 	}
 
+	// an unknown account
 	NSAssert( [[self accounts] containsObject:account], @"Selected account is unknown");
+	
+	// if we're already logged into the newly selected account, return
+	if([[self selectedAccount] isEqual:account]) {
+		return;
+	}
+	
+	// if we're already loggin in to another account, logout
+	if([[self smugMugManager] isLoggedIn]) {
+		// handle the rest of the account changed tasks after we logout
+		NSInvocation *inv = [NSInvocation invocationWithMethodSignature:
+			[self methodSignatureForSelector:@selector(accountChangedTasks:)]];
+		[inv setSelector:@selector(accountChangedTasks:)];
+		[inv retainArguments];
+		[self setPostLogoutInvocation:inv];		
+		[[self postLogoutInvocation] setArgument:account atIndex:0];
 
+		[[self smugMugManager] logout]; // aynchronous callback
+	} else {
+		[self accountChangedTasks:account];
+	}
+	
+}
+
+-(void)accountChangedTasks:(NSString *)account {
+	// set our newly selected acccount
 	[[self accountManager] setSelectedAccount:account];
+	
+	[self setLoginAttempted:NO];
+	// login to the newly selected account
+	[self attemptLoginIfNecessary];	
 }
 
 -(NSString *)selectedAccount {
@@ -826,6 +878,18 @@ const float DefaultJpegScalingFactor = 0.9;
 	
 	loginSheetStatusMessage = [m retain];
 }
+
+-(NSInvocation *)postLogoutInvocation {
+	return postLogoutInvocation;
+}
+
+-(void)setPostLogoutInvocation:(NSInvocation *)inv {
+	if([self postLogoutInvocation] != nil)
+		[[self postLogoutInvocation] release];
+		
+	postLogoutInvocation = [inv retain];
+}
+
 
 -(SmugMugManager *)smugMugManager {
 	return smugMugManager;
