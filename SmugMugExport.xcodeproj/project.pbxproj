@@ -162,12 +162,12 @@
 				932165800B2F921E00624A8D /* KeychainManager.m */,
 				932164570B2F78BF00624A8D /* SmugMugExport.h */,
 				932164580B2F78BF00624A8D /* SmugMugExport.m */,
-				932164590B2F78BF00624A8D /* SmugMugExportBox.h */,
-				9321645A0B2F78BF00624A8D /* SmugMugExportBox.m */,
 				9321645B0B2F78BF00624A8D /* SmugMugManager.h */,
 				9321645C0B2F78BF00624A8D /* SmugMugManager.m */,
 				935A1A4E0C1CC09700043E12 /* SmugMugUserDefaults.m */,
 				935A19690C1C642A00043E12 /* SmugMugUserDefaults.h */,
+				932164590B2F78BF00624A8D /* SmugMugExportBox.h */,
+				9321645A0B2F78BF00624A8D /* SmugMugExportBox.m */,
 				938E26DE0C0F49180059F26B /* Remote Access */,
 			);
 			name = Classes;

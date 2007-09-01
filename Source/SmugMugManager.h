@@ -23,7 +23,7 @@
 
 @interface SmugMugManager : NSObject {
 	id delegate;
-
+		
 	NSArray *albums;
 	NSString *username;
 	NSString *password;
@@ -35,7 +35,7 @@
 	NSArray *categories;
 	NSArray *subcategories;
 	NSMutableDictionary *newAlbumPreferences;
-	NSDictionary *selectedCategory;
+	NSDictionary *selectedSubCategory;
 	
 	NSString *currentPathForUpload;
 	long uploadSize;
@@ -77,6 +77,7 @@
 -(void)createNewAlbum;
 -(void)clearAlbumCreationState;
 -(void)deleteAlbum:(NSString *)albumId;
+-(NSDictionary *)createNullSubcategory;
 
 -(NSArray *)albums;
 -(NSArray *)categories;

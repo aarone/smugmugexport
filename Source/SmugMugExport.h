@@ -20,8 +20,9 @@
 	IBOutlet NSPopUpButton *acccountPopupButton;
 	IBOutlet NSArrayController *albumsArrayController;
 	IBOutlet NSPanel *newAlbumSheet;
-	IBOutlet NSArrayController *categoriesArrayController; 
 	IBOutlet NSPanel *preferencesPanel;
+	IBOutlet NSArrayController *categoriesArrayController;
+	IBOutlet NSArrayController *subCategoriesArrayController;
 
 	 // this is the username bound to the textfield, account manager holds the real username
 	NSString *username; 

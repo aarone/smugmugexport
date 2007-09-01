@@ -77,11 +77,13 @@
 -(NSInvocation *)postLogoutInvocation;
 -(void)setPostLogoutInvocation:(NSInvocation *)inv;
 -(void)accountChangedTasks:(NSString *)account;
-
+-(NSPredicate *)createRelevantSubCategoryPredicate;
+-(void)initializeLocalizableStrings;
 -(BOOL)siteUrlHasBeenFetched;
 -(void)setSiteUrlHasBeenFetched:(BOOL)v;
 -(NSURL *)uploadSiteUrl;
 -(void)setUploadSiteUrl:(NSURL *)url;
+-(void)selectFirstSubCategory;
 @end
 
 NSLock *GalleryOpenLock = nil;
@@ -94,7 +96,10 @@ NSString *SubCategoryID = @"id";
 // UI keys
 NSString *ExistingAlbumTabIdentifier = @"existingAlbum";
 NSString *NewAlbumTabIdentifier = @"newAlbum";
-NSString *NewAccountLabel = @"New Account...";
+
+// UI strings
+NSString *NewAccountLabel;
+NSString *NullSubcategoryLabel;
 
 // defaults keys
 NSString *SMESelectedTabIdDefaultsKey = @"SMESelectedTabId";
@@ -121,12 +126,13 @@ const float DefaultJpegScalingFactor = 0.9;
 		return nil;
 	
 	exportManager = exportMgr;	
+	[self initializeLocalizableStrings];
 	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
 	
 	[self setAccountManager:[AccountManager accountManager]];
-	[self performSelectorOnMainThread:@selector(setSmugMugManager:)  withObject:[SmugMugManager smugmugManager] waitUntilDone:YES];
+	[self setSmugMugManager:[SmugMugManager smugmugManager]];
 	[[self smugMugManager] setDelegate:self];
-
+	
 	[self setLoginAttempted:NO];
 	[self setSiteUrlHasBeenFetched:NO];
 	[self setImagesUploaded:0];
@@ -135,6 +141,11 @@ const float DefaultJpegScalingFactor = 0.9;
 	[self setIsCreatingAlbum:NO];
 	
 	return self;
+}
+
+-(void)initializeLocalizableStrings {
+	NewAccountLabel = NSLocalizedString(@"New Account...", @"Text for New Account entry in account popup");
+	NullSubcategoryLabel = NSLocalizedString(@"None", @"Text for Null SubCategory");
 }
 
 -(void)dealloc {
@@ -181,6 +192,37 @@ const float DefaultJpegScalingFactor = 0.9;
 }
 
 -(void)awakeFromNib {
+	[categoriesArrayController addObserver:self forKeyPath:@"selectionIndex" options:NSKeyValueObservingOptionNew context:NULL];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+					  ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context
+{
+	if([keyPath isEqualToString:@"selectionIndex"]) {
+		NSMutableArray *relevantSubCategories = [NSMutableArray arrayWithArray:[[[self smugMugManager] subcategories] filteredArrayUsingPredicate:[self createRelevantSubCategoryPredicate]]];
+		if(relevantSubCategories == nil)
+			relevantSubCategories = [NSMutableArray array];
+		
+		NSDictionary *nullSubCategory = [[self smugMugManager] createNullSubcategory];
+		[relevantSubCategories insertObject:nullSubCategory	atIndex:0];
+		[subCategoriesArrayController setContent:nil];
+		[subCategoriesArrayController setContent:relevantSubCategories];
+		[subCategoriesArrayController setSelectionIndex:0];
+	}
+}
+
+-(NSPredicate *)createRelevantSubCategoryPredicate {
+	NSArray *subCategories = [[self smugMugManager] subcategories];
+	
+	if(IsEmpty([[self smugMugManager] categories]) ||
+	   IsEmpty([categoriesArrayController selectedObjects]) ||
+	   IsEmpty(subCategories))
+		return [NSPredicate predicateWithValue:YES];
+
+	NSDictionary *selectedCategory = [[categoriesArrayController selectedObjects] objectAtIndex:0];
+	return [NSPredicate predicateWithFormat:@"Category.id = %@", [selectedCategory objectForKey:@"id"]];
 }
 
 -(BOOL)sheetIsDisplayed {

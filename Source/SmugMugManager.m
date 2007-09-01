@@ -31,13 +31,11 @@ kCFStreamEventErrorOccurred;
 -(NSString *)passwordHash;
 -(void)setPasswordHash:(NSString *)p;
 
-
 -(NSURL *)SmugMugAccessURL;
 
 -(BOOL)smResponseWasSuccessful:(SmugMugAccess *)req;
 -(void)evaluateLoginResponse:(id)response;
 
--(NSString *)contentTypeForPath:(NSString *)path;
 -(NSData *)postBodyForImageAtPath:(NSString *)path 
 						  albumId:(NSString *)albumId 
 							title:(NSString *)title 
@@ -53,8 +51,6 @@ kCFStreamEventErrorOccurred;
 -(void)setIsLoggingIn:(BOOL)v;
 -(void)setIsLoggedIn:(BOOL)v;
 -(NSDictionary *)defaultNewAlbumPreferences;
--(NSDictionary *)selectedCategory;
--(void)setSelectedCategory:(NSDictionary *)d;
 -(void)createNewAlbum;
 -(void)createNewAlbumCallback:(SEL)callback;
 -(void)newAlbumCreationDidComplete:(SmugMugAccess *)req;
@@ -82,9 +78,10 @@ kCFStreamEventErrorOccurred;
 -(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSString *)albumId;
 -(void)getImageUrlsWithCallback:(SEL)callback imageId:(NSString *)imageId;
 -(void)getImageUrlsDidComplete:(SmugMugAccess *)req;
-
 -(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey;
-
+-(NSString *)selectedSubCategoryID;
+-(NSDictionary *)selectedSubCategory;
+-(void)setSelectedSubCategory:(NSDictionary *)subcategory;	
 @end
 
 static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType type, void *clientCallBackInfo) {
@@ -155,7 +152,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 		return nil;
 
 	[self setNewAlbumPreferences:[NSMutableDictionary dictionaryWithDictionary:[self defaultNewAlbumPreferences]]]; 
-	
+	[self setSelectedSubCategory:[self createNullSubcategory]];
 	return self;
 }
 
@@ -168,8 +165,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	[[self username] release];
 	[[self sessionID] release];
 	[[self subcategories] release];
-	[[self selectedCategory] release];
-
+	[[self selectedSubCategory] release];
+	
 	[super dealloc];
 }
 
@@ -180,13 +177,6 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 #pragma mark Miscellaneous Get/Set Methods
 -(NSMutableDictionary *)newAlbumPreferences {
 	return newAlbumPreferences;
-}
-
--(void)setSelectedCategory:(NSDictionary *)d {
-	if([self selectedCategory] != nil)
-		[[self selectedCategory] release];
-	
-	selectedCategory = [d retain];
 }
 
 -(void)setNewAlbumPreferences:(NSMutableDictionary *)a {
@@ -545,6 +535,11 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	
 }
 
+-(NSDictionary *)createNullSubcategory {
+	return [NSDictionary dictionaryWithObjectsAndKeys:@"None", @"Title",
+		@"0", @"id", nil];
+}
+
 -(void)buildSubCategoryList {
 	[self buildSubCategoryListWithCallback:@selector(subcategoryGetDidComplete:)];
 }
@@ -637,9 +632,10 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	[newAlbumProerties setObject:[[[self categories] objectAtIndex:selectedCategoryIndex] objectForKey:CategoryID]
 						  forKey:@"CategoryID"];
 	[newAlbumProerties setObject:@"smugmug.albums.create" forKey:@"method"];
+	[newAlbumProerties setObject:[self selectedSubCategoryID] forKey:@"SubCategoryID"];
 	[newAlbumProerties setObject:[self sessionID] forKey:@"SessionID"];
 	[newAlbumProerties setObject:[[self newAlbumPreferences] objectForKey:AlbumTitlePref] forKey:@"Title"];
-	NSMutableArray *orderedKeys = [NSMutableArray arrayWithObjects:@"method", @"SessionID", @"Title", @"CategoryID", nil];
+	NSMutableArray *orderedKeys = [NSMutableArray arrayWithObjects:@"method", @"SessionID", @"Title", @"CategoryID", @"SubCategoryID", nil];
 	[orderedKeys addObjectsFromArray:[basicNewAlbumPrefs allKeys]];
 
 	[req invokeMethodWithURL:[self SmugMugAccessURL]
@@ -647,6 +643,22 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 					 valueDict:newAlbumProerties
 			  responseCallback:callback
 				responseTarget:self];
+}
+
+-(NSString *)selectedSubCategoryID {
+	return [[self selectedSubCategory] objectForKey:@"id"];
+}
+
+-(NSDictionary *)selectedSubCategory {
+	return selectedSubCategory;
+}
+
+-(void)setSelectedSubCategory:(NSDictionary *)subcategory {
+	if([self selectedSubCategory] != nil) {
+		[[self selectedSubCategory] release];
+	}
+	
+	selectedSubCategory = [subcategory retain];
 }
 
 -(NSDictionary *)newAlbumOptionalPrefDictionary {
@@ -789,6 +801,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	
 	if(bytesWritten >= uploadSize)
 		[timer invalidate];
+	
 //		isUploading = NO; // stop the timer. we're not getting any more data from the socket for this image
 }
 
@@ -918,7 +931,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(NSData *)imageDataForPath:(NSString *)pathToImage {
-	
+
 	NSString *application = nil;
 	NSString *filetype = nil;
 	BOOL result = [[NSWorkspace sharedWorkspace] getInfoForFile:pathToImage
@@ -984,24 +997,6 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	[postBody appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n",Boundary] dataUsingEncoding:NSUTF8StringEncoding]];
 
 	return postBody;
-}
-
--(NSString *)contentTypeForPath:(NSString *)path {
-	
-	// is there a better way to do this?
-	if([[path lowercaseString] hasSuffix:@"jpg"] ||
-	   [[path lowercaseString] hasSuffix:@"jpeg"] ||
-	   [[path lowercaseString] hasSuffix:@"jpe"])
-		return @"image/jpeg";
-	else if([[path lowercaseString] hasSuffix:@"tiff"] ||
-			[[path lowercaseString] hasSuffix:@"tif"])
-		return @"image/tiff";
-	else if([[path lowercaseString] hasSuffix:@"png"])
-		return @"image/png";
-	else if([[path lowercaseString] hasSuffix:@"gif"])
-		return @"image/gif";
-
-	return @"image/jpeg"; // guess??
 }
 
 @end

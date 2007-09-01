@@ -27,6 +27,7 @@
                 newAlbumSheet = NSPanel; 
                 preferencesPanel = NSPanel; 
                 settingsBox = NSBox; 
+                subCategoriesArrayController = NSArrayController; 
                 uploadPanel = NSPanel; 
             }; 
             SUPERCLASS = NSObject; 
@@ -35,7 +36,7 @@
         {
             CLASS = SmugMugManager; 
             LANGUAGE = ObjC; 
-            OUTLETS = {categoryArrayController = NSArrayController; delegate = id; }; 
+            OUTLETS = {categoriesArrayController = NSArrayController; delegate = id; }; 
             SUPERCLASS = NSObject; 
         }, 
         {CLASS = SmugMugUserDefaults; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
