@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "SMDecoder.h"
 
 @interface SmugMugAccess : NSObject {
 	NSURLConnection *connection;
@@ -15,7 +16,10 @@
 	id target;
 	BOOL wasSuccessful;
 	NSError *error;
+	NSObject<SMDecoder> * decoder;
 }
+
++(SmugMugAccess *)smugMugAccess:(NSObject<SMDecoder> *)decoder;
 
 #pragma mark REST method invocation API
 /*!
@@ -51,13 +55,7 @@
 	 */
 -(NSError *)error;
 
-/*!
-    @method     response
-	@abstract   Returns the response returned by the last GET call or nil of no document has been returned.
- */
--(NSMutableData *)response;
-
--(id)decodedResponse;
+-(NSDictionary *)decodedResponse;
 
 +(NSString *)userAgent;
 @end

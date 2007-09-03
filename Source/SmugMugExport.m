@@ -741,7 +741,7 @@ const float DefaultJpegScalingFactor = 0.9;
 /* the user selected an account in the drop down */
 -(void)setSelectedAccount:(NSString *)account {
 	
-	// a placeholder account; do nothing
+	// add a new account
 	if([account isEqualToString:NewAccountLabel]) {
 		[self showLoginSheet:self];
 		return;

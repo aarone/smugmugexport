@@ -13,8 +13,6 @@
 -(void)logoutDidComplete:(NSNumber *)wasSuccessful;
 -(void)uploadDidCompleteWithArgs:(NSArray *)args;
 -(void)uploadMadeProgressWithArgs:(NSArray *)args;
-//-(void)uploadDidCompleteForFile:(NSString *)aFullPathToImage imageId:(NSString *)imageId  withError:(NSString *)error;
-//-(void)uploadMadeProgressForFile:(NSString *)pathToFile bytesWritten:(long)bytesWritten totalBytes:(long)totalBytes;
 -(void)categoryGetDidComplete:(NSNumber *)wasSuccessful;
 -(void)createNewAlbumDidComplete:(NSNumber *)wasSuccessful;
 -(void)deleteAlbumDidComplete:(NSNumber *)wasSuccessful;
@@ -23,7 +21,7 @@
 
 @interface SmugMugManager : NSObject {
 	id delegate;
-		
+
 	NSArray *albums;
 	NSString *username;
 	NSString *password;

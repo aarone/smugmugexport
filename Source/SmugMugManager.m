@@ -8,11 +8,12 @@
 
 #import "SmugMugManager.h"
 #import "NSDataAdditions.h"
-#import "JSONRequest.h"
 #import "Globals.h"
 #import "SmugMugAccess.h"
+#import "SMDecoder.h"
 #import "NSUserDefaultsAdditions.h"
 #import "NSBitmapImageRepAdditions.h"
+#import "JSONDecoder.h"
 
 static const CFOptionFlags DAClientNetworkEvents = 
 kCFStreamEventOpenCompleted     |
@@ -81,7 +82,9 @@ kCFStreamEventErrorOccurred;
 -(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey;
 -(NSString *)selectedSubCategoryID;
 -(NSDictionary *)selectedSubCategory;
--(void)setSelectedSubCategory:(NSDictionary *)subcategory;	
+-(void)setSelectedSubCategory:(NSDictionary *)subcategory;
+-(NSObject<SMDecoder> *)decoder;
+-(SmugMugAccess *)smAccess;
 @end
 
 static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType type, void *clientCallBackInfo) {
@@ -170,8 +173,12 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	[super dealloc];
 }
 
--(Class)storeAccessClass {
-	return [JSONRequest class];
+-(NSObject<SMDecoder> *)decoder {
+	return [JSONDecoder decoder];
+}
+
+-(SmugMugAccess *)smAccess {
+	return [SmugMugAccess smugMugAccess:[self decoder]];
 }
 
 #pragma mark Miscellaneous Get/Set Methods
@@ -388,7 +395,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
  * added or deleted.  See the workaround below.
  */
 -(void)buildAlbumListWithCallback:(SEL)callback {
-	SmugMugAccess *req = [[self storeAccessClass] request];
+	SmugMugAccess *req = [self smAccess];
 
 	/*
 	 * If we add or delete an album and then refresh the list using this method,
@@ -434,7 +441,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
 -(void)loginWithCallback:(SEL)loginDidEndSelector {
 	[self setIsLoggingIn:YES];
-	SmugMugAccess *request = [[self storeAccessClass] request];
+	SmugMugAccess *request = [self smAccess];
 
 	[request invokeMethodWithURL:[self SmugMugAccessURL] 
 						  keys:[NSArray arrayWithObjects:@"method", @"EmailAddress",@"Password", @"APIKey", nil]
@@ -462,7 +469,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 		return;
 	}
 
-	SmugMugAccess *req = [[self storeAccessClass] request];	
+	SmugMugAccess *req = [self smAccess];	
 	[req invokeMethodWithURL:[self SmugMugAccessURL] 
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.logout", [self sessionID], nil]
@@ -492,7 +499,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)getImageUrlsWithCallback:(SEL)callback imageId:(NSString *)imageId {
-	SmugMugAccess *req = [[self storeAccessClass] request];
+	SmugMugAccess *req = [self smAccess];
 	[req invokeMethodWithURL:[self SmugMugAccessURL]
 						 keys:[NSArray arrayWithObjects:@"method", @"SessionID", @"ImageID", nil]
 					   values:[NSArray arrayWithObjects:@"smugmug.images.getURLs", [self sessionID], imageId, nil]
@@ -515,7 +522,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)buildCategoryListWithCallback:(SEL)callback {
-	SmugMugAccess *req = [[self storeAccessClass] request];
+	SmugMugAccess *req = [self smAccess];
 	[req invokeMethodWithURL:[self SmugMugAccessURL]
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.categories.get", [self sessionID], nil]
@@ -545,7 +552,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)buildSubCategoryListWithCallback:(SEL)callback {
-	SmugMugAccess *req = [[self storeAccessClass] request];
+	SmugMugAccess *req = [self smAccess];
 	[req invokeMethodWithURL:[self SmugMugAccessURL]
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.subcategories.getAll", [self sessionID], nil]
@@ -576,7 +583,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSString *)albumId {
-	SmugMugAccess *req = [[self storeAccessClass] request];
+	SmugMugAccess *req = [self smAccess];
 	[req invokeMethodWithURL:[self SmugMugAccessURL]
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", @"AlbumID", nil]
 						values:[NSArray arrayWithObjects:@"smugmug.albums.delete", [self sessionID], albumId, nil]
@@ -624,7 +631,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)createNewAlbumCallback:(SEL)callback {
-	SmugMugAccess *req = [[self storeAccessClass] request];
+	SmugMugAccess *req = [self smAccess];
 	
 	int selectedCategoryIndex = [selectedCategoryIndices firstIndex];
 	NSDictionary *basicNewAlbumPrefs = [self newAlbumOptionalPrefDictionary];

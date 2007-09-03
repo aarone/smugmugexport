@@ -6,25 +6,25 @@
 //  Copyright 2007 Aaron Evans. All rights reserved.
 //
 
-#import "JSONRequest.h"
+#import "JSONDecoder.h"
 #import "CJSONDeserializer.h"
 #import "Globals.h"
 #import "NSUserDefaultsAdditions.h"
 
-@implementation JSONRequest
+@implementation JSONDecoder
 
-+(JSONRequest *)request {
++(NSObject<SMDecoder> *)decoder {
 	return [[[[self class] alloc] init] autorelease];
 }
 
--(id)decodedResponse {
-	NSString *responseString = [[[NSString alloc] initWithData:[self response] encoding:NSUTF8StringEncoding] autorelease];
+-(NSDictionary *)decodedResponse:(NSData *)smResponse {
+	NSString *responseString = [[[NSString alloc] initWithData:smResponse encoding:NSUTF8StringEncoding] autorelease];
 	
 	if(IsNetworkTracingEnabled()) {
 		NSLog(@"response: %@", responseString);
 	}
 	
-	return [[CJSONDeserializer deserializer] deserialize:responseString];
+	return (NSDictionary *)[[CJSONDeserializer deserializer] deserialize:responseString];
 }
 
 @end

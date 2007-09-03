@@ -11,6 +11,7 @@
 #import "NSURLAdditions.h"
 #import "Globals.h"
 #import "NSUserDefaultsAdditions.h"
+#import "SMDecoder.h"
 
 @interface SmugMugAccess (Private)
 -(NSURLConnection *)connection;
@@ -24,6 +25,8 @@
 -(id)target;
 -(void)setTarget:(id)t;
 -(void)setErrror:(NSError *)err;
+-(NSObject<SMDecoder> *)decoder;
+-(void)setDecoder:(NSObject<SMDecoder> *)aDecoder;	
 @end
 
 @interface NSURLRequest (NSURLRequestAdditions)
@@ -42,24 +45,38 @@
 
 @implementation SmugMugAccess
 
--(id)init {
+-(id)initWithDecoder:(NSObject<SMDecoder> *)aDecoder {
 	if(![super init])
 		return nil;
 	
+	[self setDecoder:aDecoder];
 	[self setWasSuccessful:NO];
 	
 	return self;
 }
 
-+(SmugMugAccess *)request {
-	return [[[[self class] alloc] init] autorelease];
++(SmugMugAccess *)smugMugAccess:(NSObject<SMDecoder> *)aDecoder {
+	return [[[[self class] alloc] initWithDecoder:aDecoder] autorelease];
 }
 
 -(void)dealloc {
 	[[self connection] release];
 	[[self error] release];
+	[[self decoder] release];
 	
 	[super dealloc];
+}
+
+
+-(NSObject<SMDecoder> *)decoder {
+	return decoder;
+}
+
+-(void)setDecoder:(NSObject<SMDecoder> *)aDecoder {
+	if([self decoder] != nil)
+		[[self decoder] release];
+	
+	decoder = [aDecoder retain];
 }
 
 +(NSString *)userAgent {
@@ -204,8 +221,8 @@
 	[[self target] performSelector:callback withObject:self];
 }
 
--(id)decodedResponse {
-	return nil;
+-(NSDictionary *)decodedResponse {
+	return [[self decoder] decodedResponse:[self response]];
 }
 
 @end
