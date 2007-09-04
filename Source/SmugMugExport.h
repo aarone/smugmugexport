@@ -35,7 +35,7 @@
 	NSImage *currentThumbnail;
 	NSString *imageUploadProgressText; // below the thumbnail..
 	NSURL *uploadSiteUrl;
-	
+	NSMutableDictionary *newAlbumPreferences;
 	
 	NSInvocation *postLogoutInvocation; // do this after a logout is complete
 	

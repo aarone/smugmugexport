@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		930961400C66A0C7002B8DAA /* SmugMugAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = 9309613E0C66A0C7002B8DAA /* SmugMugAccess.m */; };
 		930961BB0C66A164002B8DAA /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 930961BA0C66A164002B8DAA /* libcrypto.dylib */; };
 		930DE5F30B4831D2008120ED /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 930DE5BE0B4831D2008120ED /* Security.framework */; };
 		932164520B2F78B000624A8D /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9321644E0B2F78B000624A8D /* NSDataAdditions.m */; };
@@ -29,10 +28,8 @@
 		938E26AB0C0F47EA0059F26B /* NSURLAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26A90C0F47EA0059F26B /* NSURLAdditions.m */; };
 		938E27490C0F4DE10059F26B /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E27470C0F4DE10059F26B /* NSStringAdditions.m */; };
 		93BD6F2F0AD84AAC007CE525 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
-		93DD88F70C8C4AE000A6131B /* JSONDecoder.h in Private Frameworks */ = {isa = PBXBuildFile; fileRef = 93DD88F40C8C4AE000A6131B /* JSONDecoder.h */; };
 		93DD88F80C8C4AE000A6131B /* JSONDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD88F50C8C4AE000A6131B /* JSONDecoder.m */; };
-		93DD88F90C8C4AE000A6131B /* SMDecoder.h in Private Frameworks */ = {isa = PBXBuildFile; fileRef = 93DD88F60C8C4AE000A6131B /* SMDecoder.h */; };
-		93EE86860C8085850028A598 /* NSBitmapImageRepAdditions.h in Private Frameworks */ = {isa = PBXBuildFile; fileRef = 93EE86840C8085850028A598 /* NSBitmapImageRepAdditions.h */; };
+		93DD89D80C8C526100A6131B /* SMRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD89D60C8C526100A6131B /* SMRequest.m */; };
 		93EE86870C8085850028A598 /* NSBitmapImageRepAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EE86850C8085850028A598 /* NSBitmapImageRepAdditions.m */; };
 /* End PBXBuildFile section */
 
@@ -43,9 +40,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				93EE86860C8085850028A598 /* NSBitmapImageRepAdditions.h in Private Frameworks */,
-				93DD88F70C8C4AE000A6131B /* JSONDecoder.h in Private Frameworks */,
-				93DD88F90C8C4AE000A6131B /* SMDecoder.h in Private Frameworks */,
 			);
 			name = "Private Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -56,8 +50,6 @@
 		089C1672FE841209C02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		089C167FFE841241C02AAC07 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
-		9309613D0C66A0C7002B8DAA /* SmugMugAccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugMugAccess.h; path = Source/SmugMugAccess.h; sourceTree = "<group>"; };
-		9309613E0C66A0C7002B8DAA /* SmugMugAccess.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SmugMugAccess.m; path = Source/SmugMugAccess.m; sourceTree = "<group>"; };
 		930961BA0C66A164002B8DAA /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
 		930DE5BE0B4831D2008120ED /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		9321644D0B2F78B000624A8D /* NSDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSDataAdditions.h; path = Source/NSDataAdditions.h; sourceTree = "<group>"; };
@@ -104,6 +96,9 @@
 		93DD88F40C8C4AE000A6131B /* JSONDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JSONDecoder.h; path = Source/JSONDecoder.h; sourceTree = "<group>"; };
 		93DD88F50C8C4AE000A6131B /* JSONDecoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JSONDecoder.m; path = Source/JSONDecoder.m; sourceTree = "<group>"; };
 		93DD88F60C8C4AE000A6131B /* SMDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMDecoder.h; path = Source/SMDecoder.h; sourceTree = "<group>"; };
+		93DD89D50C8C526100A6131B /* SMRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMRequest.h; path = Source/SMRequest.h; sourceTree = "<group>"; };
+		93DD89D60C8C526100A6131B /* SMRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMRequest.m; path = Source/SMRequest.m; sourceTree = "<group>"; };
+		93EBDDE30C8CF5EA00905273 /* SMUploadObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMUploadObserver.h; path = Source/SMUploadObserver.h; sourceTree = "<group>"; };
 		93EE86840C8085850028A598 /* NSBitmapImageRepAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSBitmapImageRepAdditions.h; path = Source/NSBitmapImageRepAdditions.h; sourceTree = "<group>"; };
 		93EE86850C8085850028A598 /* NSBitmapImageRepAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSBitmapImageRepAdditions.m; path = Source/NSBitmapImageRepAdditions.m; sourceTree = "<group>"; };
 		D2F7E65807B2D6F200F64583 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
@@ -173,7 +168,7 @@
 				935A19690C1C642A00043E12 /* SmugMugUserDefaults.h */,
 				932164590B2F78BF00624A8D /* SmugMugExportBox.h */,
 				9321645A0B2F78BF00624A8D /* SmugMugExportBox.m */,
-				938E26DE0C0F49180059F26B /* Remote Access */,
+				938E26DE0C0F49180059F26B /* SmugMug Access */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -243,16 +238,17 @@
 			name = CocoaJSON;
 			sourceTree = "<group>";
 		};
-		938E26DE0C0F49180059F26B /* Remote Access */ = {
+		938E26DE0C0F49180059F26B /* SmugMug Access */ = {
 			isa = PBXGroup;
 			children = (
-				9309613D0C66A0C7002B8DAA /* SmugMugAccess.h */,
-				9309613E0C66A0C7002B8DAA /* SmugMugAccess.m */,
+				93EBDDE30C8CF5EA00905273 /* SMUploadObserver.h */,
+				93DD88F60C8C4AE000A6131B /* SMDecoder.h */,
+				93DD89D50C8C526100A6131B /* SMRequest.h */,
+				93DD89D60C8C526100A6131B /* SMRequest.m */,
 				93DD88F40C8C4AE000A6131B /* JSONDecoder.h */,
 				93DD88F50C8C4AE000A6131B /* JSONDecoder.m */,
-				93DD88F60C8C4AE000A6131B /* SMDecoder.h */,
 			);
-			name = "Remote Access";
+			name = "SmugMug Access";
 			sourceTree = "<group>";
 		};
 		9394BC8D0ADDBF390066CD67 /* Categories */ = {
@@ -359,9 +355,9 @@
 				938E27490C0F4DE10059F26B /* NSStringAdditions.m in Sources */,
 				935A1A4F0C1CC09700043E12 /* SmugMugUserDefaults.m in Sources */,
 				935A1A870C1CC2CC00043E12 /* NSUserDefaultsAdditions.m in Sources */,
-				930961400C66A0C7002B8DAA /* SmugMugAccess.m in Sources */,
 				93EE86870C8085850028A598 /* NSBitmapImageRepAdditions.m in Sources */,
 				93DD88F80C8C4AE000A6131B /* JSONDecoder.m in Sources */,
+				93DD89D80C8C526100A6131B /* SMRequest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

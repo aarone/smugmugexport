@@ -40,6 +40,23 @@ extern NSString *SubCategoryID;
 
 extern const float DefaultJpegScalingFactor;
 
+
+// new album property keys
+extern NSString *IsPublicPref;
+extern NSString *ShowFilenamesPref;
+extern NSString *AllowCommentsPref;
+extern NSString *AllowExternalLinkingPref;
+extern NSString *DisplayEXIFInfoPref;
+extern NSString *EnableEasySharePref;
+extern NSString *AllowPurchasingPref;
+extern NSString *AllowOriginalsToBeViewedPref;
+extern NSString *AllowFriendsToEditPref;
+extern NSString *AlbumTitlePref;
+extern NSString *AlbumDescriptionPref;
+extern NSString *AlbumKeywordsPref;
+extern NSString *AlbumCategoryPref;
+
+
 // conveinent macros
 #define ShouldScaleImages() ([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMSelectedScalingTag] intValue] != 0)
 #define IsNetworkTracingEnabled() ([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEnableNetworkTracing] boolValue])

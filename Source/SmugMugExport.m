@@ -12,6 +12,7 @@
 #import "ExportMgr.h"
 #import "AccountManager.h"
 #import "Globals.h"
+#import "NSBitmapImageRepAdditions.h"
 #import "NSUserDefaultsAdditions.h"
 
 @interface SmugMugExport (Private)
@@ -84,6 +85,11 @@
 -(NSURL *)uploadSiteUrl;
 -(void)setUploadSiteUrl:(NSURL *)url;
 -(void)selectFirstSubCategory;
+-(NSDictionary *)defaultNewAlbumPreferences;
+-(NSMutableDictionary *)newAlbumPreferences;
+-(void)setNewAlbumPreferences:(NSMutableDictionary *)a;
+-(NSDictionary *)newAlbumOptionalPrefDictionary;
+-(void)clearAlbumCreationState;
 @end
 
 NSLock *GalleryOpenLock = nil;
@@ -132,7 +138,8 @@ const float DefaultJpegScalingFactor = 0.9;
 	[self setAccountManager:[AccountManager accountManager]];
 	[self setSmugMugManager:[SmugMugManager smugmugManager]];
 	[[self smugMugManager] setDelegate:self];
-	
+
+	[self setNewAlbumPreferences:[NSMutableDictionary dictionaryWithDictionary:[self defaultNewAlbumPreferences]]]; 
 	[self setLoginAttempted:NO];
 	[self setSiteUrlHasBeenFetched:NO];
 	[self setImagesUploaded:0];
@@ -162,9 +169,9 @@ const float DefaultJpegScalingFactor = 0.9;
 	[[self statusText] release];
 	[[self currentThumbnail] release];
 	[[self imageUploadProgressText] release];
+	[[self newAlbumPreferences] release];
 
 	[super dealloc];
-
 }
 
 -(SmugMugUserDefaults *)defaults {
@@ -201,9 +208,11 @@ const float DefaultJpegScalingFactor = 0.9;
                        context:(void *)context
 {
 	if([keyPath isEqualToString:@"selectionIndex"]) {
-		NSMutableArray *relevantSubCategories = [NSMutableArray arrayWithArray:[[[self smugMugManager] subcategories] filteredArrayUsingPredicate:[self createRelevantSubCategoryPredicate]]];
-		if(relevantSubCategories == nil)
-			relevantSubCategories = [NSMutableArray array];
+		if([categoriesArrayController selectedObjects] == nil || [[categoriesArrayController selectedObjects] count] == 0)
+			return;
+		
+		NSDictionary *selectedCategory = [[categoriesArrayController selectedObjects] objectAtIndex:0];
+		NSMutableArray *relevantSubCategories = [NSMutableArray arrayWithArray:[[self smugMugManager] subCategoriesForCategory:selectedCategory]];
 		
 		NSDictionary *nullSubCategory = [[self smugMugManager] createNullSubcategory];
 		[relevantSubCategories insertObject:nullSubCategory	atIndex:0];
@@ -211,18 +220,6 @@ const float DefaultJpegScalingFactor = 0.9;
 		[subCategoriesArrayController setContent:relevantSubCategories];
 		[subCategoriesArrayController setSelectionIndex:0];
 	}
-}
-
--(NSPredicate *)createRelevantSubCategoryPredicate {
-	NSArray *subCategories = [[self smugMugManager] subcategories];
-	
-	if(IsEmpty([[self smugMugManager] categories]) ||
-	   IsEmpty([categoriesArrayController selectedObjects]) ||
-	   IsEmpty(subCategories))
-		return [NSPredicate predicateWithValue:YES];
-
-	NSDictionary *selectedCategory = [[categoriesArrayController selectedObjects] objectAtIndex:0];
-	return [NSPredicate predicateWithFormat:@"Category.id = %@", [selectedCategory objectForKey:@"id"]];
 }
 
 -(BOOL)sheetIsDisplayed {
@@ -409,6 +406,41 @@ const float DefaultJpegScalingFactor = 0.9;
 	[NSApp endSheet:[self preferencesPanel]];
 }
 
+-(NSMutableDictionary *)newAlbumPreferences {
+	return newAlbumPreferences;
+}
+
+-(void)setNewAlbumPreferences:(NSMutableDictionary *)a {
+	if([self newAlbumPreferences] != nil)
+		[[self newAlbumPreferences] release];
+	
+	newAlbumPreferences = [a retain];
+}
+
+-(NSDictionary *)defaultNewAlbumPreferences {
+	NSNumber *Set = [NSNumber numberWithBool:YES];
+	//	NSNumber *NotSet = [NSNumber numberWithBool:NO];
+	
+	return [NSDictionary dictionaryWithObjectsAndKeys:
+		Set, IsPublicPref,
+		Set, ShowFilenamesPref,
+		Set, AllowCommentsPref,
+		Set, AllowExternalLinkingPref,
+		Set, DisplayEXIFInfoPref,
+		Set, EnableEasySharePref,
+		Set, AllowPurchasingPref,
+		Set, AllowOriginalsToBeViewedPref,
+		Set, AllowFriendsToEditPref,
+		nil];
+	
+	// unset:
+	//		nil, @"Title",
+	//		nil, @"Description",
+	//		nil, @"Keywords",
+	//		nil, @"Category"
+}
+
+
 #pragma mark Add Album
 
 -(IBAction)addNewAlbum:(id)sender { // opens the create album sheet
@@ -424,7 +456,7 @@ const float DefaultJpegScalingFactor = 0.9;
 		return;
 	}
 	
-	[[self smugMugManager] clearAlbumCreationState];
+	[self clearAlbumCreationState];
 	[NSApp beginSheet:[self newAlbumSheet]
 	   modalForWindow:[[self exportManager] window]
 		modalDelegate:self
@@ -467,10 +499,37 @@ const float DefaultJpegScalingFactor = 0.9;
 	}
 }
 
+-(void)clearAlbumCreationState {
+	[[self newAlbumPreferences] removeObjectForKey:AlbumTitlePref];
+	[[self newAlbumPreferences] removeObjectForKey:AlbumDescriptionPref];
+	[[self newAlbumPreferences] removeObjectForKey:AlbumKeywordsPref];
+}
+
+-(NSString *)selectedCategoryId {
+	return [[[categoriesArrayController selectedObjects] objectAtIndex:0] objectForKey:CategoryID];
+}
+
+-(NSString *)selectedSubCategoryId {
+	return [[[subCategoriesArrayController selectedObjects] objectAtIndex:0] objectForKey:CategoryID];
+}
+
+-(NSString *)albumTitle {
+	return [[self newAlbumPreferences] objectForKey:AlbumTitlePref];
+}
 
 -(IBAction)createAlbum:(id)sender {
-	[self setIsCreatingAlbum:YES];
-	[[self smugMugManager] createNewAlbum];
+	if(IsEmpty([self albumTitle])) {
+		NSBeep();
+		return;
+	}
+	
+	[self setIsCreatingAlbum:YES];	
+	
+	[[self smugMugManager] createNewAlbumWithCategory:[self selectedCategoryId]
+										  subcategory:[self selectedSubCategoryId]
+												title:[self albumTitle] 
+									  albumProperties:[self newAlbumPreferences]];
+	return;
 }
 
 #pragma mark Delete Album
@@ -604,26 +663,71 @@ const float DefaultJpegScalingFactor = 0.9;
 	[self uploadNextImage];
 }
 
+-(NSData *)imageDataForPath:(NSString *)pathToImage {
+	
+	NSString *application = nil;
+	NSString *filetype = nil;
+	BOOL result = [[NSWorkspace sharedWorkspace] getInfoForFile:pathToImage
+													application:&application
+														   type:&filetype];
+	if(result == NO) {
+		NSLog(@"Error getting file type for file (%@).  This image will not be exported.", pathToImage);
+		return nil;
+	}
+	
+	BOOL isJpeg = [[filetype lowercaseString] isEqual:@"jpg"];
+	
+	if(!isJpeg && ShouldScaleImages())
+		NSLog(@"The image (%@) is not a jpeg and cannot be scaled by this program (yet).", pathToImage);
+	
+	if(isJpeg && ShouldScaleImages()) {
+		int maxWidth = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleWidth] intValue];
+		int maxHeight = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleHeight] intValue];
+		
+		// allow no input and treat it like infinity
+		if(maxWidth == 0)
+			maxWidth = INT_MAX;
+		if(maxHeight == 0)
+			maxHeight = INT_MAX;
+		
+		NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc] initWithData:[NSData dataWithContentsOfFile:pathToImage]] autorelease];
+		// scale
+		if([rep pixelsWide] > maxWidth || [rep pixelsHigh] > maxHeight)
+			return [rep scaledRepToMaxWidth:maxWidth maxHeight:maxHeight];
+		
+		// no scale
+		return [NSData dataWithContentsOfFile:pathToImage];
+	}
+	
+	// the default operation
+	return [NSData dataWithContentsOfFile:pathToImage];	
+}
+
 -(void)uploadNextImage {
 	
 	NSString *selectedAlbumId = [[[self selectedAlbum] objectForKey:AlbumID] stringValue];
+	NSString *nextFile = [[self exportManager] imagePathAtIndex:[self imagesUploaded]];
+	NSData *imageData = [self imageDataForPath:nextFile];
+	NSString *filename = [[nextFile pathComponents] lastObject];
+	
 	if([[self exportManager] respondsToSelector:@selector(imageCaptionAtIndex:)]) {
 		// iPhoto <=6
-		[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
-									 albumWithID:selectedAlbumId
-										   title:[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]]
-										comments:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
-										keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]];		
+		[[self smugMugManager] uploadImageData:imageData
+									  filename:filename
+								   albumWithID:selectedAlbumId
+										 title:[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]]
+									   caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
+									  keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]];		
 	} else {
 		// iPhoto 7
-		[[self smugMugManager] uploadImageAtPath:[[self exportManager] imagePathAtIndex:[self imagesUploaded]]
-									 albumWithID:selectedAlbumId
-										   title:[[self exportManager] imageTitleAtIndex:[self imagesUploaded]]
-										comments:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
-										keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]];
+		[[self smugMugManager] uploadImageData:imageData
+									  filename:filename
+								   albumWithID:selectedAlbumId
+										 title:[[self exportManager] imageTitleAtIndex:[self imagesUploaded]]
+									   caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
+									  keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]];
 	}	
 }
-
 
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful {
 	[NSApp endSheet:uploadPanel];
@@ -641,42 +745,52 @@ const float DefaultJpegScalingFactor = 0.9;
 		[self setBrowserOpenedInGallery:YES];
 		[[NSWorkspace sharedWorkspace] openURL:uploadSiteUrl];
 	}
-	[GalleryOpenLock unlock];
 	
+	[GalleryOpenLock unlock];
 }
 
--(void)uploadDidCompleteWithArgs:(NSArray *)args {
-//	NSString *aFullPathToImage = [args objectAtIndex:0];
-	NSString *imageId = [args objectAtIndex:1];
-	NSString *error = [args count] > 2 ? [args objectAtIndex:2] : nil;
+-(void)uploadDidFail:(NSData *)imageData reason:(NSString *)errorText {
+
+	if([self uploadRetryCount] < UploadFailureRetryCount) {
+		// if an error occurred, retry up to UploadFailureRetryCount times
+		
+		[self incrementUploadRetryCount];
+		[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Retrying upload of image %d of %d", @"Retry upload progress"), [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
+		
+		[self uploadNextImage];		
+		return;
+	} else {
+		// our max retries have been hit, stop uploading
+		[self performUploadCompletionTasks:NO];
+		NSString *errorString = NSLocalizedString(@"Image upload failed (%@).", @"Error message to display when upload fails.");
+		[self presentError:[NSString stringWithFormat:errorString, errorText]];
+		return;
+	}
+}
+
+-(void)uploadMadeProgress:(NSData *)imageData bytesWritten:(long)bytesWritten ofTotalBytes:(long)totalBytes {	
+	float progressForFile = MIN(100.0, ceil(100.0*(float)bytesWritten/(float)totalBytes));
+	[self setFileUploadProgress:[NSNumber numberWithFloat:progressForFile]];
 	
+	float baselinePercentageCompletion = 100.0*((float)[self imagesUploaded])/((float)[[self exportManager] imageCount]);
+	float estimatedFileContribution = (100.0/((float)[[self exportManager] imageCount]))*((float)bytesWritten)/((float)totalBytes);
+	[self setSessionUploadProgress:[NSNumber numberWithFloat:MIN(100.0, ceil(baselinePercentageCompletion+estimatedFileContribution))]];
+	
+	[self setImageUploadProgressText:[NSString stringWithFormat:@"%0.0fKB of %0.0fKB", bytesWritten/1024.0, totalBytes/1024.0]];
+}
+
+-(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId {
+		
 	if(uploadCancelled) {
 		[self performUploadCompletionTasks:NO];
 		return; // stop uploading
 	}
 
-	if(error == nil) {
-		@synchronized(self) {
-			if(!siteUrlHasBeenFetched) {
-				[self setSiteUrlHasBeenFetched:NO];
-				[[self smugMugManager] fetchImageUrls:imageId];
-			}
+	@synchronized(self) {
+		if(!siteUrlHasBeenFetched) {
+			[self setSiteUrlHasBeenFetched:NO];
+			[[self smugMugManager] fetchImageUrls:smImageId];
 		}
-	} else  if(error != nil && [self uploadRetryCount] < UploadFailureRetryCount) {
-		// if an error occurred, retry up to UploadFailureRetryCount times
-
-		[self incrementUploadRetryCount];
-		[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Retrying upload of image %d of %d", @"Retry upload progress"), [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
-		
-
-		[self uploadNextImage];		
-		return;
-	} else if (error != nil) {
-		// our max retries have been hit, stop uploading
-		[self performUploadCompletionTasks:NO];
-		NSString *errorString = NSLocalizedString(@"Image upload failed (%@).", @"Error message to display when upload fails.");
-		[self presentError:[NSString stringWithFormat:errorString, error]];
-		return;
 	}
 
 	// onto the next image
@@ -692,28 +806,13 @@ const float DefaultJpegScalingFactor = 0.9;
 		NSImage *img = [[[NSImage alloc] initWithData:[NSData dataWithContentsOfFile: thumbnailPath]] autorelease];
 		[img setScalesWhenResized:YES];
 		[self setCurrentThumbnail:img];
-
+		
 		[self uploadNextImage];		
 	}
 }
 
 -(void)didEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
     [sheet orderOut:self];
-}
-
--(void)uploadMadeProgressWithArgs:(NSArray *)args {
-//	NSString *pathToFile = [args objectAtIndex:0];
-	long bytesWritten = [[args objectAtIndex:1] longValue];
-	long totalBytes = [[args objectAtIndex:2] longValue];
-
-	float progressForFile = MIN(100.0, ceil(100.0*(float)bytesWritten/(float)totalBytes));
-	[self setFileUploadProgress:[NSNumber numberWithFloat:progressForFile]];
-
-	float baselinePercentageCompletion = 100.0*((float)[self imagesUploaded])/((float)[[self exportManager] imageCount]);
-	float estimatedFileContribution = (100.0/((float)[[self exportManager] imageCount]))*((float)bytesWritten)/((float)totalBytes);
-	[self setSessionUploadProgress:[NSNumber numberWithFloat:MIN(100.0, ceil(baselinePercentageCompletion+estimatedFileContribution))]];
-
-	[self setImageUploadProgressText:[NSString stringWithFormat:@"%0.0fKB of %0.0fKB", bytesWritten/1024.0, totalBytes/1024.0]];
 }
 
 -(IBAction)cancelUpload:(id)sender {

@@ -9,7 +9,6 @@
 #import "JSONDecoder.h"
 #import "CJSONDeserializer.h"
 #import "Globals.h"
-#import "NSUserDefaultsAdditions.h"
 
 @implementation JSONDecoder
 
@@ -19,10 +18,6 @@
 
 -(NSDictionary *)decodedResponse:(NSData *)smResponse {
 	NSString *responseString = [[[NSString alloc] initWithData:smResponse encoding:NSUTF8StringEncoding] autorelease];
-	
-	if(IsNetworkTracingEnabled()) {
-		NSLog(@"response: %@", responseString);
-	}
 	
 	return (NSDictionary *)[[CJSONDeserializer deserializer] deserialize:responseString];
 }

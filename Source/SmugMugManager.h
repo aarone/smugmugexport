@@ -7,19 +7,28 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "SMUploadObserver.h"
 
 @protocol SmugMugManagerDelegate
 -(void)loginDidComplete:(NSNumber *)wasSuccessful;
 -(void)logoutDidComplete:(NSNumber *)wasSuccessful;
--(void)uploadDidCompleteWithArgs:(NSArray *)args;
--(void)uploadMadeProgressWithArgs:(NSArray *)args;
+-(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId;
+-(void)uploadDidFail:(NSData *)imageData reason:(NSString *)errorText;
+-(void)uploadMadeProgress:(NSData *)imageData bytesWritten:(long)bytesWritten ofTotalBytes:(long)totalBytes;
 -(void)categoryGetDidComplete:(NSNumber *)wasSuccessful;
 -(void)createNewAlbumDidComplete:(NSNumber *)wasSuccessful;
 -(void)deleteAlbumDidComplete:(NSNumber *)wasSuccessful;
 -(void)imageUrlFetchDidComplete:(NSDictionary *)imageUrls;
 @end
 
-@interface SmugMugManager : NSObject {
+/*
+ * High-level interface to smugmug.  Most methods are asynchronous and
+ * require a delegate to implement the methods above.  The delegate
+ * is guaranteed that responses are provided on the main thread.  This class
+ * knows about the SmugMug API but is sheltered from the underlying API
+ * implementation (provided by a SMRequest)
+ */
+@interface SmugMugManager : NSObject<SMUploadObserver> {
 	id delegate;
 
 	NSArray *albums;
@@ -28,20 +37,15 @@
 	NSString *sessionID;
 	NSString *userID;
 	NSString *passwordHash;
-	CFReadStreamRef readStream;
-	NSMutableData *responseData;
 	NSArray *categories;
 	NSArray *subcategories;
-	NSMutableDictionary *newAlbumPreferences;
-	NSDictionary *selectedSubCategory;
 	
+	SMRequest *lastUploadRequest;
 	NSString *currentPathForUpload;
-	long uploadSize;
 	BOOL isUploading;
 	BOOL isLoggingIn;
 	BOOL isLoggedIn;
 	long nextProgressThreshold;
-	NSIndexSet *selectedCategoryIndices;
 }
 
 +(SmugMugManager *)smugmugManager;
@@ -63,22 +67,26 @@
 -(NSString *)password;
 -(void)setPassword:(NSString *)p;
 
--(void)uploadImageAtPath:(NSString *)path 
-			 albumWithID:(NSString *)albumId 
-				   title:(NSString *)title
-				comments:(NSString *)comments
-				keywords:(NSArray *)keywords;
+-(void)uploadImageData:(NSData *)imageData
+			  filename:(NSString *)filename
+		   albumWithID:(NSString *)albumId 
+				 title:(NSString *)title
+			   caption:(NSString *)caption
+			  keywords:(NSArray *)keywords;
 -(void)stopUpload;
 
 -(void)fetchImageUrls:(NSString *)imageId;
 
--(void)createNewAlbum;
--(void)clearAlbumCreationState;
+-(void)createNewAlbumWithCategory:(NSString *)categoryId 
+					  subcategory:(NSString *)subCategoryId 
+							title:(NSString *)title 
+				  albumProperties:(NSDictionary *)newAlbumProperties;
 -(void)deleteAlbum:(NSString *)albumId;
 -(NSDictionary *)createNullSubcategory;
 
 -(NSArray *)albums;
 -(NSArray *)categories;
 -(NSArray *)subcategories;
+-(NSArray *)subCategoriesForCategory:(NSDictionary *)aCategory;
 
 @end
