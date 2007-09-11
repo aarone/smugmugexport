@@ -17,6 +17,7 @@
 	SEL callback;
 	id target;
 	BOOL wasSuccessful;
+	BOOL connectionIsOpen;
 	NSError *error;
 	NSObject<SMDecoder> *decoder;
 	

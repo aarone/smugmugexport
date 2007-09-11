@@ -22,7 +22,7 @@
 -(void)setResponse:(NSMutableData *)data;
 -(void)appendToResponse:(NSData *)data;
 -(void)setWasSuccessful:(BOOL)v;
--(SEL) callback;
+-(SEL)callback;
 -(void)setCallback:(SEL)c;
 -(id)target;
 -(void)setTarget:(id)t;
@@ -42,6 +42,9 @@
 -(NSString *)uploadApiVersion;
 -(NSString *)uploadResponseType;
 -(NSData *)imageData;
+-(BOOL)connectionIsOpen;
+-(void)setConnectionIsOpen:(BOOL)v;
+-(void)destroyUploadResources;
 @end
 
 static NSString *UserAgent = nil;
@@ -92,6 +95,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	
 	[self setDecoder:aDecoder];
 	[self setWasSuccessful:NO];
+	[self setConnectionIsOpen:NO];
 	
 	return self;
 }
@@ -217,6 +221,14 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	target = t; // no retain, just like a delegate
 }
 
+-(BOOL)connectionIsOpen {
+	return connectionIsOpen;
+}
+
+-(void)setConnectionIsOpen:(BOOL)v {
+	connectionIsOpen = v;
+}
+
 -(NSError *)error {
 	return error;
 }
@@ -239,10 +251,12 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	[self setResponse:[NSMutableData data]];
 	
 	[self setConnection:[NSURLConnection connectionWithRequest:req delegate:self]]; // begin request
+	[self setConnectionIsOpen:YES];
 	
 	while ( [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
-									 beforeDate:[NSDate distantFuture]] );
-	
+									 beforeDate:[NSDate distantFuture]] 
+			&& [self connectionIsOpen]);
+
 	[pool release];
 }
 
@@ -297,16 +311,17 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	[self setWasSuccessful:YES];
 	[self setError:nil];
 	[[self target] performSelector:callback withObject:self];
+	[self setConnectionIsOpen:NO];
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)e {
 	[self setWasSuccessful:NO];
 	[self setError:e];
 	[[self target] performSelector:callback withObject:self];
+	[self setConnectionIsOpen:NO];
 }
 
--(NSDictionary *)decodedResponse {
-	
+-(NSDictionary *)decodedResponse {	
 	if(IsNetworkTracingEnabled()) {
 		NSString *responseAsString = [[[NSString alloc] initWithData:[self response] 
 															encoding:NSUTF8StringEncoding] autorelease];
@@ -319,11 +334,13 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 #pragma mark Upload Methods
 -(void)cancelUpload {
 	[self setIsUploading:NO];
+	[[self observer] uploadCanceled:self];
+	[self destroyUploadResources];
 }
 
 -(void)appendToResponse {
 	
-	UInt8 buffer[2048];
+	UInt8 buffer[4096];
 	
 	if(![self isUploading])
 		return;
@@ -332,7 +349,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	
 	if (bytesRead < 0)
 		NSLog(@"Warning: Error (< 0b from CFReadStreamRead");
-	else if (bytesRead)
+	else
 		[[self response] appendBytes:(void *)buffer length:(unsigned)bytesRead];
 }
 
@@ -342,6 +359,8 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	CFReadStreamUnscheduleFromRunLoop(readStream, CFRunLoopGetCurrent(), kCFRunLoopCommonModes);
 	CFReadStreamClose(readStream);
 	CFRelease(readStream);
+	readStream = nil;
+	
 	[self setResponse:nil];
 }
 

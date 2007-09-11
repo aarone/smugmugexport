@@ -15,6 +15,7 @@
 -(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId;
 -(void)uploadDidFail:(NSData *)imageData reason:(NSString *)errorText;
 -(void)uploadMadeProgress:(NSData *)imageData bytesWritten:(long)bytesWritten ofTotalBytes:(long)totalBytes;
+-(void)uploadWasCanceled;
 -(void)categoryGetDidComplete:(NSNumber *)wasSuccessful;
 -(void)createNewAlbumDidComplete:(NSNumber *)wasSuccessful;
 -(void)deleteAlbumDidComplete:(NSNumber *)wasSuccessful;

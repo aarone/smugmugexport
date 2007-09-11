@@ -13,6 +13,7 @@
 
 -(void)uploadMadeProgress:(SMRequest *)request bytesWritten:(long)numberOfBytes ofTotalBytes:(long)totalBytes;
 -(void)uploadFailed:(SMRequest *)request withError:(NSString *)reason;
+-(void)uploadCanceled:(SMRequest *)request;
 -(void)uploadSucceeded:(SMRequest *)request;
 
 @end

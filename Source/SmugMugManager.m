@@ -460,6 +460,13 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	[[self delegate] uploadDidFail:[args objectAtIndex:0] reason:[args objectAtIndex:1]];
 }
 
+
+-(void)uploadCanceled:(SMRequest *)request {
+	[[self delegate] performSelectorOnMainThread:@selector(uploadWasCanceled)
+						   withObject:nil
+						waitUntilDone:NO];	
+}
+
 -(void)uploadFailed:(SMRequest *)request withError:(NSString *)reason {
 	[self performSelectorOnMainThread:@selector(notifyDelegateOfUploadFailure:)
 						   withObject:[NSArray arrayWithObjects:[request imageData], reason, nil]

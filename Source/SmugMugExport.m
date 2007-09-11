@@ -638,7 +638,6 @@ const float DefaultJpegScalingFactor = 0.9;
 		return;
 	}
 	
-	uploadCancelled = NO;
 	[self setBrowserOpenedInGallery:NO];
 	[self setImagesUploaded:0];
 	[self setFileUploadProgress:[NSNumber numberWithInt:0]];
@@ -779,13 +778,12 @@ const float DefaultJpegScalingFactor = 0.9;
 	[self setImageUploadProgressText:[NSString stringWithFormat:@"%0.0fKB of %0.0fKB", bytesWritten/1024.0, totalBytes/1024.0]];
 }
 
--(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId {
-		
-	if(uploadCancelled) {
-		[self performUploadCompletionTasks:NO];
-		return; // stop uploading
-	}
+-(void)uploadWasCanceled {
+	[self performUploadCompletionTasks:NO];
+}
 
+-(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId {
+	
 	@synchronized(self) {
 		if(!siteUrlHasBeenFetched) {
 			[self setSiteUrlHasBeenFetched:NO];
@@ -794,7 +792,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	}
 
 	// onto the next image
-	[self resetUploadRetryCount];
+ 	[self resetUploadRetryCount];
 	[self setImagesUploaded:[self imagesUploaded] + 1];
 	[self setSessionUploadProgress:[NSNumber numberWithFloat:100.0*((float)[self imagesUploaded])/((float)[[self exportManager] imageCount])]];
 	
@@ -816,7 +814,6 @@ const float DefaultJpegScalingFactor = 0.9;
 }
 
 -(IBAction)cancelUpload:(id)sender {
-	uploadCancelled = YES;
 	[self cancelExport];
 }
 
