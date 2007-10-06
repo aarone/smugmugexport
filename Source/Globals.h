@@ -34,12 +34,13 @@ extern NSString *SMEnableAlbumFetchDelay;
 // jpeg quality factor v to use when scaling images v : 0 <= v <= 1 
 extern NSString *SMJpegQualityFactor;
 
-extern NSString *AlbumID;
-extern NSString *CategoryID;
-extern NSString *SubCategoryID;
+extern NSString *SMAlbumID;
+extern NSString *SMCategoryID;
+extern NSString *SMSubCategoryID;
 
 extern const float DefaultJpegScalingFactor;
 
+extern NSString *SMApplicationName;
 
 // new album property keys
 extern NSString *IsPublicPref;

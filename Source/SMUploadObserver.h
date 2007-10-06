@@ -9,6 +9,7 @@
 #import <Cocoa/Cocoa.h>
 @class SMRequest;
 
+// protocol for monitoring an upload
 @protocol SMUploadObserver
 
 -(void)uploadMadeProgress:(SMRequest *)request bytesWritten:(long)numberOfBytes ofTotalBytes:(long)totalBytes;

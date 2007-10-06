@@ -10,7 +10,7 @@
 #import "SmugMugManager.h"
 #import "ExportPluginProtocol.h"
 #import "ExportMgr.h"
-#import "AccountManager.h"
+#import "SMAccountManager.h"
 #import "Globals.h"
 #import "NSBitmapImageRepAdditions.h"
 #import "NSUserDefaultsAdditions.h"
@@ -33,8 +33,8 @@
 -(int)imagesUploaded;
 -(void)setImagesUploaded:(int)v;
 -(void)resizeWindow;
--(AccountManager *)accountManager;
--(void)setAccountManager:(AccountManager *)mgr;
+-(SMAccountManager *)accountManager;
+-(void)setSMAccountManager:(SMAccountManager *)mgr;
 -(void)registerDefaults;
 -(BOOL)loginAttempted;
 -(void)setLoginAttempted:(BOOL)v;
@@ -95,9 +95,10 @@
 NSLock *GalleryOpenLock = nil;
 
 // Globals
-NSString *AlbumID = @"id";
-NSString *CategoryID = @"id";
-NSString *SubCategoryID = @"id";
+NSString *SMAlbumID = @"id";
+NSString *SMCategoryID = @"id";
+NSString *SMSubCategoryID = @"id";
+NSString *SMApplicationName = @"SmugMugExport";
 
 // UI keys
 NSString *ExistingAlbumTabIdentifier = @"existingAlbum";
@@ -135,7 +136,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	[self initializeLocalizableStrings];
 	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
 	
-	[self setAccountManager:[AccountManager accountManager]];
+	[self setSMAccountManager:[SMAccountManager accountManager]];
 	[self setSmugMugManager:[SmugMugManager smugmugManager]];
 	[[self smugMugManager] setDelegate:self];
 
@@ -506,11 +507,11 @@ const float DefaultJpegScalingFactor = 0.9;
 }
 
 -(NSString *)selectedCategoryId {
-	return [[[categoriesArrayController selectedObjects] objectAtIndex:0] objectForKey:CategoryID];
+	return [[[categoriesArrayController selectedObjects] objectAtIndex:0] objectForKey:SMCategoryID];
 }
 
 -(NSString *)selectedSubCategoryId {
-	return [[[subCategoriesArrayController selectedObjects] objectAtIndex:0] objectForKey:SubCategoryID];
+	return [[[subCategoriesArrayController selectedObjects] objectAtIndex:0] objectForKey:SMSubCategoryID];
 }
 
 -(NSString *)albumTitle {
@@ -535,7 +536,7 @@ const float DefaultJpegScalingFactor = 0.9;
 #pragma mark Delete Album
 
 -(IBAction)removeAlbum:(id)sender {
-	if([[self selectedAlbum] objectForKey:AlbumID] == nil) { // no album is selected
+	if([[self selectedAlbum] objectForKey:SMAlbumID] == nil) { // no album is selected
 		NSBeep();
 		return;
 	}
@@ -566,7 +567,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	[self setIsBusy:YES];
 	[self setIsDeletingAlbum:YES];
 	[self setStatusText:NSLocalizedString(@"Deleting Album...", @"Delete album status")];
-	[[self smugMugManager] deleteAlbum:[[self selectedAlbum] objectForKey:AlbumID]];
+	[[self smugMugManager] deleteAlbum:[[self selectedAlbum] objectForKey:SMAlbumID]];
 }	
 
 -(void)sheetDidDismiss:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo {
@@ -704,7 +705,7 @@ const float DefaultJpegScalingFactor = 0.9;
 
 -(void)uploadNextImage {
 	
-	NSString *selectedAlbumId = [[[self selectedAlbum] objectForKey:AlbumID] stringValue];
+	NSString *selectedAlbumId = [[[self selectedAlbum] objectForKey:SMAlbumID] stringValue];
 	NSString *nextFile = [[self exportManager] imagePathAtIndex:[self imagesUploaded]];
 	NSData *imageData = [self imageDataForPath:nextFile];
 	NSString *filename = [[nextFile pathComponents] lastObject];
@@ -983,11 +984,11 @@ const float DefaultJpegScalingFactor = 0.9;
 	isUploading = v;
 }
 
--(AccountManager *)accountManager {
+-(SMAccountManager *)accountManager {
 	return accountManager;
 }
 
--(void)setAccountManager:(AccountManager *)mgr {
+-(void)setSMAccountManager:(SMAccountManager *)mgr {
 	if([self accountManager] != nil)
 		[[self accountManager] release];
 	
@@ -1041,11 +1042,11 @@ const float DefaultJpegScalingFactor = 0.9;
 }
 
 -(id)description {
-    return NSLocalizedString(@"SmugMugExport", @"Name of the Plugin");
+    return NSLocalizedString(SMApplicationName, @"Name of the Plugin");
 }
 
 -(id)name {
-    return NSLocalizedString(@"SmugMugExport", @"Name of the Project");
+    return NSLocalizedString(SMApplicationName, @"Name of the Project");
 }
 
 -(NSString *)username {

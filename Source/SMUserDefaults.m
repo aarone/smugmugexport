@@ -23,8 +23,7 @@ static SMUserDefaults *sharedSMUserDefaults = nil;
 	return sharedSMUserDefaults;
 }
 
-+ (id)allocWithZone:(NSZone *)zone
-{
++ (id)allocWithZone:(NSZone *)zone {
     @synchronized(self) {
         if (sharedSMUserDefaults == nil) {
             sharedSMUserDefaults = [super allocWithZone:zone];
@@ -34,28 +33,23 @@ static SMUserDefaults *sharedSMUserDefaults = nil;
     return nil; //on subsequent allocation attempts return nil
 }
 
-- (id)copyWithZone:(NSZone *)zone
-{
+- (id)copyWithZone:(NSZone *)zone {
     return self;
 }
 
-- (id)retain
-{
+- (id)retain {
     return self;
 }
 
-- (unsigned)retainCount
-{
+- (unsigned)retainCount {
     return UINT_MAX;  //denotes an object that cannot be released
 }
 
-- (void)release
-{
+- (void)release {
     //do nothing
 }
 
-- (id)autorelease
-{
+- (id)autorelease {
     return self;
 }
 

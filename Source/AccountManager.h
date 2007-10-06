@@ -1,5 +1,5 @@
 //
-//  AccountManager.h
+//  SMAccountManager.h
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 10/29/06.
@@ -13,11 +13,11 @@
  * Interface between exporter instance and the known user accounts.  Does not actually
  * communicate with SmugMug.
  */
-@interface AccountManager : NSObject {
+@interface SMAccountManager : NSObject {
 
 }
 
-+(AccountManager *)accountManager;
++(SMAccountManager *)accountManager;
 -(void)addAccount:(NSString *)account withPassword:(NSString *)password;
 -(NSArray *)accounts;
 -(NSString *)selectedAccount;

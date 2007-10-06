@@ -83,13 +83,13 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 @implementation NSDictionary (SMAdditions)
 -(NSComparisonResult)compareByAlbumId:(NSDictionary *)aDict {
 	
-	if([self objectForKey:AlbumID] == nil)
+	if([self objectForKey:SMAlbumID] == nil)
 		return NSOrderedAscending;
 	
-	if([aDict objectForKey:AlbumID] == nil)
+	if([aDict objectForKey:SMAlbumID] == nil)
 		return NSOrderedDescending;
 		
-	return [[aDict objectForKey:AlbumID] intValue] - [[self objectForKey:AlbumID] intValue];
+	return [[aDict objectForKey:SMAlbumID] intValue] - [[self objectForKey:SMAlbumID] intValue];
 }
 
 -(NSComparisonResult)compareByTitle:(NSDictionary *)aDict {
@@ -660,7 +660,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	
 	[newAlbumProperties setObject:@"smugmug.albums.create" forKey:@"method"];
 	[newAlbumProperties setObject:categoryId forKey:@"CategoryID"];
-	[newAlbumProperties setObject:subCategoryId forKey:@"SubCategoryID"];
+	[newAlbumProperties setObject:subCategoryId forKey:@"SMSubCategoryID"];
 	[newAlbumProperties setObject:[self sessionID] forKey:@"SessionID"];
 	[newAlbumProperties setObject:title forKey:@"Title"];
 	

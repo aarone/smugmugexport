@@ -1,12 +1,12 @@
 //
-//  AccountManager.m
+//  SMAccountManager.m
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 10/29/06.
 //  Copyright 2006 Aaron Evans. All rights reserved.
 //
 
-#import "AccountManager.h"
+#import "SMAccountManager.h"
 #import "KeychainManager.h"
 #import "Globals.h"
 #import "NSUserDefaultsAdditions.h"
@@ -14,7 +14,7 @@
 NSString *KeychainItemName = @"SmugMug Exporter";
 NSString *KeychainItemKind = @"application password";
 
-@interface AccountManager (Private)
+@interface SMAccountManager (Private)
 -(void)populateAccounts;
 -(NSString *)keychainItemNameForAccount:(NSString *)accountId;
 -(BOOL)passwordExistsInKeychainForAccount:(NSString *)account;
@@ -30,7 +30,7 @@ NSString *KeychainItemKind = @"application password";
 -(BOOL)rememberPasswordInKeychain;
 @end
 
-@implementation AccountManager
+@implementation SMAccountManager
 
 -(id)init {
 	if(![super init])
@@ -39,7 +39,7 @@ NSString *KeychainItemKind = @"application password";
 	return self;
 }
 
-+(AccountManager *)accountManager {
++(SMAccountManager *)accountManager {
 	return [[[[self class] alloc] init] autorelease];
 }
 

@@ -7,7 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-@class SmugMugManager, ExportMgr, AccountManager;
+@class SmugMugManager, ExportMgr, SMAccountManager;
 @protocol ExportPluginProtocol, SmugMugManagerDelegate;
 
 @interface SMExportPlugin : NSObject <ExportPluginProtocol, SmugMugManagerDelegate> {
@@ -54,7 +54,7 @@
 
 	ExportMgr *exportManager;
 	SmugMugManager *smugMugManager;
-	AccountManager *accountManager;
+	SMAccountManager *accountManager;
 }
 
 #pragma mark Upload Actions

@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-
+// decodes the responses we receive from smugmug.
 @protocol SMDecoder
 
 +(NSObject<SMDecoder> *)decoder;
