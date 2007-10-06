@@ -11,7 +11,7 @@
 #import "ExportPluginProtocol.h"
 #import "ExportMgr.h"
 #import "SMAccountManager.h"
-#import "Globals.h"
+#import "SMGlobals.h"
 #import "NSBitmapImageRepAdditions.h"
 #import "NSUserDefaultsAdditions.h"
 

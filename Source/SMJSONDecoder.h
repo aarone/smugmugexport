@@ -1,5 +1,5 @@
 //
-//  JSONDecoder.h
+//  SMJSONDecoder.h
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 5/31/07.
@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "SMDecoder.h"
 
-@interface JSONDecoder : NSObject<SMDecoder> {
+@interface SMJSONDecoder : NSObject<SMDecoder> {
 }
 
 +(NSObject<SMDecoder> *)decoder;

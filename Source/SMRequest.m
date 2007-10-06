@@ -9,7 +9,7 @@
 #import "SMRequest.h"
 
 #import "NSURLAdditions.h"
-#import "Globals.h"
+#import "SMGlobals.h"
 #import "NSUserDefaultsAdditions.h"
 #import "SMDecoder.h"
 #import "NSDataAdditions.h"

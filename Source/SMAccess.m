@@ -7,11 +7,11 @@
 //
 
 #import "SMAccess.h"
-#import "Globals.h"
+#import "SMGlobals.h"
 #import "SMRequest.h"
 #import "SMDecoder.h"
 #import "NSUserDefaultsAdditions.h"
-#import "JSONDecoder.h"
+#import "SMJSONDecoder.h"
 
 @interface SMAccess (Private)
 -(NSString *)sessionID;
@@ -124,7 +124,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(NSObject<SMDecoder> *)decoder {
-	return [JSONDecoder decoder];
+	return [SMJSONDecoder decoder];
 }
 
 -(SMRequest *)createRequest {

@@ -8,7 +8,7 @@
 
 #import "NSBitmapImageRepAdditions.h"
 #import "NSUserDefaultsAdditions.h"
-#import "Globals.h"
+#import "SMGlobals.h"
 
 /*
  * there are two problems with this category that I'd like to fix someday:

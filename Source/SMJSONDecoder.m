@@ -6,11 +6,11 @@
 //  Copyright 2007 Aaron Evans. All rights reserved.
 //
 
-#import "JSONDecoder.h"
+#import "SMJSONDecoder.h"
 #import "CJSONDeserializer.h"
-#import "Globals.h"
+#import "SMGlobals.h"
 
-@implementation JSONDecoder
+@implementation SMJSONDecoder
 
 +(NSObject<SMDecoder> *)decoder {
 	return [[[[self class] alloc] init] autorelease];

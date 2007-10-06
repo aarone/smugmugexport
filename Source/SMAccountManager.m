@@ -8,7 +8,7 @@
 
 #import "SMAccountManager.h"
 #import "KeychainManager.h"
-#import "Globals.h"
+#import "SMGlobals.h"
 #import "NSUserDefaultsAdditions.h"
 
 NSString *KeychainItemName = @"SmugMug Exporter";
