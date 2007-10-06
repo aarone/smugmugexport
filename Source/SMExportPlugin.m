@@ -1,6 +1,6 @@
 //
 //  SmugmugExport.m
-//  SMExportPlugin
+//  SmugMugExport
 //
 //  Created by Aaron Evans on 10/7/06.
 //  Copyright 2006 Aaron Evans. All rights reserved.
@@ -133,7 +133,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	
 	exportManager = exportMgr;	
 	[self initializeLocalizableStrings];
-	[NSBundle loadNibNamed: @"SMExportPlugin" owner:self];
+	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
 	
 	[self setAccountManager:[AccountManager accountManager]];
 	[self setSmugMugManager:[SmugMugManager smugmugManager]];
@@ -1041,11 +1041,11 @@ const float DefaultJpegScalingFactor = 0.9;
 }
 
 -(id)description {
-    return NSLocalizedString(@"SMExportPlugin", @"Name of the Plugin");
+    return NSLocalizedString(@"SmugMugExport", @"Name of the Plugin");
 }
 
 -(id)name {
-    return NSLocalizedString(@"SMExportPlugin", @"Name of the Project");
+    return NSLocalizedString(@"SmugMugExport", @"Name of the Project");
 }
 
 -(NSString *)username {
@@ -1140,11 +1140,11 @@ const float DefaultJpegScalingFactor = 0.9;
 }
 
 -(void)unlockProgress {
-	NSLog(@"SMExportPlugin -- unlockProgress");
+	NSLog(@"SmugMugExport -- unlockProgress");
 }
 
 -(void)lockProgress {
-	NSLog(@"SMExportPlugin -- lockProgress");
+	NSLog(@"SmugMugExport -- lockProgress");
 }
 
 -(void *)progress {
@@ -1152,7 +1152,7 @@ const float DefaultJpegScalingFactor = 0.9;
 }
 
 -(void)performExport:(id)fp8 {
-	NSLog(@"SMExportPlugin -- performExport");
+	NSLog(@"SmugMugExport -- performExport");
 }
 
 -(void)startExport:(id)fp8 {

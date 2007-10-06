@@ -1,6 +1,6 @@
 //
 //  KeychainManager.m
-//  SMExportPlugin
+//  SmugMugExport
 //
 //  Created by Aaron Evans on 11/14/06.
 //  Copyright 2006 Aaron Evans. All rights reserved.

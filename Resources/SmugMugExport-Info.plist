@@ -21,6 +21,6 @@
 	<key>NSMainNibFile</key>
 	<string>SmugMugExport</string>
 	<key>NSPrincipalClass</key>
-	<string>SmugMugExport</string>
+	<string>SMExportPlugin</string>
 </dict>
 </plist>

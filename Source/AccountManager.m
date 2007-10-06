@@ -1,6 +1,6 @@
 //
 //  AccountManager.m
-//  SMExportPlugin
+//  SmugMugExport
 //
 //  Created by Aaron Evans on 10/29/06.
 //  Copyright 2006 Aaron Evans. All rights reserved.

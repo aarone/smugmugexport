@@ -10,17 +10,16 @@
 		930961BB0C66A164002B8DAA /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 930961BA0C66A164002B8DAA /* libcrypto.dylib */; };
 		930DE5F30B4831D2008120ED /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 930DE5BE0B4831D2008120ED /* Security.framework */; };
 		932164520B2F78B000624A8D /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9321644E0B2F78B000624A8D /* NSDataAdditions.m */; };
-		932164600B2F78BF00624A8D /* SmugMugExport.m in Sources */ = {isa = PBXBuildFile; fileRef = 932164580B2F78BF00624A8D /* SmugMugExport.m */; };
-		932164620B2F78BF00624A8D /* SmugMugExportBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 9321645A0B2F78BF00624A8D /* SmugMugExportBox.m */; };
 		932164640B2F78BF00624A8D /* SmugMugManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9321645C0B2F78BF00624A8D /* SmugMugManager.m */; };
 		932164800B2F78E000624A8D /* AccountManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9321647E0B2F78E000624A8D /* AccountManager.m */; };
 		932164860B2F78F500624A8D /* SmugMugExport.nib in Resources */ = {isa = PBXBuildFile; fileRef = 932164810B2F78F500624A8D /* SmugMugExport.nib */; };
 		932164960B2F7B4600624A8D /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 932164950B2F7B4600624A8D /* Info.plist */; };
 		932164990B2F7B5700624A8D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 932164970B2F7B5700624A8D /* InfoPlist.strings */; };
 		932165820B2F921E00624A8D /* KeychainManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 932165800B2F921E00624A8D /* KeychainManager.m */; };
-		933A9E550CB7C53900B7B2A5 /* SMTableView.h in Private Frameworks */ = {isa = PBXBuildFile; fileRef = 933A9E530CB7C53900B7B2A5 /* SMTableView.h */; };
 		933A9E560CB7C53900B7B2A5 /* SMTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 933A9E540CB7C53900B7B2A5 /* SMTableView.m */; };
-		935A1A4F0C1CC09700043E12 /* SmugMugUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = 935A1A4E0C1CC09700043E12 /* SmugMugUserDefaults.m */; };
+		933AA0920CB825CA00B7B2A5 /* SMExportBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0900CB825C900B7B2A5 /* SMExportBox.m */; };
+		933AA0B30CB8273000B7B2A5 /* SMUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0B10CB8273000B7B2A5 /* SMUserDefaults.m */; };
+		933AA0CC0CB827CF00B7B2A5 /* SMExportPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0CA0CB827CF00B7B2A5 /* SMExportPlugin.m */; };
 		935A1A870C1CC2CC00043E12 /* NSUserDefaultsAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 935A1A850C1CC2CC00043E12 /* NSUserDefaultsAdditions.m */; };
 		938E26870C0F46E50059F26B /* CJSONDeserializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26810C0F46E50059F26B /* CJSONDeserializer.m */; };
 		938E26890C0F46E50059F26B /* CJSONScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26830C0F46E50059F26B /* CJSONScanner.m */; };
@@ -42,7 +41,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				933A9E550CB7C53900B7B2A5 /* SMTableView.h in Private Frameworks */,
 			);
 			name = "Private Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -57,10 +55,6 @@
 		930DE5BE0B4831D2008120ED /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		9321644D0B2F78B000624A8D /* NSDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSDataAdditions.h; path = Source/NSDataAdditions.h; sourceTree = "<group>"; };
 		9321644E0B2F78B000624A8D /* NSDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSDataAdditions.m; path = Source/NSDataAdditions.m; sourceTree = "<group>"; };
-		932164570B2F78BF00624A8D /* SmugMugExport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugMugExport.h; path = Source/SmugMugExport.h; sourceTree = "<group>"; };
-		932164580B2F78BF00624A8D /* SmugMugExport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SmugMugExport.m; path = Source/SmugMugExport.m; sourceTree = "<group>"; };
-		932164590B2F78BF00624A8D /* SmugMugExportBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugMugExportBox.h; path = Source/SmugMugExportBox.h; sourceTree = "<group>"; };
-		9321645A0B2F78BF00624A8D /* SmugMugExportBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SmugMugExportBox.m; path = Source/SmugMugExportBox.m; sourceTree = "<group>"; };
 		9321645B0B2F78BF00624A8D /* SmugMugManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugMugManager.h; path = Source/SmugMugManager.h; sourceTree = "<group>"; };
 		9321645C0B2F78BF00624A8D /* SmugMugManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SmugMugManager.m; path = Source/SmugMugManager.m; sourceTree = "<group>"; };
 		932164730B2F78D000624A8D /* Globals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Globals.h; path = Source/Globals.h; sourceTree = "<group>"; };
@@ -78,8 +72,12 @@
 		932165800B2F921E00624A8D /* KeychainManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KeychainManager.m; path = Source/KeychainManager.m; sourceTree = "<group>"; };
 		933A9E530CB7C53900B7B2A5 /* SMTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMTableView.h; path = Source/SMTableView.h; sourceTree = "<group>"; };
 		933A9E540CB7C53900B7B2A5 /* SMTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMTableView.m; path = Source/SMTableView.m; sourceTree = "<group>"; };
-		935A19690C1C642A00043E12 /* SmugMugUserDefaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugMugUserDefaults.h; path = Source/SmugMugUserDefaults.h; sourceTree = "<group>"; };
-		935A1A4E0C1CC09700043E12 /* SmugMugUserDefaults.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SmugMugUserDefaults.m; path = Source/SmugMugUserDefaults.m; sourceTree = "<group>"; };
+		933AA08F0CB825C900B7B2A5 /* SMExportBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMExportBox.h; path = Source/SMExportBox.h; sourceTree = "<group>"; };
+		933AA0900CB825C900B7B2A5 /* SMExportBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMExportBox.m; path = Source/SMExportBox.m; sourceTree = "<group>"; };
+		933AA0B00CB8273000B7B2A5 /* SMUserDefaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMUserDefaults.h; path = Source/SMUserDefaults.h; sourceTree = "<group>"; };
+		933AA0B10CB8273000B7B2A5 /* SMUserDefaults.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMUserDefaults.m; path = Source/SMUserDefaults.m; sourceTree = "<group>"; };
+		933AA0C90CB827CF00B7B2A5 /* SMExportPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMExportPlugin.h; path = Source/SMExportPlugin.h; sourceTree = "<group>"; };
+		933AA0CA0CB827CF00B7B2A5 /* SMExportPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMExportPlugin.m; path = Source/SMExportPlugin.m; sourceTree = "<group>"; };
 		935A1A840C1CC2CC00043E12 /* NSUserDefaultsAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSUserDefaultsAdditions.h; path = Source/NSUserDefaultsAdditions.h; sourceTree = "<group>"; };
 		935A1A850C1CC2CC00043E12 /* NSUserDefaultsAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSUserDefaultsAdditions.m; path = Source/NSUserDefaultsAdditions.m; sourceTree = "<group>"; };
 		938E26800C0F46E50059F26B /* CJSONDeserializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CJSONDeserializer.h; path = Source/CJSONDeserializer.h; sourceTree = "<group>"; };
@@ -163,16 +161,14 @@
 			children = (
 				9321647D0B2F78E000624A8D /* AccountManager.h */,
 				9321647E0B2F78E000624A8D /* AccountManager.m */,
-				9321657F0B2F921D00624A8D /* KeychainManager.h */,
-				932165800B2F921E00624A8D /* KeychainManager.m */,
-				932164570B2F78BF00624A8D /* SmugMugExport.h */,
-				932164580B2F78BF00624A8D /* SmugMugExport.m */,
+				933AA0C90CB827CF00B7B2A5 /* SMExportPlugin.h */,
+				933AA0CA0CB827CF00B7B2A5 /* SMExportPlugin.m */,
 				9321645B0B2F78BF00624A8D /* SmugMugManager.h */,
 				9321645C0B2F78BF00624A8D /* SmugMugManager.m */,
-				935A1A4E0C1CC09700043E12 /* SmugMugUserDefaults.m */,
-				935A19690C1C642A00043E12 /* SmugMugUserDefaults.h */,
-				932164590B2F78BF00624A8D /* SmugMugExportBox.h */,
-				9321645A0B2F78BF00624A8D /* SmugMugExportBox.m */,
+				933AA08F0CB825C900B7B2A5 /* SMExportBox.h */,
+				933AA0900CB825C900B7B2A5 /* SMExportBox.m */,
+				933AA0B00CB8273000B7B2A5 /* SMUserDefaults.h */,
+				933AA0B10CB8273000B7B2A5 /* SMUserDefaults.m */,
 				938E26DE0C0F49180059F26B /* SmugMug Access */,
 			);
 			name = Classes;
@@ -230,6 +226,8 @@
 		933A9E5B0CB7C59F00B7B2A5 /* Misc */ = {
 			isa = PBXGroup;
 			children = (
+				9321657F0B2F921D00624A8D /* KeychainManager.h */,
+				932165800B2F921E00624A8D /* KeychainManager.m */,
 				933A9E530CB7C53900B7B2A5 /* SMTableView.h */,
 				933A9E540CB7C53900B7B2A5 /* SMTableView.m */,
 			);
@@ -356,8 +354,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				932164520B2F78B000624A8D /* NSDataAdditions.m in Sources */,
-				932164600B2F78BF00624A8D /* SmugMugExport.m in Sources */,
-				932164620B2F78BF00624A8D /* SmugMugExportBox.m in Sources */,
 				932164640B2F78BF00624A8D /* SmugMugManager.m in Sources */,
 				932164800B2F78E000624A8D /* AccountManager.m in Sources */,
 				932165820B2F921E00624A8D /* KeychainManager.m in Sources */,
@@ -368,12 +364,14 @@
 				938E26930C0F46FA0059F26B /* NSScanner_Extensions.m in Sources */,
 				938E26AB0C0F47EA0059F26B /* NSURLAdditions.m in Sources */,
 				938E27490C0F4DE10059F26B /* NSStringAdditions.m in Sources */,
-				935A1A4F0C1CC09700043E12 /* SmugMugUserDefaults.m in Sources */,
 				935A1A870C1CC2CC00043E12 /* NSUserDefaultsAdditions.m in Sources */,
 				93EE86870C8085850028A598 /* NSBitmapImageRepAdditions.m in Sources */,
 				93DD88F80C8C4AE000A6131B /* JSONDecoder.m in Sources */,
 				93DD89D80C8C526100A6131B /* SMRequest.m in Sources */,
 				933A9E560CB7C53900B7B2A5 /* SMTableView.m in Sources */,
+				933AA0920CB825CA00B7B2A5 /* SMExportBox.m in Sources */,
+				933AA0B30CB8273000B7B2A5 /* SMUserDefaults.m in Sources */,
+				933AA0CC0CB827CF00B7B2A5 /* SMExportPlugin.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

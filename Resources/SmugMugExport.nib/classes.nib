@@ -1,6 +1,38 @@
 {
     IBClasses = (
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = SMExportBox; LANGUAGE = ObjC; SUPERCLASS = NSBox; }, 
+        {
+            ACTIONS = {
+                addNewAlbum = id; 
+                cancelLoginSheet = id; 
+                cancelNewAlbumSheet = id; 
+                cancelUpload = id; 
+                closePreferencesSheet = id; 
+                createAlbum = id; 
+                donate = id; 
+                performLoginFromSheet = id; 
+                removeAlbum = id; 
+                showLoginSheet = id; 
+                showPreferences = id; 
+            }; 
+            CLASS = SMExportPlugin; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                acccountPopupButton = NSPopUpButton; 
+                albumsArrayController = NSArrayController; 
+                categoriesArrayController = NSArrayController; 
+                firstView = id; 
+                lastView = id; 
+                loginPanel = NSPanel; 
+                newAlbumSheet = NSPanel; 
+                preferencesPanel = NSPanel; 
+                settingsBox = NSBox; 
+                subCategoriesArrayController = NSArrayController; 
+                uploadPanel = NSPanel; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }, 
         {
             CLASS = SMTableView; 
             LANGUAGE = ObjC; 
