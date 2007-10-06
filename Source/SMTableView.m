@@ -1,13 +1,13 @@
 //
 //  SMTableView.m
-//  SmugMugExport
+//  SMExportPlugin
 //
 //  Created by Aaron Evans on 10/6/07.
 //  Copyright 2007 Aaron Evans. All rights reserved.
 //
 
 #import "SMTableView.h"
-#import "SmugMugExport.h"
+#import "SMExportPlugin.h"
 
 @implementation SMTableView
 

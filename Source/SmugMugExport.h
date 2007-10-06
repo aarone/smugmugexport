@@ -1,6 +1,6 @@
 //
 //  SmugmugExport.h
-//  SmugMugExport
+//  SMExportPlugin
 //
 //  Created by Aaron Evans on 10/7/06.
 //  Copyright 2006 Aaron Evans. All rights reserved.
@@ -10,7 +10,7 @@
 @class SmugMugManager, ExportMgr, AccountManager;
 @protocol ExportPluginProtocol, SmugMugManagerDelegate;
 
-@interface SmugMugExport : NSObject <ExportPluginProtocol, SmugMugManagerDelegate> {
+@interface SMExportPlugin : NSObject <ExportPluginProtocol, SmugMugManagerDelegate> {
 
 	IBOutlet id firstView;
 	IBOutlet id lastView;

@@ -1,12 +1,12 @@
 //
 //  SmugmugExport.m
-//  SmugMugExport
+//  SMExportPlugin
 //
 //  Created by Aaron Evans on 10/7/06.
 //  Copyright 2006 Aaron Evans. All rights reserved.
 //
 
-#import "SmugMugExport.h"
+#import "SMExportPlugin.h"
 #import "SmugMugManager.h"
 #import "ExportPluginProtocol.h"
 #import "ExportMgr.h"
@@ -15,7 +15,7 @@
 #import "NSBitmapImageRepAdditions.h"
 #import "NSUserDefaultsAdditions.h"
 
-@interface SmugMugExport (Private)
+@interface SMExportPlugin (Private)
 -(ExportMgr *)exportManager;
 -(void)setExportManager:(ExportMgr *)m;
 -(SmugMugManager *)smugMugManager;
@@ -125,7 +125,7 @@ NSString *SMJpegQualityFactor = @"SMJpegQualityFactor";
 static int UploadFailureRetryCount = 3;
 const float DefaultJpegScalingFactor = 0.9;
 
-@implementation SmugMugExport
+@implementation SMExportPlugin
 
 -(id)initWithExportImageObj:(id)exportMgr {
 	if(![super init])
@@ -133,7 +133,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	
 	exportManager = exportMgr;	
 	[self initializeLocalizableStrings];
-	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
+	[NSBundle loadNibNamed: @"SMExportPlugin" owner:self];
 	
 	[self setAccountManager:[AccountManager accountManager]];
 	[self setSmugMugManager:[SmugMugManager smugmugManager]];
@@ -1041,11 +1041,11 @@ const float DefaultJpegScalingFactor = 0.9;
 }
 
 -(id)description {
-    return NSLocalizedString(@"SmugMugExport", @"Name of the Plugin");
+    return NSLocalizedString(@"SMExportPlugin", @"Name of the Plugin");
 }
 
 -(id)name {
-    return NSLocalizedString(@"SmugMugExport", @"Name of the Project");
+    return NSLocalizedString(@"SMExportPlugin", @"Name of the Project");
 }
 
 -(NSString *)username {
@@ -1140,11 +1140,11 @@ const float DefaultJpegScalingFactor = 0.9;
 }
 
 -(void)unlockProgress {
-	NSLog(@"SmugMugExport -- unlockProgress");
+	NSLog(@"SMExportPlugin -- unlockProgress");
 }
 
 -(void)lockProgress {
-	NSLog(@"SmugMugExport -- lockProgress");
+	NSLog(@"SMExportPlugin -- lockProgress");
 }
 
 -(void *)progress {
@@ -1152,7 +1152,7 @@ const float DefaultJpegScalingFactor = 0.9;
 }
 
 -(void)performExport:(id)fp8 {
-	NSLog(@"SmugMugExport -- performExport");
+	NSLog(@"SMExportPlugin -- performExport");
 }
 
 -(void)startExport:(id)fp8 {
@@ -1215,7 +1215,7 @@ const float DefaultJpegScalingFactor = 0.9;
 }
 
 -(void)clickExport {
-	NSLog(@"SmugMugExport -- clickExport");
+	NSLog(@"SMExportPlugin -- clickExport");
 }
 
 - (BOOL)handlesMovieFiles {

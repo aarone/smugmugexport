@@ -1,5 +1,5 @@
 //
-// Prefix header for all source files of the 'SmugMugExport' target in the 'SmugMugExport' project.
+// Prefix header for all source files of the 'SMExportPlugin' target in the 'SMExportPlugin' project.
 //
 
 #ifdef __OBJC__

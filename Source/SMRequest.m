@@ -1,6 +1,6 @@
 //
 //  SMRequest.m
-//  SmugMugExport
+//  SMExportPlugin
 //
 //  Created by Aaron Evans on 5/31/07.
 //  Copyright 2007 Aaron Evans. All rights reserved.
@@ -105,7 +105,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 +(void)initialize {
-	UserAgent = [[NSString alloc] initWithFormat:@"iPhoto SmugMugExport/%@", [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:@"CFBundleVersion"]];
+	UserAgent = [[NSString alloc] initWithFormat:@"iPhoto SMExportPlugin/%@", [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:@"CFBundleVersion"]];
 }
 
 -(void)dealloc {
@@ -119,7 +119,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(NSString *)appName {
-	return @"SmugMugExport";
+	return @"SMExportPlugin";
 }
 
 -(NSString *)uploadApiVersion {
