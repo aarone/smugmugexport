@@ -7,10 +7,10 @@
 //
 
 #import <Cocoa/Cocoa.h>
-@class SmugMugManager, ExportMgr, SMAccountManager;
-@protocol ExportPluginProtocol, SmugMugManagerDelegate;
+@class SMAccess, ExportMgr, SMAccountManager;
+@protocol ExportPluginProtocol, SMAccessDelegate;
 
-@interface SMExportPlugin : NSObject <ExportPluginProtocol, SmugMugManagerDelegate> {
+@interface SMExportPlugin : NSObject <ExportPluginProtocol, SMAccessDelegate> {
 
 	IBOutlet id firstView;
 	IBOutlet id lastView;
@@ -53,7 +53,7 @@
 	int imagesUploaded;
 
 	ExportMgr *exportManager;
-	SmugMugManager *smugMugManager;
+	SMAccess *smAccess;
 	SMAccountManager *accountManager;
 }
 

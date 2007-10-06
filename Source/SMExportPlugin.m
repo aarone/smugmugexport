@@ -7,7 +7,7 @@
 //
 
 #import "SMExportPlugin.h"
-#import "SmugMugManager.h"
+#import "SMAccess.h"
 #import "ExportPluginProtocol.h"
 #import "ExportMgr.h"
 #import "SMAccountManager.h"
@@ -18,8 +18,8 @@
 @interface SMExportPlugin (Private)
 -(ExportMgr *)exportManager;
 -(void)setExportManager:(ExportMgr *)m;
--(SmugMugManager *)smugMugManager;
--(void)setSmugMugManager:(SmugMugManager *)m;
+-(SMAccess *)smAccess;
+-(void)setSMAccess:(SMAccess *)m;
 -(NSString *)username;
 -(void)setUsername:(NSString *)n;
 -(NSString *)password;
@@ -137,8 +137,8 @@ const float DefaultJpegScalingFactor = 0.9;
 	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
 	
 	[self setSMAccountManager:[SMAccountManager accountManager]];
-	[self setSmugMugManager:[SmugMugManager smugmugManager]];
-	[[self smugMugManager] setDelegate:self];
+	[self setSMAccess:[SMAccess smugmugManager]];
+	[[self smAccess] setDelegate:self];
 
 	[self setNewAlbumPreferences:[NSMutableDictionary dictionaryWithDictionary:[self defaultNewAlbumPreferences]]]; 
 	[self setLoginAttempted:NO];
@@ -159,7 +159,7 @@ const float DefaultJpegScalingFactor = 0.9;
 -(void)dealloc {
 	[[self postLogoutInvocation] release];
 	[[self uploadSiteUrl] release];
-	[[self smugMugManager] release];
+	[[self smAccess] release];
 	[[self username] release];
 	[[self password] release];
 	[[self sessionUploadStatusText] release];
@@ -213,9 +213,9 @@ const float DefaultJpegScalingFactor = 0.9;
 			return;
 		
 		NSDictionary *selectedCategory = [[categoriesArrayController selectedObjects] objectAtIndex:0];
-		NSMutableArray *relevantSubCategories = [NSMutableArray arrayWithArray:[[self smugMugManager] subCategoriesForCategory:selectedCategory]];
+		NSMutableArray *relevantSubCategories = [NSMutableArray arrayWithArray:[[self smAccess] subCategoriesForCategory:selectedCategory]];
 		
-		NSDictionary *nullSubCategory = [[self smugMugManager] createNullSubcategory];
+		NSDictionary *nullSubCategory = [[self smAccess] createNullSubcategory];
 		[relevantSubCategories insertObject:nullSubCategory	atIndex:0];
 		[subCategoriesArrayController setContent:nil];
 		[subCategoriesArrayController setContent:relevantSubCategories];
@@ -268,14 +268,14 @@ const float DefaultJpegScalingFactor = 0.9;
 		return;
 	
 	/* don't try to login if we're already logged in or attempting to login */
-	if([[self smugMugManager] isLoggedIn] ||
-	   [[self smugMugManager] isLoggingIn])
+	if([[self smAccess] isLoggedIn] ||
+	   [[self smAccess] isLoggingIn])
 		return;
 	
 	/*
 	 * Show the login window if we're not logged in and there is no way to autologin
 	 */
-	if(![[self smugMugManager] isLoggedIn] && 
+	if(![[self smAccess] isLoggedIn] && 
 	   ![[self accountManager] canAttemptAutoLogin]) {
 		
 		// show the login panel after some delay
@@ -286,8 +286,8 @@ const float DefaultJpegScalingFactor = 0.9;
 	/*
 	 *  If we have a saved password for the previously selected account, log in to that account.
 	 */
-	if(![[self smugMugManager] isLoggedIn] && 
-	   ![[self smugMugManager] isLoggingIn] &&
+	if(![[self smAccess] isLoggedIn] && 
+	   ![[self smAccess] isLoggingIn] &&
 	   [[[self accountManager] accounts] count] > 0 &&
 	   [[self accountManager] selectedAccount] != nil &&
 	   ![self loginAttempted] &&
@@ -296,9 +296,9 @@ const float DefaultJpegScalingFactor = 0.9;
 		[self setLoginAttempted:YES];
 		[self performSelectorOnMainThread:@selector(setIsBusyWithNumber:) withObject:[NSNumber numberWithBool:YES] waitUntilDone:NO];	
 		[self performSelectorOnMainThread:@selector(setStatusText:) withObject:NSLocalizedString(@"Logging in...", @"Status text for logginng in") waitUntilDone:NO];
-		[[self smugMugManager] setUsername:[[self accountManager] selectedAccount]];
-		[[self smugMugManager] setPassword:[[self accountManager] passwordForAccount:[[self accountManager] selectedAccount]]]; 
-		[[self smugMugManager] login]; // gets asyncronous callback
+		[[self smAccess] setUsername:[[self accountManager] selectedAccount]];
+		[[self smAccess] setPassword:[[self accountManager] passwordForAccount:[[self accountManager] selectedAccount]]]; 
+		[[self smAccess] login]; // gets asyncronous callback
 	}
 }
 
@@ -342,9 +342,9 @@ const float DefaultJpegScalingFactor = 0.9;
 	
 	[self setLoginSheetStatusMessage:NSLocalizedString(@"Logging In...", @"log in status string")];
 	[self setLoginSheetIsBusy:YES];
-	[[self smugMugManager] setUsername:[self username]];
-	[[self smugMugManager] setPassword:[self password]];
-	[[self smugMugManager] login]; // gets asyncronous callback
+	[[self smAccess] setUsername:[self username]];
+	[[self smAccess] setPassword:[self password]];
+	[[self smAccess] login]; // gets asyncronous callback
 }
 
 -(void)loginDidComplete:(NSNumber *)wasSuccessful {
@@ -362,13 +362,13 @@ const float DefaultJpegScalingFactor = 0.9;
 	}
 	
 	// attempt to login, if successful add to keychain
-	[[self accountManager] addAccount:[[self smugMugManager] username] withPassword:[[self smugMugManager] password]];
+	[[self accountManager] addAccount:[[self smAccess] username] withPassword:[[self smAccess] password]];
 	
-	[self setSelectedAccount:[[self smugMugManager] username]];
+	[self setSelectedAccount:[[self smAccess] username]];
 	[NSApp endSheet:loginPanel];
 	
-	[[self smugMugManager] buildCategoryList];
-	[[self smugMugManager] buildSubCategoryList];
+	[[self smAccess] buildCategoryList];
+	[[self smAccess] buildSubCategoryList];
 }
 
 
@@ -452,7 +452,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	if([self sheetIsDisplayed])
 		return;
 
-	if(![[self smugMugManager] isLoggedIn] || [[self smugMugManager] isLoggingIn]) {
+	if(![[self smAccess] isLoggedIn] || [[self smAccess] isLoggingIn]) {
 		NSBeep();
 		return;
 	}
@@ -526,7 +526,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	
 	[self setIsCreatingAlbum:YES];	
 	
-	[[self smugMugManager] createNewAlbumWithCategory:[self selectedCategoryId]
+	[[self smAccess] createNewAlbumWithCategory:[self selectedCategoryId]
 										  subcategory:[self selectedSubCategoryId]
 												title:[self albumTitle] 
 									  albumProperties:[self newAlbumPreferences]];
@@ -542,7 +542,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	}
 	
 	// not properly logged in, can't remove an album
-	if(![[self smugMugManager] isLoggedIn] || [[self smugMugManager] isLoggingIn]) {
+	if(![[self smAccess] isLoggedIn] || [[self smAccess] isLoggingIn]) {
 		NSBeep();
 		return;
 	}
@@ -567,7 +567,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	[self setIsBusy:YES];
 	[self setIsDeletingAlbum:YES];
 	[self setStatusText:NSLocalizedString(@"Deleting Album...", @"Delete album status")];
-	[[self smugMugManager] deleteAlbum:[[self selectedAlbum] objectForKey:SMAlbumID]];
+	[[self smAccess] deleteAlbum:[[self selectedAlbum] objectForKey:SMAlbumID]];
 }	
 
 -(void)sheetDidDismiss:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo {
@@ -634,7 +634,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	if([self sheetIsDisplayed]) // this should be impossible
 		return;
 
-	if(![[self smugMugManager] isLoggedIn]) {
+	if(![[self smAccess] isLoggedIn]) {
 		NSBeep();
 		return;
 	}
@@ -712,7 +712,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	
 	if([[self exportManager] respondsToSelector:@selector(imageCaptionAtIndex:)]) {
 		// iPhoto <=6
-		[[self smugMugManager] uploadImageData:imageData
+		[[self smAccess] uploadImageData:imageData
 									  filename:filename
 								   albumWithID:selectedAlbumId
 										 title:[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]]
@@ -720,7 +720,7 @@ const float DefaultJpegScalingFactor = 0.9;
 									  keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]];		
 	} else {
 		// iPhoto 7
-		[[self smugMugManager] uploadImageData:imageData
+		[[self smAccess] uploadImageData:imageData
 									  filename:filename
 								   albumWithID:selectedAlbumId
 										 title:[[self exportManager] imageTitleAtIndex:[self imagesUploaded]]
@@ -788,7 +788,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	@synchronized(self) {
 		if(!siteUrlHasBeenFetched) {
 			[self setSiteUrlHasBeenFetched:NO];
-			[[self smugMugManager] fetchImageUrls:smImageId];
+			[[self smAccess] fetchImageUrls:smImageId];
 		}
 	}
 
@@ -853,7 +853,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	}
 	
 	// if we're already loggin in to another account, logout
-	if([[self smugMugManager] isLoggedIn]) {
+	if([[self smAccess] isLoggedIn]) {
 		// handle the rest of the account changed tasks after we logout
 		NSInvocation *inv = [NSInvocation invocationWithMethodSignature:
 			[self methodSignatureForSelector:@selector(accountChangedTasks:)]];
@@ -862,7 +862,7 @@ const float DefaultJpegScalingFactor = 0.9;
 		[self setPostLogoutInvocation:inv];		
 		[[self postLogoutInvocation] setArgument:account atIndex:0];
 
-		[[self smugMugManager] logout]; // aynchronous callback
+		[[self smAccess] logout]; // aynchronous callback
 	} else {
 		[self accountChangedTasks:account];
 	}
@@ -1030,15 +1030,15 @@ const float DefaultJpegScalingFactor = 0.9;
 }
 
 
--(SmugMugManager *)smugMugManager {
-	return smugMugManager;
+-(SMAccess *)smAccess {
+	return smAccess;
 }
 
--(void)setSmugMugManager:(SmugMugManager *)m {
-	if([self smugMugManager] != nil)
-		[[self smugMugManager] release];
+-(void)setSMAccess:(SMAccess *)m {
+	if([self smAccess] != nil)
+		[[self smAccess] release];
 	
-	smugMugManager = [m retain];
+	smAccess = [m retain];
 }
 
 -(id)description {
@@ -1137,7 +1137,7 @@ const float DefaultJpegScalingFactor = 0.9;
 #pragma mark iPhoto Export Manager Delegate methods
 
 -(void)cancelExport {
-	[[self smugMugManager] stopUpload];
+	[[self smAccess] stopUpload];
 }
 
 -(void)unlockProgress {
@@ -1190,7 +1190,7 @@ const float DefaultJpegScalingFactor = 0.9;
 
 -(void)viewWillBeDeactivated {
 	loginAttempted = NO;
-//	[[self smugMugManager] logout];
+//	[[self smAccess] logout];
 }
 
 -(void)viewWillBeActivated {

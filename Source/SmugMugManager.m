@@ -1,19 +1,19 @@
 //
-//  SmugMugManager.m
+//  SMAccess.m
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 10/7/06.
 //  Copyright 2006 Aaron Evans. All rights reserved.
 //
 
-#import "SmugMugManager.h"
+#import "SMAccess.h"
 #import "Globals.h"
 #import "SMRequest.h"
 #import "SMDecoder.h"
 #import "NSUserDefaultsAdditions.h"
 #import "JSONDecoder.h"
 
-@interface SmugMugManager (Private)
+@interface SMAccess (Private)
 -(NSString *)sessionID;
 -(void)setSessionID:(NSString *)anID;
 -(void)setAlbums:(NSArray *)a;
@@ -97,9 +97,9 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 @end
 
-@implementation SmugMugManager
+@implementation SMAccess
 
-+(SmugMugManager *)smugmugManager {
++(SMAccess *)smugmugManager {
 	return [[[[self class] alloc] init] autorelease];
 }
 

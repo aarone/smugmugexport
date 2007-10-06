@@ -1,5 +1,5 @@
 //
-//  SmugMugManager.h
+//  SMAccess.h
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 10/7/06.
@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "SMUploadObserver.h"
 
-@protocol SmugMugManagerDelegate
+@protocol SMAccessDelegate
 -(void)loginDidComplete:(NSNumber *)wasSuccessful;
 -(void)logoutDidComplete:(NSNumber *)wasSuccessful;
 -(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId;
@@ -29,7 +29,7 @@
  * knows about the SmugMug API but is sheltered from the underlying API
  * implementation (provided by a SMRequest)
  */
-@interface SmugMugManager : NSObject<SMUploadObserver> {
+@interface SMAccess : NSObject<SMUploadObserver> {
 	id delegate;
 
 	NSArray *albums;
@@ -49,7 +49,7 @@
 	long nextProgressThreshold;
 }
 
-+(SmugMugManager *)smugmugManager;
++(SMAccess *)smugmugManager;
 
 -(void)setDelegate:(id)delegate;
 -(id)delegate;
