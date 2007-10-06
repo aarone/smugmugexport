@@ -113,6 +113,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	[[self error] release];
 	[[self decoder] release];
 	[[self imageData] release];
+	[[self response] release];
 	
 	[super dealloc];
 }
@@ -142,7 +143,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(void)setObserver:(NSObject<SMUploadObserver> *)anObserver {
-	observer = anObserver; // avoid retain cycles
+	observer = anObserver;
 }
 
 -(void)setDecoder:(NSObject<SMDecoder> *)aDecoder {
@@ -281,7 +282,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	while(aKey = [keyEnumerator nextObject])
 		[values addObject:[keyValDict objectForKey:aKey]];
 	
-	[self invokeMethodWithURL:baseURL keys:keys values:values responseCallback:callbackSel responseTarget:responseTarget];
+   	[self invokeMethodWithURL:baseURL keys:keys values:values responseCallback:callbackSel responseTarget:responseTarget];
 }
 
 #pragma mark NSURLConnection Delegate Methods
@@ -356,10 +357,12 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 -(void)destroyUploadResources {
 	[self setIsUploading:NO];
 	
-	CFReadStreamUnscheduleFromRunLoop(readStream, CFRunLoopGetCurrent(), kCFRunLoopCommonModes);
-	CFReadStreamClose(readStream);
-	CFRelease(readStream);
-	readStream = nil;
+	if(readStream != NULL) {
+		CFReadStreamUnscheduleFromRunLoop(readStream, CFRunLoopGetCurrent(), kCFRunLoopCommonModes);
+		CFReadStreamClose(readStream);
+		CFRelease(readStream);
+		readStream = NULL;
+	}
 	
 	[self setResponse:nil];
 }
@@ -371,14 +374,15 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	[[NSRunLoop currentRunLoop] addTimer:uploadProgressTimer forMode:NSModalPanelRunLoopMode];
 	
 	while ( [[NSRunLoop currentRunLoop] runMode:NSModalPanelRunLoopMode
-									 beforeDate:[NSDate distantFuture]] );
+									 beforeDate:[NSDate distantFuture]] &&
+			[self isUploading]);
 	
 	[pool release];
 }
 
 -(void)trackUploadProgress:(NSTimer *)timer {
 	
-	if(![self isUploading]) {
+	if(![self isUploading] || readStream == NULL) {
 		[timer invalidate];
 		return;
 	}
@@ -387,6 +391,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	
 	int bytesWritten;
 	CFNumberGetValue (bytesWrittenProperty, 3, &bytesWritten);
+	CFRelease(bytesWrittenProperty);
 	
 	[[self observer] uploadMadeProgress:self bytesWritten:bytesWritten ofTotalBytes:[[self imageData] length]];
 
@@ -473,6 +478,8 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	if (!CFReadStreamSetClient(readStream, DAClientNetworkEvents, ReadStreamClientCallBack, &ctxt)) {
 		CFRelease(readStream);
 		readStream = NULL;
+		NSLog(@"CFReadStreamSetClient returned null on start of upload");
+		return;
 	}
 	
 	CFReadStreamScheduleWithRunLoop(readStream, CFRunLoopGetCurrent(), kCFRunLoopCommonModes);

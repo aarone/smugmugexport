@@ -510,7 +510,7 @@ const float DefaultJpegScalingFactor = 0.9;
 }
 
 -(NSString *)selectedSubCategoryId {
-	return [[[subCategoriesArrayController selectedObjects] objectAtIndex:0] objectForKey:CategoryID];
+	return [[[subCategoriesArrayController selectedObjects] objectAtIndex:0] objectForKey:SubCategoryID];
 }
 
 -(NSString *)albumTitle {

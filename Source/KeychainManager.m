@@ -309,12 +309,10 @@ static KeychainManager *sharedKeychainManager = nil;
             strncpy (passwordBuffer, password, length);
 			
             passwordBuffer[length] = '\0';
+			SecKeychainItemFreeContent (&list, password);
 			return [NSString stringWithUTF8String:passwordBuffer];
         }
-		
-        SecKeychainItemFreeContent (&list, password);
-		
-    } 
+    }
 	
 	return nil;
 }

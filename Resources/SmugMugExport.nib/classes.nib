@@ -2,6 +2,12 @@
     IBClasses = (
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {
+            CLASS = SMTableView; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {exporter = SmugMugExport; }; 
+            SUPERCLASS = NSTableView; 
+        }, 
+        {
             ACTIONS = {
                 addNewAlbum = id; 
                 cancelLoginSheet = id; 

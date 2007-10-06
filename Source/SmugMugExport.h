@@ -23,7 +23,7 @@
 	IBOutlet NSPanel *preferencesPanel;
 	IBOutlet NSArrayController *categoriesArrayController;
 	IBOutlet NSArrayController *subCategoriesArrayController;
-
+	
 	 // this is the username bound to the textfield, account manager holds the real username
 	NSString *username; 
 	NSString *password; // same goes for password..
