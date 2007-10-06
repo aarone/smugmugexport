@@ -1,34 +1,34 @@
 //
-//  SmugMugUserDefaults.m
+//  SMUserDefaults.m
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 6/10/07.
 //  Copyright 2007 Aaron Evans. All rights reserved.
 //
 
-#import "SmugMugUserDefaults.h"
+#import "SMUserDefaults.h"
 
 CFStringRef AppId = NULL;
 
-static SmugMugUserDefaults *sharedSmugMugUserDefaults = nil;
+static SMUserDefaults *sharedSMUserDefaults = nil;
 
-@implementation SmugMugUserDefaults
+@implementation SMUserDefaults
 
-+(SmugMugUserDefaults *)smugMugDefaults {
++(SMUserDefaults *)smugMugDefaults {
 	@synchronized(self) {
-		if(sharedSmugMugUserDefaults == nil) {
+		if(sharedSMUserDefaults == nil) {
 			[[self alloc] init];
 		}
 	}
-	return sharedSmugMugUserDefaults;
+	return sharedSMUserDefaults;
 }
 
 + (id)allocWithZone:(NSZone *)zone
 {
     @synchronized(self) {
-        if (sharedSmugMugUserDefaults == nil) {
-            sharedSmugMugUserDefaults = [super allocWithZone:zone];
-            return sharedSmugMugUserDefaults;  // assignment and return on first allocation
+        if (sharedSMUserDefaults == nil) {
+            sharedSMUserDefaults = [super allocWithZone:zone];
+            return sharedSMUserDefaults;  // assignment and return on first allocation
         }
     }
     return nil; //on subsequent allocation attempts return nil

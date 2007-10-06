@@ -174,7 +174,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	[super dealloc];
 }
 
--(SmugMugUserDefaults *)defaults {
+-(SMUserDefaults *)defaults {
 	return [NSUserDefaults smugMugUserDefaults];
 }
 

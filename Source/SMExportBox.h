@@ -1,5 +1,5 @@
 //
-//  SmugmugExportBox.h
+//  SMExportBox.h
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 10/7/06.
@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "ExportPluginBoxProtocol.h"
 
-@interface SmugMugExportBox : NSBox <ExportPluginBoxProtocol> {
+@interface SMExportBox : NSBox <ExportPluginBoxProtocol> {
 
 }
 

@@ -7,12 +7,12 @@
 //
 
 #import "NSUserDefaultsAdditions.h"
-#import "SmugMugUserDefaults.h"
+#import "SMUserDefaults.h"
 
 @implementation NSUserDefaults (NSUserDefaultsAdditions)
 
-+(SmugMugUserDefaults *)smugMugUserDefaults {
-	return [SmugMugUserDefaults smugMugDefaults];
++(SMUserDefaults *)smugMugUserDefaults {
+	return [SMUserDefaults smugMugDefaults];
 }
 
 @end

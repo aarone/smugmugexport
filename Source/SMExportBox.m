@@ -1,15 +1,15 @@
 //
-//  SmugmugExportBox.m
+//  SMExportBox.m
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 10/7/06.
 //  Copyright 2006 Aaron Evans. All rights reserved.
 //
 
-#import "SmugmugExportBox.h"
+#import "SMExportBox.h"
 
 
-@implementation SmugMugExportBox
+@implementation SMExportBox
 
 - (BOOL)performKeyEquivalent:(id)fp8 {
 	return NO;

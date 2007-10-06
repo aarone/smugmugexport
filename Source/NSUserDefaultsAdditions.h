@@ -7,10 +7,10 @@
 //
 
 #import <Cocoa/Cocoa.h>
-@class SmugMugUserDefaults;
+@class SMUserDefaults;
 
 @interface NSUserDefaults (NSUserDefaultsAdditions)
 
-+(SmugMugUserDefaults *)smugMugUserDefaults;
++(SMUserDefaults *)smugMugUserDefaults;
 
 @end

@@ -1,5 +1,5 @@
 //
-//  SmugMugUserDefaults.h
+//  SMUserDefaults.h
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 6/10/07.
@@ -9,11 +9,11 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface SmugMugUserDefaults : NSObject {
+@interface SMUserDefaults : NSObject {
 
 }
 
-+(SmugMugUserDefaults *)smugMugDefaults;
++(SMUserDefaults *)smugMugDefaults;
 
 -(void)registerDefaults:(NSDictionary *)dictionary;
 -(void)setObject:(id)val forKey:(id)key;
