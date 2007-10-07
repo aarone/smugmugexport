@@ -34,7 +34,7 @@
 -(void)setImagesUploaded:(int)v;
 -(void)resizeWindow;
 -(SMAccountManager *)accountManager;
--(void)setSMAccountManager:(SMAccountManager *)mgr;
+-(void)setAccountManager:(SMAccountManager *)mgr;
 -(void)registerDefaults;
 -(BOOL)loginAttempted;
 -(void)setLoginAttempted:(BOOL)v;
@@ -57,7 +57,7 @@
 -(void)setLoginSheetIsBusy:(BOOL)v;
 -(void)setUploadRetryCount:(int)v;
 -(int)uploadRetryCount;
--(void)setInsertionPoint;
+-(void)setInsertionPoint:(NSWindow *)aWindow;
 -(void)incrementUploadRetryCount;
 -(void)resetUploadRetryCount;
 -(void)presentError:(NSString *)errorText;
@@ -124,8 +124,10 @@ NSString *SMEnableNetworkTracing = @"SMEnableNetworkTracing";
 NSString *SMEnableAlbumFetchDelay = @"SMEnableAlbumFetchDelay";
 NSString *SMJpegQualityFactor = @"SMJpegQualityFactor";
 
-static int UploadFailureRetryCount = 3;
+static const int UploadFailureRetryCount = 3;
 const float DefaultJpegScalingFactor = 0.9;
+static const int SMDefaultScaledHeight = 2592;
+static const int SMDefaultScaledWidth = 2592;
 
 @implementation SMExportPlugin
 
@@ -137,7 +139,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	[self initializeLocalizableStrings];
 	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
 	
-	[self setSMAccountManager:[SMAccountManager accountManager]];
+	[self setAccountManager:[SMAccountManager accountManager]];
 	[self setSMAccess:[SMAccess smugmugManager]];
 	[[self smAccess] setDelegate:self];
 
@@ -192,6 +194,8 @@ const float DefaultJpegScalingFactor = 0.9;
 	[defaultsDict setObject:@"yes" forKey:SMEnableAlbumFetchDelay];
 	[defaultsDict setObject:[NSNumber numberWithFloat:DefaultJpegScalingFactor] forKey:SMJpegQualityFactor];
 	[defaultsDict setObject:[NSNumber numberWithInt:0] forKey:SMSelectedScalingTag];
+	[defaultsDict setObject:[NSNumber numberWithInt: SMDefaultScaledWidth] forKey:SMImageScaleWidth];
+	[defaultsDict setObject:[NSNumber numberWithInt: SMDefaultScaledHeight] forKey:SMImageScaleHeight];
 	
 	[[NSUserDefaults smugMugUserDefaults] registerDefaults:defaultsDict];
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.accounts"] triggerChangeNotificationsForDependentKey:@"accounts"];
@@ -316,16 +320,16 @@ const float DefaultJpegScalingFactor = 0.9;
 	   didEndSelector:@selector(loginDidEndSheet:returnCode:contextInfo:)
 		  contextInfo:nil];
 
-	[self setInsertionPoint];
+	[self setInsertionPoint:[self loginPanel]];
 	
 	// mark that we've shown the user the login sheet at least once
 	[self setLoginAttempted:YES];
 }
 
--(void)setInsertionPoint {
-	if([[loginPanel firstResponder] respondsToSelector:@selector(setString:)]) {
+-(void)setInsertionPoint:(NSWindow *)aWindow {
+	if([[aWindow firstResponder] respondsToSelector:@selector(setString:)]) {
 		// hack to get insertion point to appear in textfield
-		[(NSTextView *)[loginPanel firstResponder] setString:@""];
+		[(NSTextView *)[aWindow firstResponder] setString:@""];
 	}	
 }
 
@@ -469,7 +473,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	   didEndSelector:@selector(newAlbumDidEndSheet:returnCode:contextInfo:)
 		  contextInfo:nil];
 
-	[self setInsertionPoint];
+	[self setInsertionPoint:[self newAlbumSheet]];
 }
 
 -(IBAction)cancelNewAlbumSheet:(id)sender {
@@ -733,7 +737,7 @@ const float DefaultJpegScalingFactor = 0.9;
 
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful {
 	[NSApp endSheet:uploadPanel];
-	[[self exportManager] cancelExportBeforeBeginning];
+//	[[self exportManager] cancelExportBeforeBeginning];
 	[self setIsUploading:NO];
 
 	[GalleryOpenLock lock];
@@ -990,7 +994,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	return accountManager;
 }
 
--(void)setSMAccountManager:(SMAccountManager *)mgr {
+-(void)setAccountManager:(SMAccountManager *)mgr {
 	if([self accountManager] != nil)
 		[[self accountManager] release];
 	
