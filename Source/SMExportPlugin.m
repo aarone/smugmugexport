@@ -57,6 +57,7 @@
 -(void)setLoginSheetIsBusy:(BOOL)v;
 -(void)setUploadRetryCount:(int)v;
 -(int)uploadRetryCount;
+-(void)setInsertionPoint;
 -(void)incrementUploadRetryCount;
 -(void)resetUploadRetryCount;
 -(void)presentError:(NSString *)errorText;
@@ -315,13 +316,17 @@ const float DefaultJpegScalingFactor = 0.9;
 	   didEndSelector:@selector(loginDidEndSheet:returnCode:contextInfo:)
 		  contextInfo:nil];
 
+	[self setInsertionPoint];
+	
+	// mark that we've shown the user the login sheet at least once
+	[self setLoginAttempted:YES];
+}
+
+-(void)setInsertionPoint {
 	if([[loginPanel firstResponder] respondsToSelector:@selector(setString:)]) {
 		// hack to get insertion point to appear in textfield
 		[(NSTextView *)[loginPanel firstResponder] setString:@""];
-	}
-		
-	// mark that we've shown the user the login sheet at least once
-	[self setLoginAttempted:YES];
+	}	
 }
 
 -(IBAction)cancelLoginSheet:(id)sender {
@@ -464,10 +469,7 @@ const float DefaultJpegScalingFactor = 0.9;
 	   didEndSelector:@selector(newAlbumDidEndSheet:returnCode:contextInfo:)
 		  contextInfo:nil];
 
-	if([[[self newAlbumSheet] firstResponder] respondsToSelector:@selector(setString:)]) {
-		// hack to get insertion point to appear in textfield
-		[(NSTextView *)[[self newAlbumSheet] firstResponder] setString:@""];
-	}
+	[self setInsertionPoint];
 }
 
 -(IBAction)cancelNewAlbumSheet:(id)sender {
