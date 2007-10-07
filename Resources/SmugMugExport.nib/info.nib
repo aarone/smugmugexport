@@ -30,11 +30,11 @@
 	<key>IBOpenObjects</key>
 	<array>
 		<integer>189</integer>
-		<integer>5</integer>
 		<integer>18</integer>
 		<integer>61</integer>
+		<integer>5</integer>
 	</array>
 	<key>IBSystem Version</key>
-	<string>8R2218</string>
+	<string>8R218</string>
 </dict>
 </plist>
