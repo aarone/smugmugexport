@@ -429,11 +429,50 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	return NSLocalizedString(@"Unknown domain", @"Default stream error domain.");
 }
 
+-(NSString *)errorDescriptionForError:(CFStreamError *)err {
+
+	if(err->domain == kCFStreamErrorDomainPOSIX) {
+		return [NSString stringWithFormat:@"%d : %s", err->error, strerror(err->error)];
+	} else {
+		return [NSString stringWithFormat:@"%d", err->error];
+	}
+		
+}
+
+-(NSString *)errorTextForError:(CFStreamError *)err {
+	NSString *domain = [self domainStringForError:err];
+	NSString *desc = [self errorDescriptionForError:err];
+	return [NSString stringWithFormat:@"%@ : %@", domain, desc];
+}
+
 -(void)errorOccurred: (CFStreamError *)err {
-	NSString *errorText = [NSString stringWithFormat:@"%@ : %d", [self domainStringForError:err], err->error];
+	NSString *errorText = [self errorTextForError:err];// domainStringForError:err errorNumber:err->error];
 
 	[[self observer] uploadFailed:self withError:errorText];
 	[self destroyUploadResources];
+}
+
+-(NSString *)imageHeadersForRequest:(CFHTTPMessageRef *)myRequest {
+	NSDictionary *headers = (NSDictionary *)CFHTTPMessageCopyAllHeaderFields(*myRequest);
+	NSEnumerator *enumerator = [headers keyEnumerator];
+	NSMutableString *result = [NSMutableString string];
+	NSString *key;
+	while(key = [enumerator nextObject])
+		[result appendFormat:@"%@: %@\n", key, [headers objectForKey:key]];
+		
+	[headers release];
+	return result;
+}
+
+-(NSString *)cleanNewlines:(NSString *)aString {
+	// adding a newline to a header will cause the sent request to be invalid.
+	// use carriage returns instead of newlines.
+	NSMutableString *cleanedString = [[aString mutableCopy] autorelease];
+	[cleanedString replaceOccurrencesOfString:@"\n"
+								   withString:@"\r"
+									  options:nil
+										range:NSMakeRange(0, [cleanedString length])];
+	return cleanedString;
 }
 
 -(void)uploadImageData:(NSData *)theImageData
@@ -460,14 +499,18 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-SessionID"), (CFStringRef)sessionId);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Version"), (CFStringRef)[self uploadApiVersion]);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-ResponseType"), (CFStringRef)[self uploadResponseType]);
-	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-FileName"), (CFStringRef)filename);
+	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-FileName"), (CFStringRef)[self cleanNewlines:filename]);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-AlbumID"), (CFStringRef)albumId);
 
 	if(!IsEmpty(caption))
-		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Caption"), (CFStringRef)caption);
+		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Caption"), (CFStringRef)[self cleanNewlines:caption]);
 
 	if(keywords != nil && [keywords count] > 0)
-		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Keywords"), (CFStringRef)[keywords componentsJoinedByString:@" "]);
+		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Keywords"), (CFStringRef)[self cleanNewlines:[keywords componentsJoinedByString:@" "]]);
+	
+	if(IsNetworkTracingEnabled()) {
+		NSLog(@"Image headers: %@", [self imageHeadersForRequest:&myRequest]);
+	}
 	
 	CFHTTPMessageSetBody(myRequest, (CFDataRef)theImageData);
 	

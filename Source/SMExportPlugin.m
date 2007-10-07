@@ -124,7 +124,8 @@ NSString *SMEnableNetworkTracing = @"SMEnableNetworkTracing";
 NSString *SMEnableAlbumFetchDelay = @"SMEnableAlbumFetchDelay";
 NSString *SMJpegQualityFactor = @"SMJpegQualityFactor";
 
-static const int UploadFailureRetryCount = 3;
+// two additional attempts to upload an image if the upload fails
+static const int UploadFailureRetryCount = 2; 
 const float DefaultJpegScalingFactor = 0.9;
 static const int SMDefaultScaledHeight = 2592;
 static const int SMDefaultScaledWidth = 2592;
@@ -761,9 +762,8 @@ static const int SMDefaultScaledWidth = 2592;
 		// if an error occurred, retry up to UploadFailureRetryCount times
 		
 		[self incrementUploadRetryCount];
-		[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Retrying upload of image %d of %d", @"Retry upload progress"), [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
-		
-		[self uploadNextImage];		
+		[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Retrying upload of image %d of %d\nReason: %@", @"Retry upload progress"), [self imagesUploaded] + 1, [[self exportManager] imageCount], errorText]];
+		[self uploadNextImage];
 		return;
 	} else {
 		// our max retries have been hit, stop uploading
