@@ -8,8 +8,6 @@
 
 #import "SMUserDefaults.h"
 
-CFStringRef AppId = NULL;
-
 static SMUserDefaults *sharedSMUserDefaults = nil;
 
 @implementation SMUserDefaults
@@ -53,8 +51,8 @@ static SMUserDefaults *sharedSMUserDefaults = nil;
     return self;
 }
 
-+(void)initialize {
-	AppId =	(CFStringRef)CFSTR("org.aarone.smugmugexport");
+-(CFStringRef)appId {
+	return (CFStringRef)[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleIdentifier"];
 }
 
 -(void)registerDefaults:(NSDictionary *)dictionary {
@@ -71,10 +69,10 @@ static SMUserDefaults *sharedSMUserDefaults = nil;
 -(void)setValue:(id)val forUndefinedKey:(id)key {
 	CFPreferencesSetValue((CFStringRef)key,
 						  (CFPropertyListRef)val,
-						  AppId,
+						  [self appId],
 						  kCFPreferencesCurrentUser,
 						  kCFPreferencesAnyHost);
-	CFPreferencesSynchronize(AppId,
+	CFPreferencesSynchronize([self appId],
 							 kCFPreferencesCurrentUser,
 							 kCFPreferencesAnyHost);
 }
@@ -89,7 +87,7 @@ static SMUserDefaults *sharedSMUserDefaults = nil;
 
 - (id)valueForUndefinedKey:(id)key {
 	CFPropertyListRef val = CFPreferencesCopyValue((CFStringRef)key,
-												   AppId,
+												   [self appId],
 												   kCFPreferencesCurrentUser,
 												   kCFPreferencesAnyHost);
 	return [(id)val autorelease];
