@@ -12,4 +12,5 @@
 @interface NSData (NSDataAdditions)
 -(NSString *)md5HexString;
 -(NSData *)md5Hash;
++(NSData *)dataFromModGzUrl:(NSURL *)url;
 @end

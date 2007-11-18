@@ -428,7 +428,6 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 -(void)uploadImageData:(NSData *)imageData
 			  filename:(NSString *)filename
 		   albumWithID:(NSString *)albumId 
-				 title:(NSString *)title
 			  caption:(NSString *)caption
 			  keywords:(NSArray *)keywords {
 	
@@ -438,7 +437,6 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 						  filename:filename
 						 sessionId:[self sessionID]
 						   albumID:albumId
-							 title:title
 						  caption:caption
 						  keywords:keywords
 						  observer:self];

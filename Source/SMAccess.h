@@ -71,7 +71,6 @@
 -(void)uploadImageData:(NSData *)imageData
 			  filename:(NSString *)filename
 		   albumWithID:(NSString *)albumId 
-				 title:(NSString *)title
 			   caption:(NSString *)caption
 			  keywords:(NSArray *)keywords;
 -(void)stopUpload;

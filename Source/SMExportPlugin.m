@@ -14,6 +14,7 @@
 #import "SMGlobals.h"
 #import "NSBitmapImageRepAdditions.h"
 #import "NSUserDefaultsAdditions.h"
+#import "NSDataAdditions.h"
 
 @interface SMExportPlugin (Private)
 -(ExportMgr *)exportManager;
@@ -80,7 +81,7 @@
 -(void)setPostLogoutInvocation:(NSInvocation *)inv;
 -(void)accountChangedTasks:(NSString *)account;
 -(NSPredicate *)createRelevantSubCategoryPredicate;
--(void)initializeLocalizableStrings;
++(void)initializeLocalizableStrings;
 -(BOOL)siteUrlHasBeenFetched;
 -(void)setSiteUrlHasBeenFetched:(BOOL)v;
 -(NSURL *)uploadSiteUrl;
@@ -91,6 +92,60 @@
 -(void)setNewAlbumPreferences:(NSMutableDictionary *)a;
 -(NSDictionary *)newAlbumOptionalPrefDictionary;
 -(void)clearAlbumCreationState;
+-(NSArray *)filenameSelectionOptions;
+-(NSString *)chooseUploadFilename:(NSString *)filename title:(NSString *)imageTitle;
+-(void)displayUserUpdatePolicy;
+-(BOOL)isUpdateInProgress;
+-(void)setIsUpdateInProgress:(BOOL)v;
+-(void)remoteVersionInfoWasFetch:(NSDictionary *)remoteInfo;
+-(void)displayUpdateAvailable:(NSDictionary *)remoteInfo;
+-(void)displayNoUpdateAvailable;
+@end
+
+@interface NSString (SMStringAdditions)
+-(NSComparisonResult)compareVersionToVersion:(NSString *)aVersion;
+@end
+
+@implementation NSString (SMStringAdditions)
+// version strings are ${major}.${minor}.${micro}
+-(NSComparisonResult)compareVersionToVersion:(NSString *)aVersion {
+	NSArray *thisComponents = [self componentsSeparatedByString:@"."];
+	NSArray *thatComponents = [aVersion componentsSeparatedByString:@"."];
+	
+	if(IsEmpty(thisComponents))
+		return NSOrderedSame;
+	if(IsEmpty(thatComponents))
+		return NSOrderedSame;
+	
+	NSString *thisMajor = [thisComponents objectAtIndex:0];
+	NSString *thatMajor = [thatComponents objectAtIndex:0];
+	NSString *thisMinor = [thisComponents count] > 0 ? [thisComponents objectAtIndex:1] : nil;
+	NSString *thatMinor = [thatComponents count] > 0 ? [thatComponents objectAtIndex:1] : nil;
+	NSString *thisMicro = [thisComponents count] > 1 ? [thisComponents objectAtIndex:2] : nil;
+	NSString *thatMicro = [thatComponents count] > 1 ? [thatComponents objectAtIndex:2] : nil;
+
+	NSComparisonResult result ;
+	if((result = [thisMajor compare:thatMajor]) != NSOrderedSame)
+		return result;
+	
+	// 2.X > 2 
+	if(thisMinor == nil && thatMinor != nil)
+		return NSOrderedAscending;
+	else if(thisMinor != nil && thatMinor == nil)
+		return NSOrderedDescending;
+	
+	if((result = [thisMinor compare:thatMinor]) != NSOrderedSame)
+		return result;
+	
+	// 2.3.0 > 2.3
+	if(thisMicro == nil && thatMicro != nil)
+		return NSOrderedAscending;
+	else if(thisMicro != nil && thatMicro == nil)
+		return NSOrderedDescending;
+	
+	return [thisMicro compare:thatMicro];
+}
+
 @end
 
 NSLock *GalleryOpenLock = nil;
@@ -99,7 +154,6 @@ NSLock *GalleryOpenLock = nil;
 NSString *SMAlbumID = @"id";
 NSString *SMCategoryID = @"id";
 NSString *SMSubCategoryID = @"id";
-NSString *SMApplicationName = @"SmugMugExport";
 
 // UI keys
 NSString *ExistingAlbumTabIdentifier = @"existingAlbum";
@@ -108,6 +162,10 @@ NSString *NewAlbumTabIdentifier = @"newAlbum";
 // UI strings
 NSString *NewAccountLabel;
 NSString *NullSubcategoryLabel;
+
+NSArray *FilenameSelectionOptions;
+NSString *SMUploadedFilenameOptionFilename;
+NSString *SMUploadedFilenameOptionTitle;
 
 // defaults keys
 NSString *SMESelectedTabIdDefaultsKey = @"SMESelectedTabId";
@@ -123,12 +181,23 @@ NSString *SMShowAlbumDeleteAlert = @"SMShowAlbumDeleteAlert";
 NSString *SMEnableNetworkTracing = @"SMEnableNetworkTracing";
 NSString *SMEnableAlbumFetchDelay = @"SMEnableAlbumFetchDelay";
 NSString *SMJpegQualityFactor = @"SMJpegQualityFactor";
+NSString *SMRemoteInfoURL = @"SMRemoteInfoURL";
+NSString *SMCheckForUpdates = @"SMCheckForUpdates";
+NSString *SMUserHasSeenUpdatePolicy = @"SMUserHasSeenUpdatePolicy";
+NSString *SMAutomaticallyCheckForUpdates = @"SMAutomaticallyCheckForUpdates";
+NSString *SMUploadedFilename = @"SMUploadFilename";
+NSString *SMLastUpdateCheck = @"SMLastUpdateCheck";
+NSString *SMUpdateCheckInterval = @"SMUpdateCheckInterval";
+
 
 // two additional attempts to upload an image if the upload fails
 static const int UploadFailureRetryCount = 2; 
 const float DefaultJpegScalingFactor = 0.9;
 static const int SMDefaultScaledHeight = 2592;
 static const int SMDefaultScaledWidth = 2592;
+static const NSTimeInterval SMDefaultUpdateCheckInterval = 24.0*60.0*60.0;
+
+NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/versionInfo.plist";
 
 @implementation SMExportPlugin
 
@@ -137,7 +206,6 @@ static const int SMDefaultScaledWidth = 2592;
 		return nil;
 	
 	exportManager = exportMgr;	
-	[self initializeLocalizableStrings];
 	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
 	
 	[self setAccountManager:[SMAccountManager accountManager]];
@@ -155,9 +223,16 @@ static const int SMDefaultScaledWidth = 2592;
 	return self;
 }
 
--(void)initializeLocalizableStrings {
++(void)initializeLocalizableStrings {
 	NewAccountLabel = NSLocalizedString(@"New Account...", @"Text for New Account entry in account popup");
 	NullSubcategoryLabel = NSLocalizedString(@"None", @"Text for Null SubCategory");
+	SMUploadedFilenameOptionFilename = NSLocalizedString(@"filename", @"filename option for upload filename preference");
+	SMUploadedFilenameOptionTitle = NSLocalizedString(@"title", @"title option for upload filename preference");
+	
+	FilenameSelectionOptions = [[NSArray alloc] initWithObjects:
+								SMUploadedFilenameOptionFilename,
+								SMUploadedFilenameOptionTitle,
+								nil];
 }
 
 -(void)dealloc {
@@ -184,6 +259,8 @@ static const int SMDefaultScaledWidth = 2592;
 }
 
 +(void)initialize {
+	[self initializeLocalizableStrings];
+	
 	NSMutableDictionary *defaultsDict = [NSMutableDictionary dictionary];
 	[defaultsDict setObject:ExistingAlbumTabIdentifier forKey:SMESelectedTabIdDefaultsKey];
 	[defaultsDict setObject:[NSArray array] forKey:SMEAccountsDefaultsKey];
@@ -197,8 +274,16 @@ static const int SMDefaultScaledWidth = 2592;
 	[defaultsDict setObject:[NSNumber numberWithInt:0] forKey:SMSelectedScalingTag];
 	[defaultsDict setObject:[NSNumber numberWithInt: SMDefaultScaledWidth] forKey:SMImageScaleWidth];
 	[defaultsDict setObject:[NSNumber numberWithInt: SMDefaultScaledHeight] forKey:SMImageScaleHeight];
-	
+	[defaultsDict setObject:defaultRemoteVersionInfo forKey:SMRemoteInfoURL];
+	[defaultsDict setObject:@"yes" forKey:SMCheckForUpdates];
+	[defaultsDict setObject:SMUploadedFilenameOptionFilename forKey:SMUploadedFilename];
+	[defaultsDict setObject:[NSNumber numberWithBool:NO] forKey:SMUserHasSeenUpdatePolicy];
+	[defaultsDict setObject:[NSNumber numberWithBool:NO] forKey:SMAutomaticallyCheckForUpdates];
+	[defaultsDict setObject:[NSDate distantPast] forKey:SMLastUpdateCheck];
+	[defaultsDict setObject:[NSNumber numberWithInt:SMDefaultUpdateCheckInterval] forKey:SMUpdateCheckInterval];
+		
 	[[NSUserDefaults smugMugUserDefaults] registerDefaults:defaultsDict];
+	
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.accounts"] triggerChangeNotificationsForDependentKey:@"accounts"];
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.selectedAccount"] triggerChangeNotificationsForDependentKey:@"selectedAccount"];
 	
@@ -212,8 +297,7 @@ static const int SMDefaultScaledWidth = 2592;
 - (void)observeValueForKeyPath:(NSString *)keyPath
 					  ofObject:(id)object
                         change:(NSDictionary *)change
-                       context:(void *)context
-{
+                       context:(void *)context {
 	if([keyPath isEqualToString:@"selectionIndex"]) {
 		if([categoriesArrayController selectedObjects] == nil || [[categoriesArrayController selectedObjects] count] == 0)
 			return;
@@ -234,6 +318,14 @@ static const int SMDefaultScaledWidth = 2592;
 		[[self loginPanel] isVisible] ||
 		[[self uploadPanel] isVisible] ||
 		errorAlertSheetIsVisisble;
+}
+
+-(NSString *)versionString {
+	return [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:@"CFBundleVersion"];
+}
+
+-(NSArray *)filenameSelectionOptions {
+	return FilenameSelectionOptions;
 }
 
 -(IBAction)donate:(id)sender {
@@ -261,6 +353,137 @@ static const int SMDefaultScaledWidth = 2592;
 	errorAlertSheetIsVisisble = NO;
 	[alert release];
 }
+
+#pragma mark Software Update
+-(NSDictionary *)remoteVersionInfo {
+	NSURL *versionInfoLocation = [NSURL URLWithString:[[self defaults] objectForKey:SMRemoteInfoURL]];
+	if(versionInfoLocation == nil) {
+		NSLog(@"Cannot find a url for remote version.");
+		return nil;
+	}
+	
+	NSData *remoteData = [NSData dataFromModGzUrl:versionInfoLocation];
+	NSDictionary *remoteInfo = [NSPropertyListSerialization propertyListFromData:remoteData
+																mutabilityOption:NSPropertyListImmutable
+																		  format:NULL
+																errorDescription:nil];
+	return remoteInfo;
+}
+
+-(void)displayUserUpdatePolicy {
+	NSAlert *alert = [[NSAlert alloc] init];
+	[alert addButtonWithTitle:NSLocalizedString(@"Automatically Check", @"Option button text for automatically checking for updates")];
+	[alert addButtonWithTitle:NSLocalizedString(@"Manually Check", @"Option button text for automatically checking for updates")];
+	[alert setMessageText:NSLocalizedString(@"Automatically check for updates?", @"Message text for update confirmation text")];
+	[alert setInformativeText:NSLocalizedString(@"SmugMugExport can automatically check for new versions of the plugin.", @"Informative text to display when user selects whether to check for updates automatically.")];
+	[alert setAlertStyle:NSInformationalAlertStyle];
+	
+	int selectedButton = [alert runModal];
+	
+	[[self defaults] setObject:[NSNumber numberWithBool:YES] forKey:SMUserHasSeenUpdatePolicy];
+	[[self defaults] setObject:[NSNumber numberWithBool:selectedButton = NSAlertFirstButtonReturn] forKey:SMAutomaticallyCheckForUpdates];
+	[alert release];
+}
+
+-(void)checkForUpdatesIfNecessary {
+	if(![[[self defaults] objectForKey:SMCheckForUpdates] boolValue])
+		return;
+	
+	NSDate *lastCheck = [[self defaults] objectForKey:SMLastUpdateCheck];
+	NSTimeInterval interval = [[[self defaults] objectForKey:SMUpdateCheckInterval] doubleValue];
+	if([[NSDate date] timeIntervalSinceDate:lastCheck] > interval) {
+		[NSThread detachNewThreadSelector:@selector(checkForUpdatesInBackground:)
+								 toTarget:self
+							   withObject:[NSNumber numberWithBool:NO]];
+	}
+}
+
+-(IBAction)checkForUpdates:(id)sender {
+	if([self isUpdateInProgress]) {
+		NSLog(@"Cannot check for updates because a check is already in progress.");
+		NSBeep();
+		return;
+	}
+	
+	[NSThread detachNewThreadSelector:@selector(checkForUpdatesInBackground:)
+							 toTarget:self
+						   withObject:[NSNumber numberWithBool:YES]];
+}
+
+-(void)checkForUpdatesInBackground:(NSNumber *)displayAlertIfNoUpdateAvailable {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
+	NSDictionary *remoteInfo = [self remoteVersionInfo];
+	[[self defaults] setObject:[NSDate date] forKey:SMLastUpdateCheck];
+	
+	[self performSelectorOnMainThread:@selector(remoteVersionInfoWasFetch:)
+						   withObject:[[NSDictionary alloc] initWithObjectsAndKeys: 
+									   remoteInfo , @"remoteInfo",
+									   displayAlertIfNoUpdateAvailable, @"displayAlertIfNoUpdateAvailable", nil]
+						waitUntilDone:NO];
+	[pool release];
+}
+
+-(NSBundle *)thisBundle {
+	return [NSBundle bundleForClass:[SMExportPlugin class]];
+}
+
+-(void)remoteVersionInfoWasFetch:(NSDictionary *)args {
+	[self setIsUpdateInProgress:NO];
+	NSDictionary *remoteInfo = [args objectForKey:@"remoteInfo"];
+	NSNumber *displayAlertIfNoUpdateAvailable = [args objectForKey:@"displayAlertIfNoUpdateAvailable"];
+	// remoteInfo == nil => no check performed
+	if(remoteInfo == nil)
+		return;
+	
+	NSString *remoteVersion = [remoteInfo objectForKey:@"remoteVersion"];
+	if(remoteVersion == nil) {
+		[args release];
+		return;
+	}
+	
+	NSString *localVersion = [[[self thisBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
+	if(localVersion == nil) {
+		NSLog(@"undefined bundle version found during update.");
+		NSBeep();
+		[args release];
+		return;
+	}
+	
+
+	if([localVersion compareVersionToVersion:remoteVersion] == NSOrderedAscending)
+		[self displayUpdateAvailable:remoteInfo];
+	else if([displayAlertIfNoUpdateAvailable boolValue])
+		[self displayNoUpdateAvailable];
+
+	[args release];
+}
+
+-(void)displayNoUpdateAvailable {
+	NSAlert *alert = [[NSAlert alloc] init];
+	[alert addButtonWithTitle:NSLocalizedString(@"Dismiss", @"Dismiss button to dismiss no new version available button.")];
+	[alert setMessageText: [NSString stringWithFormat:NSLocalizedString(@"You are running the newest version of SmugMugExport (%@).", @"Message text for no update available text"), [[[self thisBundle] infoDictionary] objectForKey:@"CFBundleVersion"]]];
+	[alert setAlertStyle:NSInformationalAlertStyle];
+	[alert runModal];
+	[alert release];	
+}
+
+-(void)displayUpdateAvailable:(NSDictionary *)remoteInfo {
+	NSAlert *alert = [[NSAlert alloc] init];
+	[alert addButtonWithTitle:NSLocalizedString(@"Download New Version", @"Button text to confirm download of a new version.")];
+	[alert addButtonWithTitle:NSLocalizedString(@"Later", @"Button text to decline invitation to download a new version.")];
+	[alert setMessageText:NSLocalizedString(@"A new version of SmugMugExport is available.", @"Message text for update available text")];
+	[alert setAlertStyle:NSInformationalAlertStyle];
+	
+	int selectedButton = [alert runModal];
+	if(selectedButton = NSAlertFirstButtonReturn) {
+		// go to the update site
+		NSString *updateLocation = [remoteInfo objectForKey:@"remoteLocation"];
+		[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:updateLocation]];
+	}
+	[alert release];
+}
+
 
 #pragma mark Login Methods
 
@@ -306,6 +529,14 @@ static const int SMDefaultScaledWidth = 2592;
 		[[self smAccess] setPassword:[[self accountManager] passwordForAccount:[[self accountManager] selectedAccount]]]; 
 		[[self smAccess] login]; // gets asyncronous callback
 	}
+	
+	// if user has seen the update policy this upload session, don't show it again
+	// if the user has seen the update policy in the past, don't 
+	if(![[[self defaults] objectForKey:SMUserHasSeenUpdatePolicy] boolValue])
+		[self displayUserUpdatePolicy];
+	else
+		[self checkForUpdatesIfNecessary];
+	
 }
 
 -(IBAction)showLoginSheet:(id)sender {
@@ -715,27 +946,29 @@ static const int SMDefaultScaledWidth = 2592;
 	NSString *selectedAlbumId = [[[self selectedAlbum] objectForKey:SMAlbumID] stringValue];
 	NSString *nextFile = [[self exportManager] imagePathAtIndex:[self imagesUploaded]];
 	NSData *imageData = [self imageDataForPath:nextFile];
-	NSString *filename = [[nextFile pathComponents] lastObject];
 	
-	if([[self exportManager] respondsToSelector:@selector(imageCaptionAtIndex:)]) {
-		// iPhoto <=6
-		[[self smAccess] uploadImageData:imageData
+	NSString *title = nil;
+	if([[self exportManager] respondsToSelector:@selector(imageCaptionAtIndex:)])
+		title = [[self exportManager] imageCaptionAtIndex:[self imagesUploaded]]; // iPhoto <=6
+	else
+		title = [[self exportManager] imageTitleAtIndex:[self imagesUploaded]]; // iPhoto 7
+	
+	NSString *filename = [self chooseUploadFilename:[[nextFile pathComponents] lastObject] 
+										  title:title];
+	[[self smAccess] uploadImageData:imageData
 									  filename:filename
 								   albumWithID:selectedAlbumId
-										 title:[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]]
 									   caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
 									  keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]];		
-	} else {
-		// iPhoto 7
-		[[self smAccess] uploadImageData:imageData
-									  filename:filename
-								   albumWithID:selectedAlbumId
-										 title:[[self exportManager] imageTitleAtIndex:[self imagesUploaded]]
-									   caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
-									  keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]];
-	}	
+	
 }
 
+-(NSString *)chooseUploadFilename:(NSString *)filename title:(NSString *)imageTitle {
+	NSString *selectedUploadFilenameOption = [[NSUserDefaults smugMugUserDefaults] objectForKey:SMUploadedFilename];
+	return [selectedUploadFilenameOption isEqualToString:SMUploadedFilenameOptionTitle] ?
+											  imageTitle:filename;
+}
+	
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful {
 	[NSApp endSheet:uploadPanel];
 //	[[self exportManager] cancelExportBeforeBeginning];
@@ -1013,6 +1246,14 @@ static const int SMDefaultScaledWidth = 2592;
 	imagesUploaded = v;
 }
 
+-(BOOL)isUpdateInProgress {
+	return isUpdateInProgress;
+}
+
+-(void)setIsUpdateInProgress:(BOOL)v {
+	isUpdateInProgress = v;
+}
+
 -(NSString *)loginSheetStatusMessage {
 	return loginSheetStatusMessage;
 }
@@ -1048,11 +1289,11 @@ static const int SMDefaultScaledWidth = 2592;
 }
 
 -(id)description {
-    return NSLocalizedString(SMApplicationName, @"Name of the Plugin");
+    return [[[self thisBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"];
 }
 
 -(id)name {
-    return NSLocalizedString(SMApplicationName, @"Name of the Project");
+    return [[[self thisBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"];
 }
 
 -(NSString *)username {

@@ -55,7 +55,6 @@
 			  filename:(NSString *)filename
 			 sessionId:(NSString *)sessionId
 			   albumID:(NSString *)albumId 
-				 title:(NSString *)title
 			   caption:(NSString *)caption
 			  keywords:(NSArray *)keywords
 			  observer:(NSObject<SMUploadObserver> *)observer;

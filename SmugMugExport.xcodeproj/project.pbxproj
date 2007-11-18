@@ -14,14 +14,13 @@
 		9319DE3F0CB91B690037023F /* SMJSONDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 9319DE3D0CB91B690037023F /* SMJSONDecoder.m */; };
 		932164520B2F78B000624A8D /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9321644E0B2F78B000624A8D /* NSDataAdditions.m */; };
 		932164860B2F78F500624A8D /* SmugMugExport.nib in Resources */ = {isa = PBXBuildFile; fileRef = 932164810B2F78F500624A8D /* SmugMugExport.nib */; };
-		932164960B2F7B4600624A8D /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 932164950B2F7B4600624A8D /* Info.plist */; };
-		932164990B2F7B5700624A8D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 932164970B2F7B5700624A8D /* InfoPlist.strings */; };
 		932165820B2F921E00624A8D /* KeychainManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 932165800B2F921E00624A8D /* KeychainManager.m */; };
 		933A9E560CB7C53900B7B2A5 /* SMTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 933A9E540CB7C53900B7B2A5 /* SMTableView.m */; };
 		933AA0920CB825CA00B7B2A5 /* SMExportBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0900CB825C900B7B2A5 /* SMExportBox.m */; };
 		933AA0B30CB8273000B7B2A5 /* SMUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0B10CB8273000B7B2A5 /* SMUserDefaults.m */; };
 		933AA0CC0CB827CF00B7B2A5 /* SMExportPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0CA0CB827CF00B7B2A5 /* SMExportPlugin.m */; };
 		935A1A870C1CC2CC00043E12 /* NSUserDefaultsAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 935A1A850C1CC2CC00043E12 /* NSUserDefaultsAdditions.m */; };
+		936FB8E70CEFA13800ABD2F6 /* SmugMugExport-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 93BD6F180AD84A49007CE525 /* SmugMugExport-Info.plist */; };
 		938E26870C0F46E50059F26B /* CJSONDeserializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26810C0F46E50059F26B /* CJSONDeserializer.m */; };
 		938E26890C0F46E50059F26B /* CJSONScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26830C0F46E50059F26B /* CJSONScanner.m */; };
 		938E268B0C0F46E50059F26B /* CJSONSerializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26850C0F46E50059F26B /* CJSONSerializer.m */; };
@@ -33,19 +32,6 @@
 		93DD89D80C8C526100A6131B /* SMRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD89D60C8C526100A6131B /* SMRequest.m */; };
 		93EE86870C8085850028A598 /* NSBitmapImageRepAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EE86850C8085850028A598 /* NSBitmapImageRepAdditions.m */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		937C45570AD8583500A104BB /* Private Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-			);
-			name = "Private Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		089C1672FE841209C02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -67,8 +53,6 @@
 		932164770B2F78D600624A8D /* ExportPluginBoxProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ExportPluginBoxProtocol.h; path = Source/ExportPluginBoxProtocol.h; sourceTree = "<group>"; };
 		932164780B2F78D600624A8D /* ExportPluginProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ExportPluginProtocol.h; path = Source/ExportPluginProtocol.h; sourceTree = "<group>"; };
 		932164810B2F78F500624A8D /* SmugMugExport.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = SmugMugExport.nib; path = Resources/SmugMugExport.nib; sourceTree = "<group>"; };
-		932164950B2F7B4600624A8D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = Info.plist; path = Resources/Info.plist; sourceTree = "<group>"; };
-		932164980B2F7B5700624A8D /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = Resources/English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		932164B00B2F7BBC00624A8D /* SmugmugExport_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugmugExport_Prefix.pch; path = Source/SmugmugExport_Prefix.pch; sourceTree = "<group>"; };
 		9321657F0B2F921D00624A8D /* KeychainManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KeychainManager.h; path = Source/KeychainManager.h; sourceTree = "<group>"; };
 		932165800B2F921E00624A8D /* KeychainManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KeychainManager.m; path = Source/KeychainManager.m; sourceTree = "<group>"; };
@@ -137,8 +121,6 @@
 		089C1671FE841209C02AAC07 /* Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				930DE5BE0B4831D2008120ED /* Security.framework */,
-				930961BA0C66A164002B8DAA /* libcrypto.dylib */,
 				1058C7ACFEA557BF11CA2CBB /* Linked Frameworks */,
 				1058C7AEFEA557BF11CA2CBB /* Other Frameworks */,
 			);
@@ -149,8 +131,6 @@
 			isa = PBXGroup;
 			children = (
 				93BD6F180AD84A49007CE525 /* SmugMugExport-Info.plist */,
-				932164970B2F7B5700624A8D /* InfoPlist.strings */,
-				932164950B2F7B4600624A8D /* Info.plist */,
 				932164810B2F78F500624A8D /* SmugMugExport.nib */,
 			);
 			name = Resources;
@@ -177,6 +157,8 @@
 		1058C7ACFEA557BF11CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				930DE5BE0B4831D2008120ED /* Security.framework */,
+				930961BA0C66A164002B8DAA /* libcrypto.dylib */,
 				1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */,
 			);
 			name = "Linked Frameworks";
@@ -291,7 +273,6 @@
 				93BD6F130AD84A49007CE525 /* Resources */,
 				93BD6F140AD84A49007CE525 /* Sources */,
 				93BD6F150AD84A49007CE525 /* Frameworks */,
-				937C45570AD8583500A104BB /* Private Frameworks */,
 				932166140B32120800624A8D /* Install */,
 			);
 			buildRules = (
@@ -309,9 +290,11 @@
 		089C1669FE841209C02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB913E08733D840010E9CD /* Build configuration list for PBXProject "SmugMugExport" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 089C166AFE841209C02AAC07 /* smugmugExport */;
 			projectDirPath = "";
+			projectRoot = "";
 			targets = (
 				93BD6F160AD84A49007CE525 /* SmugMugExport */,
 			);
@@ -323,9 +306,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				936FB8E70CEFA13800ABD2F6 /* SmugMugExport-Info.plist in Resources */,
 				932164860B2F78F500624A8D /* SmugMugExport.nib in Resources */,
-				932164960B2F7B4600624A8D /* Info.plist in Resources */,
-				932164990B2F7B5700624A8D /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -344,7 +326,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/bash\n\nDST=/Applications/iPhoto.app/Contents/PlugIns/\nPREV_EXPORTER=$DST/SmugMugExport.iPhotoExporter\nNEW_EXPORTER=$TARGET_BUILD_DIR/SmugMugExport.iPhotoExporter\n\n\necho \"rm -Rf $PREV_EXPORTER && cp -R $NEW_EXPORTER $DST\"\nrm -Rf $PREV_EXPORTER && cp -R $NEW_EXPORTER $DST\n";
+			shellScript = "#!/bin/bash\n\nDST=${HOME}/Library/Application\\ Support/iPhoto/Plugins/\nPREV_EXPORTER=$DST/SmugMugExport.iPhotoExporter\nNEW_EXPORTER=$TARGET_BUILD_DIR/SmugMugExport.iPhotoExporter\n\nmkdir -p \"${DST}\"\n\necho \"rm -Rf $PREV_EXPORTER && cp -R $NEW_EXPORTER $DST\"\nrm -Rf \"$PREV_EXPORTER\" && cp -R $NEW_EXPORTER \"$DST\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -377,17 +359,6 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXVariantGroup section */
-		932164970B2F7B5700624A8D /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				932164980B2F7B5700624A8D /* English */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
-
 /* Begin XCBuildConfiguration section */
 		1DEB913F08733D840010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -415,6 +386,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/Resources/Sparkle-1.1\"";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -444,6 +420,11 @@
 					ppc,
 				);
 				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/Resources/Sparkle-1.1\"";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;

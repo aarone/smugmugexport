@@ -7,6 +7,9 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "ExportPluginProtocol.h"
+#import "SMAccess.h"
+
 @class SMAccess, ExportMgr, SMAccountManager;
 @protocol ExportPluginProtocol, SMAccessDelegate;
 
@@ -24,7 +27,9 @@
 	IBOutlet NSArrayController *categoriesArrayController;
 	IBOutlet NSArrayController *subCategoriesArrayController;
 	
+	
 	 // this is the username bound to the textfield, account manager holds the real username
+	void *updater;
 	NSString *username; 
 	NSString *password; // same goes for password..
 	NSString *sessionUploadStatusText;
@@ -49,6 +54,7 @@
 	BOOL browserOpenedInGallery;
 	BOOL isDeletingAlbum;
 	BOOL isCreatingAlbum;
+	BOOL isUpdateInProgress;
 	int uploadRetryCount;
 	int imagesUploaded;
 
@@ -78,5 +84,7 @@
 -(IBAction)cancelNewAlbumSheet:(id)sender;
 -(IBAction)createAlbum:(id)sender;
 
+#pragma mark Update
+-(IBAction)checkForUpdates:(id)sender;
 
 @end

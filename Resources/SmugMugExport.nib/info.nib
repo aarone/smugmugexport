@@ -1,41 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>IBDocumentLocation</key>
-	<string>124 127 528 335 0 0 1680 1028 </string>
 	<key>IBFramework Version</key>
-	<string>446.1</string>
-	<key>IBGroupedObjects</key>
-	<dict>
-		<key>1</key>
-		<array>
-			<string>361</string>
-			<string>363</string>
-			<string>362</string>
-			<string>359</string>
-			<string>360</string>
-		</array>
-		<key>2</key>
-		<array>
-			<string>361</string>
-			<string>363</string>
-			<string>362</string>
-			<string>359</string>
-			<string>360</string>
-		</array>
-	</dict>
-	<key>IBLastGroupID</key>
-	<string>3</string>
+	<string>629</string>
+	<key>IBLastKnownRelativeProjectPath</key>
+	<string>../../SmugMugExport.xcodeproj</string>
+	<key>IBOldestOS</key>
+	<integer>5</integer>
 	<key>IBOpenObjects</key>
 	<array>
-		<integer>189</integer>
-		<integer>18</integer>
-		<integer>61</integer>
-		<integer>342</integer>
-		<integer>5</integer>
+		<integer>343</integer>
 	</array>
 	<key>IBSystem Version</key>
-	<string>8R218</string>
+	<string>9B18</string>
+	<key>targetFramework</key>
+	<string>IBCocoaFramework</string>
 </dict>
 </plist>

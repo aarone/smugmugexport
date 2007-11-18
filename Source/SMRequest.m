@@ -479,7 +479,6 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 			  filename:(NSString *)filename
 			 sessionId:(NSString *)sessionId
 			   albumID:(NSString *)albumId 
-				 title:(NSString *)title
 			   caption:(NSString *)caption
 			  keywords:(NSArray *)keywords
 			  observer:(NSObject<SMUploadObserver> *)anObserver {
@@ -490,22 +489,24 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	if(IsNetworkTracingEnabled()) {
 		NSLog(@"Posting image to %@", [self postUploadURL:filename]);
 	}
-
+	
 	CFHTTPMessageRef myRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, CFSTR("POST"), (CFURLRef)[NSURL URLWithString:[self postUploadURL:filename]], kCFHTTPVersion1_1);
-
+	
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("User-Agent"), (CFStringRef)UserAgent);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-Length"), (CFStringRef)[NSString stringWithFormat:@"%d", [theImageData length]]);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-MD5"), (CFStringRef)[theImageData md5HexString]);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-SessionID"), (CFStringRef)sessionId);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Version"), (CFStringRef)[self uploadApiVersion]);
-	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-ResponseType"), (CFStringRef)[self uploadResponseType]);
+	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-ResponseType"), (CFStringRef)[self uploadResponseType]);	
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-FileName"), (CFStringRef)[self cleanNewlines:filename]);
+	
+	
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-AlbumID"), (CFStringRef)albumId);
 
 	if(!IsEmpty(caption))
 		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Caption"), (CFStringRef)[self cleanNewlines:caption]);
 
-	if(keywords != nil && [keywords count] > 0)
+	if(!IsEmpty(keywords))
 		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Keywords"), (CFStringRef)[self cleanNewlines:[keywords componentsJoinedByString:@" "]]);
 	
 	if(IsNetworkTracingEnabled()) {

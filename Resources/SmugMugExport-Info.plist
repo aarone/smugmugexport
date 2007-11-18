@@ -7,7 +7,9 @@
 	<key>CFBundleExecutable</key>
 	<string>SmugMugExport</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.aarone.SmugMugExport</string>
+	<string>org.aarone.smugmugexport</string>
+	<key>CFBundleDisplayName</key>
+	<string>SmugMugExport</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
@@ -15,7 +17,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.3</string>
+	<string>1.0.4</string>
 	<key>CSResourcesFileMapped</key>
 	<string>yes</string>
 	<key>NSMainNibFile</key>

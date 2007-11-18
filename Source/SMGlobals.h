@@ -38,9 +38,11 @@ extern NSString *SMAlbumID;
 extern NSString *SMCategoryID;
 extern NSString *SMSubCategoryID;
 
-extern const float DefaultJpegScalingFactor;
+extern NSString *SMUploadedFilename;
+extern NSString *SMUploadedFilenameOptionFilename;
+extern NSString *SMUploadedFilenameOptionTitle;
 
-extern NSString *SMApplicationName;
+extern const float DefaultJpegScalingFactor;
 
 // new album property keys
 extern NSString *IsPublicPref;

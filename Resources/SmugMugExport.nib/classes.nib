@@ -1,89 +1,100 @@
-{
-    IBClasses = (
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = SMExportBox; LANGUAGE = ObjC; SUPERCLASS = NSBox; }, 
-        {
-            ACTIONS = {
-                addNewAlbum = id; 
-                cancelLoginSheet = id; 
-                cancelNewAlbumSheet = id; 
-                cancelUpload = id; 
-                closePreferencesSheet = id; 
-                createAlbum = id; 
-                donate = id; 
-                performLoginFromSheet = id; 
-                removeAlbum = id; 
-                showLoginSheet = id; 
-                showPreferences = id; 
-            }; 
-            CLASS = SMExportPlugin; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                acccountPopupButton = NSPopUpButton; 
-                albumsArrayController = NSArrayController; 
-                categoriesArrayController = NSArrayController; 
-                firstView = id; 
-                lastView = id; 
-                loginPanel = NSPanel; 
-                newAlbumSheet = NSPanel; 
-                preferencesPanel = NSPanel; 
-                settingsBox = NSBox; 
-                subCategoriesArrayController = NSArrayController; 
-                uploadPanel = NSPanel; 
-            }; 
-            SUPERCLASS = NSObject; 
-        }, 
-        {
-            CLASS = SMTableView; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {exporter = SmugMugExport; }; 
-            SUPERCLASS = NSTableView; 
-        }, 
-        {
-            ACTIONS = {
-                addNewAlbum = id; 
-                cancelLoginSheet = id; 
-                cancelNewAlbumSheet = id; 
-                cancelUpload = id; 
-                closePreferencesSheet = id; 
-                createAlbum = id; 
-                donate = id; 
-                performLoginFromSheet = id; 
-                removeAlbum = id; 
-                showLoginSheet = id; 
-                showPreferences = id; 
-            }; 
-            CLASS = SmugMugExport; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                acccountPopupButton = NSPopUpButton; 
-                albumsArrayController = NSArrayController; 
-                categoriesArrayController = NSArrayController; 
-                firstView = id; 
-                lastView = id; 
-                loginPanel = NSPanel; 
-                newAlbumSheet = NSPanel; 
-                preferencesPanel = NSPanel; 
-                settingsBox = NSBox; 
-                subCategoriesArrayController = NSArrayController; 
-                uploadPanel = NSPanel; 
-            }; 
-            SUPERCLASS = NSObject; 
-        }, 
-        {CLASS = SmugMugExportBox; LANGUAGE = ObjC; SUPERCLASS = NSBox; }, 
-        {
-            CLASS = SmugMugManager; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {categoriesArrayController = NSArrayController; delegate = id; }; 
-            SUPERCLASS = NSObject; 
-        }, 
-        {CLASS = SmugMugUserDefaults; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {
-            CLASS = SmugmugExport; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {firstView = id; lastView = id; settingsBox = NSBox; }; 
-            SUPERCLASS = NSObject; 
-        }
-    ); 
-    IBVersion = 1; 
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>CLASS</key>
+			<string>SMExportBox</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSBox</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>addNewAlbum</key>
+				<string>id</string>
+				<key>cancelLoginSheet</key>
+				<string>id</string>
+				<key>cancelNewAlbumSheet</key>
+				<string>id</string>
+				<key>cancelUpload</key>
+				<string>id</string>
+				<key>checkForUpdates</key>
+				<string>id</string>
+				<key>closePreferencesSheet</key>
+				<string>id</string>
+				<key>createAlbum</key>
+				<string>id</string>
+				<key>donate</key>
+				<string>id</string>
+				<key>performLoginFromSheet</key>
+				<string>id</string>
+				<key>removeAlbum</key>
+				<string>id</string>
+				<key>showLoginSheet</key>
+				<string>id</string>
+				<key>showPreferences</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>SMExportPlugin</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>acccountPopupButton</key>
+				<string>NSPopUpButton</string>
+				<key>albumsArrayController</key>
+				<string>NSArrayController</string>
+				<key>categoriesArrayController</key>
+				<string>NSArrayController</string>
+				<key>firstView</key>
+				<string>id</string>
+				<key>lastView</key>
+				<string>id</string>
+				<key>loginPanel</key>
+				<string>NSPanel</string>
+				<key>newAlbumSheet</key>
+				<string>NSPanel</string>
+				<key>preferencesPanel</key>
+				<string>NSPanel</string>
+				<key>settingsBox</key>
+				<string>NSBox</string>
+				<key>subCategoriesArrayController</key>
+				<string>NSArrayController</string>
+				<key>uploadPanel</key>
+				<string>NSPanel</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>SMTableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>exporter</key>
+				<string>SMExportPlugin</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSTableView</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>
