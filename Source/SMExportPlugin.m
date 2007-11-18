@@ -117,12 +117,12 @@
 	if(IsEmpty(thatComponents))
 		return NSOrderedSame;
 	
-	NSString *thisMajor = [thisComponents objectAtIndex:0];
-	NSString *thatMajor = [thatComponents objectAtIndex:0];
-	NSString *thisMinor = [thisComponents count] > 0 ? [thisComponents objectAtIndex:1] : nil;
-	NSString *thatMinor = [thatComponents count] > 0 ? [thatComponents objectAtIndex:1] : nil;
-	NSString *thisMicro = [thisComponents count] > 1 ? [thisComponents objectAtIndex:2] : nil;
-	NSString *thatMicro = [thatComponents count] > 1 ? [thatComponents objectAtIndex:2] : nil;
+	NSNumber *thisMajor = [NSNumber numberWithInt:[[thisComponents objectAtIndex:0] intValue]];
+	NSNumber *thatMajor = [NSNumber numberWithInt:[[thatComponents objectAtIndex:0] intValue]];
+	NSNumber *thisMinor = [thisComponents count] > 0 ? [NSNumber numberWithInt:[[thisComponents objectAtIndex:1] intValue]] : nil;
+	NSNumber *thatMinor = [thatComponents count] > 0 ? [NSNumber numberWithInt:[[thatComponents objectAtIndex:1] intValue]]  : nil;
+	NSNumber *thisMicro = [thisComponents count] > 1 ? [NSNumber numberWithInt:[[thisComponents objectAtIndex:2] intValue]] : nil;
+	NSNumber *thatMicro = [thatComponents count] > 1 ? [NSNumber numberWithInt:[[thatComponents objectAtIndex:2] intValue]] : nil;
 
 	NSComparisonResult result ;
 	if((result = [thisMajor compare:thatMajor]) != NSOrderedSame)
