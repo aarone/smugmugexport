@@ -29,7 +29,7 @@
 -(void)setErrror:(NSError *)err;
 -(NSObject<SMDecoder> *)decoder;
 -(void)setDecoder:(NSObject<SMDecoder> *)aDecoder;
-+(NSString *)userAgent;
++(NSString *)UserAgent;
 -(void)appendToResponse;
 -(void)transferComplete;
 -(NSString *)domainStringForError:(CFStreamError *)err;
@@ -47,8 +47,6 @@
 -(void)destroyUploadResources;
 @end
 
-static NSString *UserAgent = nil;
-
 @interface NSURLRequest (NSURLRequestAdditions)
 +(NSURLRequest *)smRequestWithURL:(NSURL *)aUrl;
 @end
@@ -57,7 +55,7 @@ static NSString *UserAgent = nil;
 @implementation NSURLRequest (NSURLRequestAdditions)
 +(NSURLRequest *)smRequestWithURL:(NSURL *)aUrl {
 	NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:aUrl];
-	[req setValue:UserAgent forHTTPHeaderField:@"User-Agent"];
+	[req setValue:[SMRequest UserAgent] forHTTPHeaderField:@"User-Agent"];
 	return req;
 }
 @end
@@ -104,8 +102,8 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	return [[[[self class] alloc] initWithDecoder:aDecoder] autorelease];
 }
 
-+(void)initialize {
-	UserAgent = [[NSString alloc] initWithFormat:@"iPhoto SMExportPlugin/%@", [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:@"CFBundleVersion"]];
++(NSString *)UserAgent {
+	return [[NSString alloc] initWithFormat:@"iPhoto SMExportPlugin/%@", [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:@"CFBundleVersion"]];
 }
 
 -(void)dealloc {
@@ -467,12 +465,12 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 -(NSString *)cleanNewlines:(NSString *)aString {
 	// adding a newline to a header will cause the sent request to be invalid.
 	// use carriage returns instead of newlines.
-	NSMutableString *cleanedString = [[aString mutableCopy] autorelease];
+	NSMutableString *cleanedString = [NSMutableString stringWithString:aString];
 	[cleanedString replaceOccurrencesOfString:@"\n"
 								   withString:@"\r"
 									  options:nil
 										range:NSMakeRange(0, [cleanedString length])];
-	return cleanedString;
+	return [NSString stringWithString:cleanedString];
 }
 
 -(void)uploadImageData:(NSData *)theImageData
@@ -492,20 +490,18 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	
 	CFHTTPMessageRef myRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, CFSTR("POST"), (CFURLRef)[NSURL URLWithString:[self postUploadURL:filename]], kCFHTTPVersion1_1);
 	
-	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("User-Agent"), (CFStringRef)UserAgent);
+	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("User-Agent"), (CFStringRef)[SMRequest UserAgent]);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-Length"), (CFStringRef)[NSString stringWithFormat:@"%d", [theImageData length]]);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-MD5"), (CFStringRef)[theImageData md5HexString]);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-SessionID"), (CFStringRef)sessionId);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Version"), (CFStringRef)[self uploadApiVersion]);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-ResponseType"), (CFStringRef)[self uploadResponseType]);	
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-FileName"), (CFStringRef)[self cleanNewlines:filename]);
-	
-	
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-AlbumID"), (CFStringRef)albumId);
-
+	
 	if(!IsEmpty(caption))
 		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Caption"), (CFStringRef)[self cleanNewlines:caption]);
-
+	
 	if(!IsEmpty(keywords))
 		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Keywords"), (CFStringRef)[self cleanNewlines:[keywords componentsJoinedByString:@" "]]);
 	

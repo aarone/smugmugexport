@@ -148,8 +148,6 @@
 
 @end
 
-NSLock *GalleryOpenLock = nil;
-
 // Globals
 NSString *SMAlbumID = @"id";
 NSString *SMCategoryID = @"id";
@@ -172,6 +170,7 @@ NSString *SMESelectedTabIdDefaultsKey = @"SMESelectedTabId";
 NSString *SMEAccountsDefaultsKey = @"SMEAccounts";
 NSString *SMESelectedAccountDefaultsKey = @"SMESelectedAccount";
 NSString *SMOpenInBrowserAfterUploadCompletion = @"SMOpenInBrowserAfterUploadCompletion";
+NSString *SMCloseExportWindowAfterUploadCompletion = @"SMCloseExportWindowAfterUploadCompletion";
 NSString *SMStorePasswordInKeychain = @"SMStorePasswordInKeychain";
 NSString *SMSelectedScalingTag = @"SMSelectedScalingTag";
 NSString *SMUseKeywordsAsTags = @"SMUseKeywordsAsTags";
@@ -265,6 +264,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[defaultsDict setObject:ExistingAlbumTabIdentifier forKey:SMESelectedTabIdDefaultsKey];
 	[defaultsDict setObject:[NSArray array] forKey:SMEAccountsDefaultsKey];
 	[defaultsDict setObject:@"yes" forKey:SMOpenInBrowserAfterUploadCompletion];
+	[defaultsDict setObject:@"yes" forKey:SMCloseExportWindowAfterUploadCompletion];
 	[defaultsDict setObject:@"yes" forKey:SMStorePasswordInKeychain];
 	[defaultsDict setObject:@"no" forKey:SMUseKeywordsAsTags];
 	[defaultsDict setObject:@"yes" forKey:SMShowAlbumDeleteAlert];
@@ -287,7 +287,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.accounts"] triggerChangeNotificationsForDependentKey:@"accounts"];
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.selectedAccount"] triggerChangeNotificationsForDependentKey:@"selectedAccount"];
 	
-	GalleryOpenLock = [[NSLock alloc] init];
 }
 
 -(void)awakeFromNib {
@@ -405,6 +404,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		return;
 	}
 	
+	[self setIsUpdateInProgress:YES];
 	[NSThread detachNewThreadSelector:@selector(checkForUpdatesInBackground:)
 							 toTarget:self
 						   withObject:[NSNumber numberWithBool:YES]];
@@ -844,14 +844,12 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	   we open the gallery in the browser. Otherwise, this happens when the upload
 		completes
 		*/
-	[GalleryOpenLock lock];
 	if(![self isUploading] && 
 	   [self uploadSiteUrl] != nil &&
 	   ![self browserOpenedInGallery] &&
 	   [[[NSUserDefaults smugMugUserDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue]) {
 		[self openLastGalleryInBrowser];
 	}
-	[GalleryOpenLock unlock];
 }
 
 -(void)openLastGalleryInBrowser {
@@ -971,13 +969,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful {
 	[NSApp endSheet:uploadPanel];
-//	[[self exportManager] cancelExportBeforeBeginning];
 	[self setIsUploading:NO];
 
-	[GalleryOpenLock lock];
 	// if this really bothers you you can set your preferences to not open the page in the browser
 	if(![[[NSUserDefaults smugMugUserDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue]) {
-		[GalleryOpenLock unlock];
 		return;
 	}
 	
@@ -986,7 +981,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[[NSWorkspace sharedWorkspace] openURL:uploadSiteUrl];
 	}
 	
-	[GalleryOpenLock unlock];
+	if([[[NSUserDefaults smugMugUserDefaults] valueForKey:SMCloseExportWindowAfterUploadCompletion] boolValue]) {
+		[[self exportManager] cancelExportBeforeBeginning];
+		 return;
+	}
 }
 
 -(void)uploadDidFail:(NSData *)imageData reason:(NSString *)errorText {

@@ -326,7 +326,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/bash\n\nDST=${HOME}/Library/Application\\ Support/iPhoto/Plugins/\nPREV_EXPORTER=$DST/SmugMugExport.iPhotoExporter\nNEW_EXPORTER=$TARGET_BUILD_DIR/SmugMugExport.iPhotoExporter\n\nmkdir -p \"${DST}\"\n\necho \"rm -Rf $PREV_EXPORTER && cp -R $NEW_EXPORTER $DST\"\nrm -Rf \"$PREV_EXPORTER\" && cp -R $NEW_EXPORTER \"$DST\"\n";
+			shellScript = "#!/bin/bash\n\nDST=/Applications/iPhoto.app/Contents/PlugIns\nPREV_EXPORTER=$DST/SmugMugExport.iPhotoExporter\nNEW_EXPORTER=$TARGET_BUILD_DIR/SmugMugExport.iPhotoExporter\n\nmkdir -p \"${DST}\"\n\necho \"rm -Rf $PREV_EXPORTER && cp -R $NEW_EXPORTER $DST\"\nrm -Rf \"$PREV_EXPORTER\" && cp -R $NEW_EXPORTER \"$DST\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
