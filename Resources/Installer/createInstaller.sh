@@ -9,5 +9,5 @@ VERSION=`/usr/libexec/PlistBuddy ../SmugMugExport-Info.plist -c "Print :CFBundle
 sudo rm -Rf $DST &&
 sudo $PKG_MAKER --doc $DOC -o $DST &&
 cd ${DST}/.. &&
-sudo zip -r ${PKG}-${VERSION}.zip ${PKG} 
+sudo zip -r ${PKG%%.pkg}-${VERSION}.zip ${PKG} 
 

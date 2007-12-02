@@ -45,6 +45,7 @@
 -(BOOL)connectionIsOpen;
 -(void)setConnectionIsOpen:(BOOL)v;
 -(void)destroyUploadResources;
+-(NSString *)cleanKeywords:(NSArray *)keywords;
 @end
 
 @interface NSURLRequest (NSURLRequestAdditions)
@@ -382,12 +383,17 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	[self setIsUploading:NO];
 	
 	if(readStream != NULL) {
-		CFReadStreamUnscheduleFromRunLoop(readStream, CFRunLoopGetCurrent(), kCFRunLoopCommonModes);
+		CFReadStreamUnscheduleFromRunLoop(readStream, uploadRunLoop, kCFRunLoopCommonModes);
 		CFReadStreamClose(readStream);
 		CFRelease(readStream);
 		readStream = NULL;
 	}
 	
+	if(uploadRunLoop != NULL) {
+	   CFRunLoopStop(uploadRunLoop);
+	   uploadRunLoop = NULL;
+	}
+	   
 	[self setResponse:nil];
 }
 
@@ -499,6 +505,10 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	return [NSString stringWithString:cleanedString];
 }
 
+-(NSString *)cleanKeywords:(NSArray *)keywords {
+	return [NSString stringWithFormat:@"\"%@\"", [keywords componentsJoinedByString:@"\" \""]];
+}
+
 -(void)uploadImageData:(NSData *)theImageData
 			  filename:(NSString *)filename
 			 sessionId:(NSString *)sessionId
@@ -506,6 +516,28 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 			   caption:(NSString *)caption
 			  keywords:(NSArray *)keywords
 			  observer:(NSObject<SMUploadObserver> *)anObserver {
+	[NSThread detachNewThreadSelector:@selector(startImageUpload:) 
+							 toTarget:self 
+						   withObject: [NSDictionary dictionaryWithObjectsAndKeys:
+										theImageData, @"imageData",
+										filename, @"filename",
+										sessionId, @"sessionId",
+										albumId, @"albumId",
+										caption, @"caption",
+										keywords, @"keywords",
+										anObserver, @"observer", nil]];
+													
+}
+
+-(void)startImageUpload:(NSDictionary *)args {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	NSData *theImageData = [args objectForKey:@"imageData"];
+	NSString *filename = [args objectForKey:@"filename"];
+	NSString *sessionId = [args objectForKey:@"sessionId"];
+	NSString *albumId = [args objectForKey: @"albumId"];
+	NSString *caption = [args objectForKey:@"caption"];
+	NSArray *keywords = [args objectForKey:@"keywords"];
+	NSObject<SMUploadObserver> *anObserver = [args objectForKey:@"observer"];
 
 	[self setObserver:anObserver];
 	[self setImageData:theImageData];
@@ -529,7 +561,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Caption"), (CFStringRef)[self cleanNewlines:caption]);
 	
 	if(!IsEmpty(keywords))
-		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Keywords"), (CFStringRef)[self cleanNewlines:[keywords componentsJoinedByString:@" "]]);
+		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Keywords"), (CFStringRef)[self cleanKeywords:keywords]);
 	
 	if(IsNetworkTracingEnabled()) {
 		NSLog(@"Image headers: %@", [self imageHeadersForRequest:&myRequest]);
@@ -549,13 +581,19 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	}
 	
 	CFReadStreamScheduleWithRunLoop(readStream, CFRunLoopGetCurrent(), kCFRunLoopCommonModes);
-	
+	uploadRunLoop = CFRunLoopGetCurrent();
 	[self setIsUploading:YES];
 	[self setResponse:[NSMutableData data]];
 	
 	CFReadStreamOpen(readStream);
 	
 	[NSThread detachNewThreadSelector:@selector(beingUploadProgressTracking) toTarget:self withObject:nil];
+
+	// CFRunLoop is not toll-free bridges to NSRunLoop
+	while ([self isUploading])
+		CFRunLoopRun();
+	
+	[pool release];
 }
 
 @end

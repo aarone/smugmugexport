@@ -984,10 +984,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	NSString *filename = [self chooseUploadFilename:[[nextFile pathComponents] lastObject] 
 										  title:title];
 	[[self smAccess] uploadImageData:imageData
-									  filename:filename
-								   albumWithID:selectedAlbumId
-									   caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
-									  keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]];		
+							filename:filename
+							albumWithID:selectedAlbumId
+								caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
+								keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]];		
 	
 }
 

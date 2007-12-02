@@ -14,6 +14,7 @@
 	NSURLConnection *connection;
 	NSMutableData *response;
 	CFReadStreamRef readStream;
+	CFRunLoopRef uploadRunLoop;
 	SEL callback;
 	id target;
 	BOOL wasSuccessful;
