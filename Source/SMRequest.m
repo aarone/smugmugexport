@@ -112,6 +112,8 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	[[self decoder] release];
 	[[self imageData] release];
 	[[self response] release];
+	[[self requestUrl] release];
+	[[self requestDict] release];
 	
 	[super dealloc];
 }
@@ -149,6 +151,28 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 		[[self decoder] release];
 	
 	decoder = [aDecoder retain];
+}
+
+-(NSDictionary *)requestDict {
+	return requestDict;
+}
+
+-(void)setRequestDict:(NSDictionary *)dict {
+	if([self requestDict] != nil)
+		[[self requestDict] release];
+	
+	requestDict = [dict retain];
+}
+
+-(NSURL *)requestUrl {
+	return requestUrl;
+}
+
+-(void)setRequestUrl:(NSURL *)url {
+	if([self requestUrl] != nil) 
+		[[self requestUrl] release];
+	
+	requestUrl = [url retain];
 }
 
 -(BOOL)isUploading {
@@ -242,6 +266,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 -(void)invokeMethodWithUrl:(NSURL *)url {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
+	[self setRequestUrl:url];
 	if(IsNetworkTracingEnabled()) {
 		NSLog(@"request: %@", [url absoluteString]);
 	}
@@ -268,6 +293,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 
 -(void)invokeMethodWithURL:(NSURL *)baseUrl keys:(NSArray *)keys values:(NSArray *)values responseCallback:(SEL)callbackSel responseTarget:(id)responseTarget {
 	
+	[self setRequestDict:[NSDictionary dictionaryWithObjects:values	forKeys:keys]];
 	NSURL *uploadUrl = [baseUrl URLByAppendingParameterListWithNames:keys values:values];
 	[self invokeMethod:uploadUrl responseCallback:callbackSel responseTarget:responseTarget];
 }

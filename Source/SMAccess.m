@@ -501,13 +501,22 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)getImageUrlsDidComplete:(SMRequest *)req {
-	if([self requestWasSuccessful:req]) {
-		NSDictionary *dict = [[req decodedResponse] objectForKey:@"Image"];
-		 
-		if([self delegate] != nil &&
-			[[self delegate] respondsToSelector:@selector(imageUrlFetchDidComplete:)])
-			[[self delegate] performSelectorOnMainThread:@selector(imageUrlFetchDidComplete:) withObject:dict waitUntilDone:NO];
-	}
+	NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+	[dict setObject:[[req requestDict] objectForKey:@"ImageID"] forKey:@"ImageID"];
+
+	if([self requestWasSuccessful:req])
+		[dict setObject:[[req decodedResponse] objectForKey:@"Image"] forKey:@"Urls"];
+
+	[self performSelectorOnMainThread:@selector(notifyDelegateOfFetchImageUrlCompletion:)
+						   withObject:dict
+						waitUntilDone:NO];
+}
+
+-(void)notifyDelegateOfFetchImageUrlCompletion:(NSDictionary *)args {
+	if([self delegate] != nil &&
+	   [[self delegate] respondsToSelector:@selector(imageUrlFetchDidCompleteForImageId:imageUrls:)])
+		[[self delegate] imageUrlFetchDidCompleteForImageId:[args objectForKey:@"ImageID"]
+												  imageUrls:[args objectForKey:@"Urls"]];
 }
 
 -(void)buildCategoryList {

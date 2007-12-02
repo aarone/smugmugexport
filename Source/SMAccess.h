@@ -19,7 +19,7 @@
 -(void)categoryGetDidComplete:(NSNumber *)wasSuccessful;
 -(void)createNewAlbumDidComplete:(NSNumber *)wasSuccessful;
 -(void)deleteAlbumDidComplete:(NSNumber *)wasSuccessful;
--(void)imageUrlFetchDidComplete:(NSDictionary *)imageUrls;
+-(void)imageUrlFetchDidCompleteForImageId:(NSString *)imageId imageUrls:(NSDictionary *)imageUrls;
 @end
 
 /*

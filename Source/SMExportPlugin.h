@@ -27,10 +27,7 @@
 	IBOutlet NSArrayController *categoriesArrayController;
 	IBOutlet NSArrayController *subCategoriesArrayController;
 	
-	
-	 // this is the username bound to the textfield, account manager holds the real username
-	void *updater;
-	NSString *username; 
+	NSString *username;  // this is the username bound to the textfield, account manager holds the real username
 	NSString *password; // same goes for password..
 	NSString *sessionUploadStatusText;
 	NSString *statusText;
@@ -57,6 +54,7 @@
 	BOOL isUpdateInProgress;
 	int uploadRetryCount;
 	int imagesUploaded;
+	int albumUrlFetchAttemptCount;
 
 	ExportMgr *exportManager;
 	SMAccess *smAccess;

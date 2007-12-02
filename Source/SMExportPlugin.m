@@ -100,6 +100,9 @@
 -(void)remoteVersionInfoWasFetch:(NSDictionary *)remoteInfo;
 -(void)displayUpdateAvailable:(NSDictionary *)remoteInfo;
 -(void)displayNoUpdateAvailable;
+-(int)albumUrlFetchAttemptCount;
+-(void)incrementAlbumUrlFetchAttemptCount;
+-(void)resetAlbumUrlFetchAttemptCount;
 @end
 
 @interface NSString (SMStringAdditions)
@@ -107,7 +110,9 @@
 @end
 
 @implementation NSString (SMStringAdditions)
-// version strings are ${major}.${minor}.${micro}
+// version strings are ${major}.${minor}.${micro}.${qualifier}
+// where all components except qualifier are integers and qualifier
+// is a alphanumeric string
 -(NSComparisonResult)compareVersionToVersion:(NSString *)aVersion {
 	NSArray *thisComponents = [self componentsSeparatedByString:@"."];
 	NSArray *thatComponents = [aVersion componentsSeparatedByString:@"."];
@@ -119,11 +124,13 @@
 	
 	NSNumber *thisMajor = [NSNumber numberWithInt:[[thisComponents objectAtIndex:0] intValue]];
 	NSNumber *thatMajor = [NSNumber numberWithInt:[[thatComponents objectAtIndex:0] intValue]];
-	NSNumber *thisMinor = [thisComponents count] > 0 ? [NSNumber numberWithInt:[[thisComponents objectAtIndex:1] intValue]] : nil;
-	NSNumber *thatMinor = [thatComponents count] > 0 ? [NSNumber numberWithInt:[[thatComponents objectAtIndex:1] intValue]]  : nil;
-	NSNumber *thisMicro = [thisComponents count] > 1 ? [NSNumber numberWithInt:[[thisComponents objectAtIndex:2] intValue]] : nil;
-	NSNumber *thatMicro = [thatComponents count] > 1 ? [NSNumber numberWithInt:[[thatComponents objectAtIndex:2] intValue]] : nil;
-
+	NSNumber *thisMinor = [thisComponents count] > 1 ? [NSNumber numberWithInt:[[thisComponents objectAtIndex:1] intValue]] : nil;
+	NSNumber *thatMinor = [thatComponents count] > 1 ? [NSNumber numberWithInt:[[thatComponents objectAtIndex:1] intValue]]  : nil;
+	NSNumber *thisMicro = [thisComponents count] > 2 ? [NSNumber numberWithInt:[[thisComponents objectAtIndex:2] intValue]] : nil;
+	NSNumber *thatMicro = [thatComponents count] > 2 ? [NSNumber numberWithInt:[[thatComponents objectAtIndex:2] intValue]] : nil;
+	NSString *thisQualifier = [thisComponents count] > 3 ? [thisComponents objectAtIndex:3] : nil;
+	NSString *thatQualifier = [thatComponents count] > 3 ? [thatComponents objectAtIndex:3] : nil;
+	
 	NSComparisonResult result ;
 	if((result = [thisMajor compare:thatMajor]) != NSOrderedSame)
 		return result;
@@ -143,7 +150,16 @@
 	else if(thisMicro != nil && thatMicro == nil)
 		return NSOrderedDescending;
 	
-	return [thisMicro compare:thatMicro];
+	if((result = [thisMicro compare:thatMicro]) != NSOrderedSame)
+		return result;
+	
+	// 2.3.0.p1 > 2.3.0
+	if(thisQualifier == nil && thatQualifier != nil)
+		return NSOrderedAscending;
+	else if(thisQualifier != nil && thatQualifier == nil)
+		return NSOrderedDescending;
+	
+	return [thisQualifier compare:thatQualifier];
 }
 
 @end
@@ -191,6 +207,7 @@ NSString *SMUpdateCheckInterval = @"SMUpdateCheckInterval";
 
 // two additional attempts to upload an image if the upload fails
 static const int UploadFailureRetryCount = 2; 
+static const int AlbumUrlFetchRetryCount = 5;
 const float DefaultJpegScalingFactor = 0.9;
 static const int SMDefaultScaledHeight = 2592;
 static const int SMDefaultScaledWidth = 2592;
@@ -218,6 +235,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[self resetUploadRetryCount];
 	[self setIsUploading:NO];
 	[self setIsCreatingAlbum:NO];
+	[self resetAlbumUrlFetchAttemptCount];
 	
 	return self;
 }
@@ -320,7 +338,8 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(NSString *)versionString {
-	return [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:@"CFBundleVersion"];
+	NSString *versionString = [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:@"CFBundleVersion"];
+	return versionString;
 }
 
 -(NSArray *)filenameSelectionOptions {
@@ -831,10 +850,21 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 #pragma mark Image Url Fetching
 
--(void)imageUrlFetchDidComplete:(NSDictionary *)imageUrls {
+-(void)imageUrlFetchDidCompleteForImageId:(NSString *)imageId imageUrls:(NSDictionary *)imageUrls {
+	if(imageUrls == nil && [self albumUrlFetchAttemptCount] < AlbumUrlFetchRetryCount) {
+		[self incrementAlbumUrlFetchAttemptCount];
+		// try again
+		[[self smAccess] performSelector:@selector(fetchImageUrls:) 
+				   withObject:imageId
+				   afterDelay:2.0
+					  inModes:[NSArray arrayWithObjects: NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];		
+		return;
+	}
+	
 	NSString *siteUrlString = [imageUrls objectForKey:@"AlbumURL"];
 	if(siteUrlString != nil) {
 		[self setUploadSiteUrl:[NSURL URLWithString:siteUrlString]];
+		[self setSiteUrlHasBeenFetched:YES];
 	} else {
 		[self setSiteUrlHasBeenFetched:NO];
 	}
@@ -1022,13 +1052,12 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId {
 	
-	@synchronized(self) {
-		if(!siteUrlHasBeenFetched) {
-			[self setSiteUrlHasBeenFetched:NO];
-			[[self smAccess] fetchImageUrls:smImageId];
-		}
+	if(![self siteUrlHasBeenFetched]) {
+		[self resetAlbumUrlFetchAttemptCount];
+		[self setSiteUrlHasBeenFetched:NO];
+		[[self smAccess] fetchImageUrls:smImageId];
 	}
-
+	
 	// onto the next image
  	[self resetUploadRetryCount];
 	[self setImagesUploaded:[self imagesUploaded] + 1];
@@ -1215,6 +1244,18 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(BOOL)isUploading {
 	return isUploading;
+}
+
+-(int)albumUrlFetchAttemptCount {
+	return albumUrlFetchAttemptCount;
+}
+
+-(void)incrementAlbumUrlFetchAttemptCount {
+	albumUrlFetchAttemptCount++;
+}
+
+-(void)resetAlbumUrlFetchAttemptCount {
+	albumUrlFetchAttemptCount = 0;
 }
 
 -(void)setIsUploading:(BOOL)v {

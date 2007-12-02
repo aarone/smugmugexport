@@ -20,16 +20,23 @@
 	BOOL connectionIsOpen;
 	NSError *error;
 	NSObject<SMDecoder> *decoder;
+	NSDictionary *requestDict;	
+	NSURL *requestUrl;
 	
 	// upload stuff
 	NSObject<SMUploadObserver> *observer;
 	BOOL isUploading;
-	NSData *imageData;
+	NSData *imageData;	
 }
 
 +(SMRequest *)SMRequest:(NSObject<SMDecoder> *)decoder;
 
 #pragma mark REST method invocation API
+
+-(NSDictionary *)requestDict;
+
+-(NSURL *)requestUrl;
+
 /*!
   @method     invokeMethod:responseCallback:responseTarget
   @abstract   Performs a GET at the given url and return the response to the given target.
