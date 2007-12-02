@@ -546,7 +546,8 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 		NSLog(@"Posting image to %@", [self postUploadURL:filename]);
 	}
 	
-	CFHTTPMessageRef myRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, CFSTR("POST"), (CFURLRef)[NSURL URLWithString:[self postUploadURL:filename]], kCFHTTPVersion1_1);
+	[self setRequestUrl:[NSURL URLWithString:[self postUploadURL:filename]]];
+	CFHTTPMessageRef myRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, CFSTR("POST"), (CFURLRef)[self requestUrl], kCFHTTPVersion1_1);
 	
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("User-Agent"), (CFStringRef)[SMRequest UserAgent]);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-Length"), (CFStringRef)[NSString stringWithFormat:@"%d", [theImageData length]]);

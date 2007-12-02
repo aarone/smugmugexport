@@ -34,8 +34,19 @@
 
 #pragma mark REST method invocation API
 
+/*!
+ @method     requestDict
+ @abstract   Returns the key/val pairs for the last request method.
+ @discussion This method returns a non-nil value only if a method has been invoked
+	with specified keys.
+ */
 -(NSDictionary *)requestDict;
 
+/*!
+    @method     requestUrl
+    @abstract   Returns the url associated with this request. 
+    @discussion Returns the url associated with this request. 
+*/
 -(NSURL *)requestUrl;
 
 /*!
