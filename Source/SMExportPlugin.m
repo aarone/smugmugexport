@@ -338,7 +338,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(NSString *)versionString {
-	NSString *versionString = [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:@"CFBundleVersion"];
+	NSString *versionString = [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
 	return versionString;
 }
 
@@ -461,7 +461,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		return;
 	}
 	
-	NSString *localVersion = [[[self thisBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
+	NSString *localVersion = [[[self thisBundle] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
 	if(localVersion == nil) {
 		NSLog(@"undefined bundle version found during update.");
 		NSBeep();
@@ -481,7 +481,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 -(void)displayNoUpdateAvailable {
 	NSAlert *alert = [[NSAlert alloc] init];
 	[alert addButtonWithTitle:NSLocalizedString(@"Dismiss", @"Dismiss button to dismiss no new version available button.")];
-	[alert setMessageText: [NSString stringWithFormat:NSLocalizedString(@"You are running the newest version of SmugMugExport (%@).", @"Message text for no update available text"), [[[self thisBundle] infoDictionary] objectForKey:@"CFBundleVersion"]]];
+	[alert setMessageText: [NSString stringWithFormat:NSLocalizedString(@"You are running the newest version of SmugMugExport (%@).", @"Message text for no update available text"), [[[self thisBundle] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey]]];
 	[alert setAlertStyle:NSInformationalAlertStyle];
 	[alert runModal];
 	[alert release];	

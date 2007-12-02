@@ -52,7 +52,7 @@ static SMUserDefaults *sharedSMUserDefaults = nil;
 }
 
 -(CFStringRef)appId {
-	return (CFStringRef)[[[NSBundle bundleForClass:[SMUserDefaults class]] infoDictionary] objectForKey:@"CFBundleIdentifier"];
+	return (CFStringRef)[[[NSBundle bundleForClass:[SMUserDefaults class]] infoDictionary] objectForKey:(NSString *)kCFBundleIdentifierKey];
 }
 
 -(void)registerDefaults:(NSDictionary *)dictionary {

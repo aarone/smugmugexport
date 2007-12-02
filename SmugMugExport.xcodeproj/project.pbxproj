@@ -20,7 +20,6 @@
 		933AA0B30CB8273000B7B2A5 /* SMUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0B10CB8273000B7B2A5 /* SMUserDefaults.m */; };
 		933AA0CC0CB827CF00B7B2A5 /* SMExportPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0CA0CB827CF00B7B2A5 /* SMExportPlugin.m */; };
 		935A1A870C1CC2CC00043E12 /* NSUserDefaultsAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 935A1A850C1CC2CC00043E12 /* NSUserDefaultsAdditions.m */; };
-		936FB8E70CEFA13800ABD2F6 /* SmugMugExport-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 93BD6F180AD84A49007CE525 /* SmugMugExport-Info.plist */; };
 		938E26870C0F46E50059F26B /* CJSONDeserializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26810C0F46E50059F26B /* CJSONDeserializer.m */; };
 		938E26890C0F46E50059F26B /* CJSONScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26830C0F46E50059F26B /* CJSONScanner.m */; };
 		938E268B0C0F46E50059F26B /* CJSONSerializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26850C0F46E50059F26B /* CJSONSerializer.m */; };
@@ -306,7 +305,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				936FB8E70CEFA13800ABD2F6 /* SmugMugExport-Info.plist in Resources */,
 				932164860B2F78F500624A8D /* SmugMugExport.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -386,11 +384,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/Resources/Sparkle-1.1\"";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -398,7 +391,6 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				HEADER_SEARCH_PATHS = Source/icu;
 				INFOPLIST_FILE = "Resources/SmugMugExport-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				OTHER_LDFLAGS = (
@@ -420,17 +412,11 @@
 					ppc,
 				);
 				COPY_PHASE_STRIP = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/Resources/Sparkle-1.1\"";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				HEADER_SEARCH_PATHS = Source/icu;
 				INFOPLIST_FILE = "Resources/SmugMugExport-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				OTHER_LDFLAGS = (
