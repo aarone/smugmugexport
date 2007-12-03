@@ -10,6 +10,8 @@
 #import "NSUserDefaultsAdditions.h"
 #import "SMGlobals.h"
 
+static const float DefaultJpegScalingFactor = 0.9;
+
 /*
  * there are two problems with this category that I'd like to fix someday:
  *  1) it's only been tested with jpegs and only returns jpegs
@@ -17,6 +19,10 @@
  *     an argument to the methods
  */
 @implementation NSBitmapImageRep (NSBitmapImageRepAdditions)
+
++(float)defaultJpegScalingFactor {
+	return DefaultJpegScalingFactor;
+}
 
 -(NSData *)scaledRepToMaxWidth:(float)maxWidth maxHeight:(float)maxHeight {
 	

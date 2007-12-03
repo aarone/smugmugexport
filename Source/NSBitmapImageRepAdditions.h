@@ -11,6 +11,7 @@
 
 @interface NSBitmapImageRep (NSBitmapImageRepAdditions)
 
++(float)defaultJpegScalingFactor;
 -(NSData *)scaledRepToMaxWidth:(float)maxWidth maxHeight:(float)maxFactor;
 -(NSData *)scaledRepToWidth:(float)widthFactor height:(float)heightFactor;
 

@@ -46,7 +46,6 @@
 	BOOL isUploading;
 	BOOL isLoggingIn;
 	BOOL isLoggedIn;
-	long nextProgressThreshold;
 }
 
 +(SMAccess *)smugmugManager;

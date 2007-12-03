@@ -32,7 +32,6 @@
 +(NSString *)UserAgent;
 -(void)appendToResponse;
 -(void)transferComplete;
--(NSString *)domainStringForError:(CFStreamError *)err;
 -(void)errorOccurred:(CFStreamError *)err;
 -(NSString *)appName;
 -(NSString *)userID;
@@ -104,7 +103,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 +(NSString *)UserAgent {
-	return [[NSString alloc] initWithFormat:@"iPhoto SMExportPlugin/%@", [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey]];
+	return [[[NSString alloc] initWithFormat:@"iPhoto SMExportPlugin/%@", [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey]] autorelease];
 }
 
 -(void)dealloc {
@@ -365,7 +364,6 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(void)appendToResponse {
-	
 	UInt8 buffer[4096];
 	
 	if(![self isUploading])
@@ -434,50 +432,32 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	[self destroyUploadResources];
 }
 
--(NSString *)domainStringForError:(CFStreamError *)err {
-	
-	if (err->domain == kCFStreamErrorDomainCustom) {
-		return NSLocalizedString(@"Custom error", @"Custom error");
-	} else if (err->domain == kCFStreamErrorDomainPOSIX) {
-		return NSLocalizedString(@"POSIX error", @"POSIX error");
-	} else if (err->domain == kCFStreamErrorDomainMacOSStatus) {
-		return [NSString stringWithFormat:@"OS error" @"OS error"];
-	} else if (err->domain == kCFStreamErrorDomainNetDB) {
-		return NSLocalizedString(@"NetDB error", @"NetDB error");
-	} else if (err->domain == kCFStreamErrorDomainMach) {
-		return NSLocalizedString(@"Mach error", @"Mach error");
-	} else if (err->domain == kCFStreamErrorDomainHTTP) {
-		return NSLocalizedString(@"HTTP error", @"HTTP error");
-	}  else if (err->domain == kCFStreamErrorDomainSOCKS) {
-		return NSLocalizedString(@"SOCKS error", @"SOCKS error");
-	} else if (err->domain == kCFStreamErrorDomainSystemConfiguration) {
-		return NSLocalizedString(@"System Configuration error", @"System Configuration error");
-	} else if (err->domain == kCFStreamErrorDomainSSL) {
-		return NSLocalizedString(@"System Configuration error", @"System Configuration error");
-	}
-	
-	return NSLocalizedString(@"Unknown domain", @"Default stream error domain.");
-}
-
 -(NSString *)errorDescriptionForError:(CFStreamError *)err {
 
 	if(err->domain == kCFStreamErrorDomainPOSIX) {
 		return [NSString stringWithFormat:@"%d : %s", err->error, strerror(err->error)];
+	} else if (err->domain == kCFStreamErrorDomainMacOSStatus) {
+		return [NSString stringWithFormat:@"%@ %d", NSLocalizedString(@"Mac Error", @"Mac Error"), err->error ];
+	} else if (err->domain == kCFStreamErrorDomainNetDB) {
+		return [NSString stringWithFormat:@"%d: %s", err->error, hstrerror(err->error)];
+	} else if (err->domain == kCFStreamErrorDomainMach) {
+		return [NSString stringWithFormat:@"%@ %d", NSLocalizedString(@"Mach Error", @"Mach Error"), err->error ];
+	} else if (err->domain == kCFStreamErrorDomainHTTP) {
+		return [NSString stringWithFormat:@"%@ %d", NSLocalizedString(@"HTTP Error", @"HTTP Error"), err->error ];
+	}  else if (err->domain == kCFStreamErrorDomainSOCKS) {
+		return [NSString stringWithFormat:@"%@ %d", NSLocalizedString(@"SOCKS Error", @"SOCKS Error"), err->error ];
+	} else if (err->domain == kCFStreamErrorDomainSystemConfiguration) {
+		return [NSString stringWithFormat:@"%@ %d", NSLocalizedString(@"System Configuration error", @"System Configuration error"), err->error ];
+	} else if (err->domain == kCFStreamErrorDomainSSL) {
+		return [NSString stringWithFormat:@"%@ %d", NSLocalizedString(@"SSL error", @"SSL error"), err->error ];
 	} else {
 		return [NSString stringWithFormat:@"%d", err->error];
 	}
 		
 }
 
--(NSString *)errorTextForError:(CFStreamError *)err {
-	NSString *domain = [self domainStringForError:err];
-	NSString *desc = [self errorDescriptionForError:err];
-	return [NSString stringWithFormat:@"%@ : %@", domain, desc];
-}
-
 -(void)errorOccurred: (CFStreamError *)err {
-	NSString *errorText = [self errorTextForError:err];// domainStringForError:err errorNumber:err->error];
-
+	NSString *errorText = [self errorDescriptionForError:err];
 	[[self observer] uploadFailed:self withError:errorText];
 	[self destroyUploadResources];
 }

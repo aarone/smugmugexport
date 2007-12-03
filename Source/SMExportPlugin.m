@@ -15,6 +15,7 @@
 #import "NSBitmapImageRepAdditions.h"
 #import "NSUserDefaultsAdditions.h"
 #import "NSDataAdditions.h"
+#import "NSStringAdditions.h"
 
 @interface SMExportPlugin (Private)
 -(ExportMgr *)exportManager;
@@ -105,65 +106,6 @@
 -(void)resetAlbumUrlFetchAttemptCount;
 @end
 
-@interface NSString (SMStringAdditions)
--(NSComparisonResult)compareVersionToVersion:(NSString *)aVersion;
-@end
-
-@implementation NSString (SMStringAdditions)
-// version strings are ${major}.${minor}.${micro}.${qualifier}
-// where all components except qualifier are integers and qualifier
-// is a alphanumeric string
--(NSComparisonResult)compareVersionToVersion:(NSString *)aVersion {
-	NSArray *thisComponents = [self componentsSeparatedByString:@"."];
-	NSArray *thatComponents = [aVersion componentsSeparatedByString:@"."];
-	
-	if(IsEmpty(thisComponents))
-		return NSOrderedSame;
-	if(IsEmpty(thatComponents))
-		return NSOrderedSame;
-	
-	NSNumber *thisMajor = [NSNumber numberWithInt:[[thisComponents objectAtIndex:0] intValue]];
-	NSNumber *thatMajor = [NSNumber numberWithInt:[[thatComponents objectAtIndex:0] intValue]];
-	NSNumber *thisMinor = [thisComponents count] > 1 ? [NSNumber numberWithInt:[[thisComponents objectAtIndex:1] intValue]] : nil;
-	NSNumber *thatMinor = [thatComponents count] > 1 ? [NSNumber numberWithInt:[[thatComponents objectAtIndex:1] intValue]]  : nil;
-	NSNumber *thisMicro = [thisComponents count] > 2 ? [NSNumber numberWithInt:[[thisComponents objectAtIndex:2] intValue]] : nil;
-	NSNumber *thatMicro = [thatComponents count] > 2 ? [NSNumber numberWithInt:[[thatComponents objectAtIndex:2] intValue]] : nil;
-	NSString *thisQualifier = [thisComponents count] > 3 ? [thisComponents objectAtIndex:3] : nil;
-	NSString *thatQualifier = [thatComponents count] > 3 ? [thatComponents objectAtIndex:3] : nil;
-	
-	NSComparisonResult result ;
-	if((result = [thisMajor compare:thatMajor]) != NSOrderedSame)
-		return result;
-	
-	// 2.X > 2 
-	if(thisMinor == nil && thatMinor != nil)
-		return NSOrderedAscending;
-	else if(thisMinor != nil && thatMinor == nil)
-		return NSOrderedDescending;
-	
-	if((result = [thisMinor compare:thatMinor]) != NSOrderedSame)
-		return result;
-	
-	// 2.3.0 > 2.3
-	if(thisMicro == nil && thatMicro != nil)
-		return NSOrderedAscending;
-	else if(thisMicro != nil && thatMicro == nil)
-		return NSOrderedDescending;
-	
-	if((result = [thisMicro compare:thatMicro]) != NSOrderedSame)
-		return result;
-	
-	// 2.3.0.p1 > 2.3.0
-	if(thisQualifier == nil && thatQualifier != nil)
-		return NSOrderedAscending;
-	else if(thisQualifier != nil && thatQualifier == nil)
-		return NSOrderedDescending;
-	
-	return [thisQualifier compare:thatQualifier];
-}
-
-@end
-
 // Globals
 NSString *SMAlbumID = @"id";
 NSString *SMCategoryID = @"id";
@@ -177,7 +119,6 @@ NSString *NewAlbumTabIdentifier = @"newAlbum";
 NSString *NewAccountLabel;
 NSString *NullSubcategoryLabel;
 
-NSArray *FilenameSelectionOptions;
 NSString *SMUploadedFilenameOptionFilename;
 NSString *SMUploadedFilenameOptionTitle;
 
@@ -208,7 +149,6 @@ NSString *SMUpdateCheckInterval = @"SMUpdateCheckInterval";
 // two additional attempts to upload an image if the upload fails
 static const int UploadFailureRetryCount = 2; 
 static const int AlbumUrlFetchRetryCount = 5;
-const float DefaultJpegScalingFactor = 0.9;
 static const int SMDefaultScaledHeight = 2592;
 static const int SMDefaultScaledWidth = 2592;
 static const NSTimeInterval SMDefaultUpdateCheckInterval = 24.0*60.0*60.0;
@@ -245,11 +185,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	NullSubcategoryLabel = NSLocalizedString(@"None", @"Text for Null SubCategory");
 	SMUploadedFilenameOptionFilename = NSLocalizedString(@"filename", @"filename option for upload filename preference");
 	SMUploadedFilenameOptionTitle = NSLocalizedString(@"title", @"title option for upload filename preference");
-	
-	FilenameSelectionOptions = [[NSArray alloc] initWithObjects:
-								SMUploadedFilenameOptionFilename,
-								SMUploadedFilenameOptionTitle,
-								nil];
 }
 
 -(void)dealloc {
@@ -288,7 +223,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[defaultsDict setObject:@"yes" forKey:SMShowAlbumDeleteAlert];
 	[defaultsDict setObject:@"no" forKey:SMEnableNetworkTracing];
 	[defaultsDict setObject:@"yes" forKey:SMEnableAlbumFetchDelay];
-	[defaultsDict setObject:[NSNumber numberWithFloat:DefaultJpegScalingFactor] forKey:SMJpegQualityFactor];
+	[defaultsDict setObject:[NSNumber numberWithFloat:[NSBitmapImageRep defaultJpegScalingFactor]] forKey:SMJpegQualityFactor];
 	[defaultsDict setObject:[NSNumber numberWithInt:0] forKey:SMSelectedScalingTag];
 	[defaultsDict setObject:[NSNumber numberWithInt: SMDefaultScaledWidth] forKey:SMImageScaleWidth];
 	[defaultsDict setObject:[NSNumber numberWithInt: SMDefaultScaledHeight] forKey:SMImageScaleHeight];
@@ -343,7 +278,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(NSArray *)filenameSelectionOptions {
-	return FilenameSelectionOptions;
+	return [NSArray arrayWithObjects:
+			 SMUploadedFilenameOptionFilename,
+			 SMUploadedFilenameOptionTitle,
+			 nil];
 }
 
 -(IBAction)donate:(id)sender {
@@ -468,7 +406,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[args release];
 		return;
 	}
-	
 
 	if([localVersion compareVersionToVersion:remoteVersion] == NSOrderedAscending)
 		[self displayUpdateAvailable:remoteInfo];
@@ -982,7 +919,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		title = [[self exportManager] imageTitleAtIndex:[self imagesUploaded]]; // iPhoto 7
 	
 	NSString *filename = [self chooseUploadFilename:[[nextFile pathComponents] lastObject] 
-										  title:title];
+											  title:title];
 	[[self smAccess] uploadImageData:imageData
 							filename:filename
 							albumWithID:selectedAlbumId

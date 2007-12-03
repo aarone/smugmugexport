@@ -42,8 +42,6 @@ extern NSString *SMUploadedFilename;
 extern NSString *SMUploadedFilenameOptionFilename;
 extern NSString *SMUploadedFilenameOptionTitle;
 
-extern const float DefaultJpegScalingFactor;
-
 // new album property keys
 extern NSString *IsPublicPref;
 extern NSString *ShowFilenamesPref;

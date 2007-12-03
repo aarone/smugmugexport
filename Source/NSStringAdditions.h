@@ -12,5 +12,5 @@
 @interface NSString (NSStringAdditions)
 
 -(NSString *)urlEscapedString;
-
+-(NSComparisonResult)compareVersionToVersion:(NSString *)aVersion;
 @end
