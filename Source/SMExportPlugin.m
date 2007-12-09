@@ -432,7 +432,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[alert setAlertStyle:NSInformationalAlertStyle];
 	
 	int selectedButton = [alert runModal];
-	if(selectedButton = NSAlertFirstButtonReturn) {
+	if(selectedButton == NSAlertFirstButtonReturn) {
 		// go to the update site
 		NSString *updateLocation = [remoteInfo objectForKey:@"remoteLocation"];
 		[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:updateLocation]];
