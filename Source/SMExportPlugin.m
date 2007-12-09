@@ -260,7 +260,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		NSDictionary *nullSubCategory = [[self smAccess] createNullSubcategory];
 		[relevantSubCategories insertObject:nullSubCategory	atIndex:0];
 		[subCategoriesArrayController setContent:nil];
-		[subCategoriesArrayController setContent:relevantSubCategories];
+		[subCategoriesArrayController setContent:[NSArray arrayWithArray:relevantSubCategories]];
 		[subCategoriesArrayController setSelectionIndex:0];
 	}
 }

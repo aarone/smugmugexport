@@ -667,7 +667,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	
 	[newAlbumProperties setObject:@"smugmug.albums.create" forKey:@"method"];
 	[newAlbumProperties setObject:categoryId forKey:@"CategoryID"];
-	[newAlbumProperties setObject:subCategoryId forKey:@"SMSubCategoryID"];
+	[newAlbumProperties setObject:subCategoryId forKey:@"SubCategoryID"];
 	[newAlbumProperties setObject:[self sessionID] forKey:@"SessionID"];
 	[newAlbumProperties setObject:title forKey:@"Title"];
 	
