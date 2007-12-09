@@ -937,21 +937,16 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful {
 	[NSApp endSheet:uploadPanel];
 	[self setIsUploading:NO];
-
-	// if this really bothers you you can set your preferences to not open the page in the browser
-	if(![[[NSUserDefaults smugMugUserDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue]) {
-		return;
-	}
 	
-	if([self uploadSiteUrl] != nil && ![self browserOpenedInGallery]) {
+	// if this really bothers you you can set your preferences to not open the page in the browser
+	if([[[NSUserDefaults smugMugUserDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue] &&
+				[self uploadSiteUrl] != nil &&  ![self browserOpenedInGallery]) {
 		[self setBrowserOpenedInGallery:YES];
 		[[NSWorkspace sharedWorkspace] openURL:uploadSiteUrl];
 	}
-	
-	if([[[NSUserDefaults smugMugUserDefaults] valueForKey:SMCloseExportWindowAfterUploadCompletion] boolValue]) {
+		
+	if([[[NSUserDefaults smugMugUserDefaults] valueForKey:SMCloseExportWindowAfterUploadCompletion] boolValue])
 		[[self exportManager] cancelExportBeforeBeginning];
-		 return;
-	}
 }
 
 -(void)uploadDidFail:(NSData *)imageData reason:(NSString *)errorText {
