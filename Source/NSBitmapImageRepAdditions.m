@@ -31,8 +31,8 @@ static const float DefaultJpegScalingFactor = 0.9;
 		
 	float scaleFactor = 1.0;
 	if( inputImageWidth > maxWidth || inputImageHeight > maxHeight ) {
-		int heightDifferential = inputImageWidth - maxWidth;
-		int widthDifferential = inputImageHeight - maxHeight;
+		int heightDifferential = inputImageHeight - maxHeight;
+		int widthDifferential = inputImageWidth - maxWidth;
 		// scale the dimension with the greatest difference
 		scaleFactor = (heightDifferential > widthDifferential) ? 
 			(float)maxHeight/(float)inputImageHeight : 

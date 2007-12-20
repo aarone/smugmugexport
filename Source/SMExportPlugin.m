@@ -76,7 +76,7 @@
 -(NSPanel *)uploadPanel;
 -(NSPanel *)loginPanel;
 -(BOOL)sheetIsDisplayed;
--(void)uploadNextImage;
+-(void)uploadCurrentImage;
 -(void)openLastGalleryInBrowser;
 -(NSInvocation *)postLogoutInvocation;
 -(void)setPostLogoutInvocation:(NSInvocation *)inv;
@@ -104,6 +104,8 @@
 -(int)albumUrlFetchAttemptCount;
 -(void)incrementAlbumUrlFetchAttemptCount;
 -(void)resetAlbumUrlFetchAttemptCount;
+-(void)performUploadCompletionTasks:(BOOL)wasSuccessful;
+-(void)uploadNextImage;
 @end
 
 // Globals
@@ -144,6 +146,7 @@ NSString *SMAutomaticallyCheckForUpdates = @"SMAutomaticallyCheckForUpdates";
 NSString *SMUploadedFilename = @"SMUploadFilename";
 NSString *SMLastUpdateCheck = @"SMLastUpdateCheck";
 NSString *SMUpdateCheckInterval = @"SMUpdateCheckInterval";
+NSString *SMContinueUploadOnFileIOError = @"SMContinueUploadOnFileIOError";
 
 
 // two additional attempts to upload an image if the upload fails
@@ -234,7 +237,8 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[defaultsDict setObject:[NSNumber numberWithBool:NO] forKey:SMAutomaticallyCheckForUpdates];
 	[defaultsDict setObject:[NSDate distantPast] forKey:SMLastUpdateCheck];
 	[defaultsDict setObject:[NSNumber numberWithInt:SMDefaultUpdateCheckInterval] forKey:SMUpdateCheckInterval];
-		
+	[defaultsDict setObject:[NSNumber numberWithBool:NO] forKey:SMContinueUploadOnFileIOError];
+	
 	[[NSUserDefaults smugMugUserDefaults] registerDefaults:defaultsDict];
 	
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.accounts"] triggerChangeNotificationsForDependentKey:@"accounts"];
@@ -857,16 +861,22 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 	NSString *thumbnailPath = [exportManager thumbnailPathAtIndex:[self imagesUploaded]];
 	NSImage *img = [[[NSImage alloc] initWithData:[NSData dataWithContentsOfFile: thumbnailPath]] autorelease];
+	if(img == nil) {
+		[self presentError:NSLocalizedString(@"Cannot load image thumbnail", @"Error message when thumbnail is nil")];
+		[self performUploadCompletionTasks:NO];
+		return;
+	}
+	
 	[img setScalesWhenResized:YES];
 	[self setCurrentThumbnail:img];
 	[self resetUploadRetryCount];
 	[self setUploadSiteUrl:nil];
 	[self setSiteUrlHasBeenFetched:NO];
 	
-	[self uploadNextImage];
+	[self uploadCurrentImage];
 }
 
--(NSData *)imageDataForPath:(NSString *)pathToImage {
+-(NSData *)imageDataForPath:(NSString *)pathToImage errorString:(NSString **)err {
 	
 	NSString *application = nil;
 	NSString *filetype = nil;
@@ -874,7 +884,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 													application:&application
 														   type:&filetype];
 	if(result == NO) {
-		NSLog(@"Error getting file type for file (%@).  This image will not be exported.", pathToImage);
+		*err =  [NSString stringWithFormat:NSLocalizedString(@"Upload failed: error accessing image: %@.", @"Error message when an image cannot be read."), pathToImage];
 		return nil;
 	}
 	
@@ -882,6 +892,13 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	
 	if(!isJpeg && ShouldScaleImages())
 		NSLog(@"The image (%@) is not a jpeg and cannot be scaled by this program (yet).", pathToImage);
+	
+	NSError *error = nil;
+	NSData *imgData = [NSData dataWithContentsOfFile:pathToImage options:0 error:&error];
+	if(imgData == nil) {
+		*err = [error localizedDescription];
+		return nil;
+	}
 	
 	if(isJpeg && ShouldScaleImages()) {
 		int maxWidth = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleWidth] intValue];
@@ -893,24 +910,38 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		if(maxHeight == 0)
 			maxHeight = INT_MAX;
 		
-		NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc] initWithData:[NSData dataWithContentsOfFile:pathToImage]] autorelease];
+		
+		NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc] initWithData:imgData] autorelease];
+		
 		// scale
 		if([rep pixelsWide] > maxWidth || [rep pixelsHigh] > maxHeight)
 			return [rep scaledRepToMaxWidth:maxWidth maxHeight:maxHeight];
 		
 		// no scale
-		return [NSData dataWithContentsOfFile:pathToImage];
+		return imgData;
 	}
 	
 	// the default operation
-	return [NSData dataWithContentsOfFile:pathToImage];	
+	return imgData;
 }
 
--(void)uploadNextImage {
+-(void)uploadCurrentImage {
 	
 	NSString *selectedAlbumId = [[[self selectedAlbum] objectForKey:SMAlbumID] stringValue];
 	NSString *nextFile = [[self exportManager] imagePathAtIndex:[self imagesUploaded]];
-	NSData *imageData = [self imageDataForPath:nextFile];
+	NSString *error = nil;
+	NSData *imageData = [self imageDataForPath:nextFile errorString:&error];
+	if(imageData == nil) {
+		if([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMContinueUploadOnFileIOError] boolValue]) {
+			NSLog(@"Error reading image data for image: %@. The image will be skipped.", nextFile);
+			[self uploadNextImage];
+		} else {
+			NSLog(@"Error reading image data for image: %@. The upload was canceled.", nextFile);
+			[self performUploadCompletionTasks:NO];
+			[self presentError:error];
+		}
+		return;
+	}
 	
 	NSString *title = nil;
 	if([[self exportManager] respondsToSelector:@selector(imageCaptionAtIndex:)])
@@ -956,7 +987,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		
 		[self incrementUploadRetryCount];
 		[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Retrying upload of image %d of %d\nReason: %@", @"Retry upload progress"), [self imagesUploaded] + 1, [[self exportManager] imageCount], errorText]];
-		[self uploadNextImage];
+		[self uploadCurrentImage];
 		return;
 	} else {
 		// our max retries have been hit, stop uploading
@@ -982,14 +1013,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[self performUploadCompletionTasks:NO];
 }
 
--(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId {
-	
-	if(![self siteUrlHasBeenFetched]) {
-		[self resetAlbumUrlFetchAttemptCount];
-		[self setSiteUrlHasBeenFetched:NO];
-		[[self smAccess] fetchImageUrls:smImageId];
-	}
-	
+-(void)uploadNextImage {
 	// onto the next image
  	[self resetUploadRetryCount];
 	[self setImagesUploaded:[self imagesUploaded] + 1];
@@ -1004,8 +1028,18 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[img setScalesWhenResized:YES];
 		[self setCurrentThumbnail:img];
 		
-		[self uploadNextImage];		
+		[self uploadCurrentImage];		
+	}	
+}
+
+-(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId {
+	
+	if(![self siteUrlHasBeenFetched]) {
+		[self resetAlbumUrlFetchAttemptCount];
+		[self setSiteUrlHasBeenFetched:NO];
+		[[self smAccess] fetchImageUrls:smImageId];
 	}
+	[self uploadNextImage];
 }
 
 -(void)didEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
