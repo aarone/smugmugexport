@@ -1090,15 +1090,14 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		NSInvocation *inv = [NSInvocation invocationWithMethodSignature:
 			[self methodSignatureForSelector:@selector(accountChangedTasks:)]];
 		[inv setSelector:@selector(accountChangedTasks:)];
+		[self setPostLogoutInvocation:inv];	
+		[[self postLogoutInvocation] setArgument:&account atIndex:2];
 		[inv retainArguments];
-		[self setPostLogoutInvocation:inv];		
-		[[self postLogoutInvocation] setArgument:account atIndex:0];
-
+		
 		[[self smAccess] logout]; // aynchronous callback
 	} else {
 		[self accountChangedTasks:account];
 	}
-	
 }
 
 -(void)accountChangedTasks:(NSString *)account {

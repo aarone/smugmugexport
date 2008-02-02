@@ -417,7 +417,11 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 -(void)logoutCallback:(SMRequest *)req {
 
 	[self setIsLoggedIn:NO];
-
+	[self setAlbums:[NSArray array]];
+	[self setIsLoggedIn:NO];
+	[self setCategories:[NSArray array]];
+	[self setSubcategories:[NSArray array]];
+	
 	if([self delegate] != nil &&
 	   [[self delegate] respondsToSelector:@selector(logoutDidComplete:)])
 		[[self delegate] performSelectorOnMainThread:@selector(logoutDidComplete:) withObject:[NSNumber numberWithBool:[self requestWasSuccessful:req]] waitUntilDone:NO];
