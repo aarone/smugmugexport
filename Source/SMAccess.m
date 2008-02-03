@@ -476,12 +476,12 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)notifyDelegateOfUploadSuccess:(NSArray *)args {
-	[[self delegate] uploadDidSucceeed:[args objectAtIndex:0] imageId:[args objectAtIndex:1]];
+	[[self delegate] uploadDidSucceeed:[args objectAtIndex:0] imageId:[args objectAtIndex:1] requestDict:[args objectAtIndex:2]];
 }
 
 -(void)uploadSucceeded:(SMRequest *)request {
 	[self performSelectorOnMainThread:@selector(notifyDelegateOfUploadSuccess:)
-						   withObject:[NSArray arrayWithObjects:[request imageData], [[[request decodedResponse] objectForKey:@"Image"] objectForKey:@"id"],  nil]
+						   withObject:[NSArray arrayWithObjects:[request imageData], [[[request decodedResponse] objectForKey:@"Image"] objectForKey:@"id"], [request requestDict], nil]
 						waitUntilDone:NO];
 }
 

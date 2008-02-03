@@ -7,13 +7,14 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import <Growl/Growl.h>
 #import "ExportPluginProtocol.h"
 #import "SMAccess.h"
 
 @class SMAccess, ExportMgr, SMAccountManager;
 @protocol ExportPluginProtocol, SMAccessDelegate;
 
-@interface SMExportPlugin : NSObject <ExportPluginProtocol, SMAccessDelegate> {
+@interface SMExportPlugin : NSObject <ExportPluginProtocol, SMAccessDelegate, GrowlApplicationBridgeDelegate> {
 
 	IBOutlet id firstView;
 	IBOutlet id lastView;

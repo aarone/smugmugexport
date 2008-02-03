@@ -12,7 +12,7 @@
 @protocol SMAccessDelegate
 -(void)loginDidComplete:(NSNumber *)wasSuccessful;
 -(void)logoutDidComplete:(NSNumber *)wasSuccessful;
--(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId;
+-(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId requestDict:(NSDictionary *)requestDict;
 -(void)uploadDidFail:(NSData *)imageData reason:(NSString *)errorText;
 -(void)uploadMadeProgress:(NSData *)imageData bytesWritten:(long)bytesWritten ofTotalBytes:(long)totalBytes;
 -(void)uploadWasCanceled;

@@ -496,16 +496,18 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 			   caption:(NSString *)caption
 			  keywords:(NSArray *)keywords
 			  observer:(NSObject<SMUploadObserver> *)anObserver {
+	NSDictionary *args = [NSDictionary dictionaryWithObjectsAndKeys:
+								 theImageData, @"imageData",
+								 filename, @"filename",
+								 sessionId, @"sessionId",
+								 albumId, @"albumId",
+								 caption, @"caption",
+								 keywords, @"keywords",
+								 anObserver, @"observer", nil];
+	[self setRequestDict:args];
 	[NSThread detachNewThreadSelector:@selector(startImageUpload:) 
 							 toTarget:self 
-						   withObject: [NSDictionary dictionaryWithObjectsAndKeys:
-										theImageData, @"imageData",
-										filename, @"filename",
-										sessionId, @"sessionId",
-										albumId, @"albumId",
-										caption, @"caption",
-										keywords, @"keywords",
-										anObserver, @"observer", nil]];
+						   withObject:args];
 													
 }
 

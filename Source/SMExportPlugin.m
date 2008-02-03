@@ -106,6 +106,26 @@
 -(void)resetAlbumUrlFetchAttemptCount;
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful;
 -(void)uploadNextImage;
+
+-(NSString *)GrowlFrameworkPath;
+-(BOOL)isGrowlLoaded;
+-(void)loadGrowl;
+-(void)unloadGrowl;
+-(void)notifyImageUploaded:(NSString *)imageFilename image:(NSData *)image;
+-(NSData *)notificationThumbnail:(NSData *)fullsizeImageData;
+@end
+
+@interface SMExportPlugin (GrowlDelegate)
+- (NSDictionary *) registrationDictionaryForGrowl;
+- (NSString *) applicationNameForGrowl;
+- (NSData *) applicationIconDataForGrowl;
+- (void) growlIsReady;
+- (void) growlNotificationWasClicked:(id)clickContext;
+- (void) growlNotificationTimedOut:(id)clickContext;
+-(void)notifyLogin:(NSString *)account;
+-(void)notifyLougout:(NSString *)account;
+-(void)notifyUploadCompleted;
+-(void)notifyUploadError:(NSString *)error;
 @end
 
 // Globals
@@ -148,6 +168,13 @@ NSString *SMLastUpdateCheck = @"SMLastUpdateCheck";
 NSString *SMUpdateCheckInterval = @"SMUpdateCheckInterval";
 NSString *SMContinueUploadOnFileIOError = @"SMContinueUploadOnFileIOError";
 
+// Growl Notification Keys
+NSString *SMGrowlUploadCompleted = @"Upload Completed";
+NSString *SMGrowlUploadError = @"Upload Error";
+NSString *SMGrowlImageUploaded = @"Image Uploaded";
+NSString *SMGrowlLogin = @"Logged In";
+NSString *SMGrowlLogout = @"Logged Out";
+
 
 // two additional attempts to upload an image if the upload fails
 static const int UploadFailureRetryCount = 2; 
@@ -165,12 +192,14 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		return nil;
 	
 	exportManager = exportMgr;	
+	[self loadGrowl];
 	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
+	
 	
 	[self setAccountManager:[SMAccountManager accountManager]];
 	[self setSMAccess:[SMAccess smugmugManager]];
 	[[self smAccess] setDelegate:self];
-
+	
 	[self setNewAlbumPreferences:[NSMutableDictionary dictionaryWithDictionary:[self defaultNewAlbumPreferences]]]; 
 	[self setLoginAttempted:NO];
 	[self setSiteUrlHasBeenFetched:NO];
@@ -191,6 +220,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)dealloc {
+	[self unloadGrowl];
 	[[self postLogoutInvocation] release];
 	[[self uploadSiteUrl] release];
 	[[self smAccess] release];
@@ -568,6 +598,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[self setSelectedAccount:[[self smAccess] username]];
 	[NSApp endSheet:loginPanel];
 	
+	[self notifyLogin:[self selectedAccount]];
 	[[self smAccess] buildCategoryList];
 	[[self smAccess] buildSubCategoryList];
 }
@@ -582,6 +613,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	if(![wasSuccessful boolValue])
 		[self presentError:NSLocalizedString(@"Logout failed.", @"Error message to display when logout fails.")];
 	else if([self postLogoutInvocation] != nil) {
+		[self notifyLougout:[self selectedAccount]];
 		[[self postLogoutInvocation] invokeWithTarget:self];
 	}
 }
@@ -975,13 +1007,18 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[self setBrowserOpenedInGallery:YES];
 		[[NSWorkspace sharedWorkspace] openURL:uploadSiteUrl];
 	}
-		
+	
 	if([[[NSUserDefaults smugMugUserDefaults] valueForKey:SMCloseExportWindowAfterUploadCompletion] boolValue])
 		[[self exportManager] cancelExportBeforeBeginning];
+	
+	if(wasSuccessful)
+		[self notifyUploadCompleted];
 }
 
 -(void)uploadDidFail:(NSData *)imageData reason:(NSString *)errorText {
 
+	[self notifyUploadError:errorText];
+	
 	if([self uploadRetryCount] < UploadFailureRetryCount) {
 		// if an error occurred, retry up to UploadFailureRetryCount times
 		
@@ -1032,13 +1069,15 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	}	
 }
 
--(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId {
+-(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId requestDict:(NSDictionary *)requestDict {
 	
 	if(![self siteUrlHasBeenFetched]) {
 		[self resetAlbumUrlFetchAttemptCount];
 		[self setSiteUrlHasBeenFetched:NO];
 		[[self smAccess] fetchImageUrls:smImageId];
 	}
+	
+	[self notifyImageUploaded:[requestDict objectForKey:@"filename"] image:[requestDict objectForKey:@"imageData"]];
 	[self uploadNextImage];
 }
 
@@ -1472,6 +1511,138 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 - (BOOL)handlesMovieFiles {
 	return NO;
+}
+
+#pragma mark Growl Delegate Methods
+
+-(NSDictionary *)registrationDictionaryForGrowl {
+	NSArray *allNotifications = [NSArray arrayWithObjects:
+								 SMGrowlLogin,
+								 SMGrowlLogout,
+								 SMGrowlUploadCompleted,
+								 SMGrowlUploadError,
+								 SMGrowlImageUploaded,
+								 nil];
+	NSArray *defaultNotifications = [NSArray arrayWithObjects:
+									 SMGrowlUploadCompleted,
+									 SMGrowlUploadError,
+									 nil];				 
+	return [NSDictionary dictionaryWithObjectsAndKeys:
+			allNotifications, GROWL_NOTIFICATIONS_ALL,
+			allNotifications, GROWL_NOTIFICATIONS_DEFAULT,
+			[NSNumber numberWithInt:1], GROWL_TICKET_VERSION,
+			nil];
+}
+
+-(NSString *)applicationNameForGrowl {
+	NSString *appName = [[[NSBundle bundleForClass:[SMExportPlugin class]] infoDictionary] objectForKey:@"CFBundleDisplayName"];
+	return appName;
+}
+
+//-(NSData *)applicationIconDataForGrowl {
+//	return nil;
+//}
+
+-(void)growlIsReady {
+
+}
+
+-(void)growlNotificationWasClicked:(id)clickContext {
+	if(clickContext != nil)
+		[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:(NSString *)clickContext]];
+}
+
+- (void) growlNotificationTimedOut:(id)clickContext {
+
+}
+
+#pragma mark Growl Notification
+
+-(NSData *)notificationThumbnail:(NSData *)fullsizeImageData {
+	NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc] initWithData:fullsizeImageData] autorelease];
+	return [rep scaledRepToMaxWidth:120 maxHeight:120];	
+}
+
+-(NSString *)GrowlFrameworkPath {
+	return [[[NSBundle bundleForClass:[self class]] privateFrameworksPath] stringByAppendingPathComponent:@"Growl.framework"];
+}
+
+-(BOOL)isGrowlLoaded {
+	NSBundle *frameworkBundle = [NSBundle bundleWithPath:[self GrowlFrameworkPath]];
+	return frameworkBundle != nil && [frameworkBundle isLoaded];
+}
+
+-(void)loadGrowl {
+	if([self isGrowlLoaded])
+		return;
+	
+	NSBundle *growlBundle = [NSBundle bundleWithPath:[self GrowlFrameworkPath]];
+	if (growlBundle && [growlBundle load]) {
+		// Register ourselves as a Growl delegate
+		[GrowlApplicationBridge setGrowlDelegate:self];
+	} else {
+		NSLog(@"Could not load Growl.framework");
+	}
+}
+
+-(void)unloadGrowl {
+	if(![self isGrowlLoaded])
+		return;
+
+	// NSBundle unload is strictly >= 10.5
+//	NSBundle *growlBundle = [NSBundle bundleWithPath:[self GrowlFrameworkPath]];
+//	if (growlBundle)
+//		[growlBundle unload];		
+}
+
+-(void)notifyImageUploaded:(NSString *)imageFilename image:(NSData *)image{	
+	[GrowlApplicationBridge notifyWithTitle:@"Image Uploaded"
+								description:imageFilename
+						   notificationName:SMGrowlImageUploaded
+								   iconData:[self notificationThumbnail:image]
+								   priority:0
+								   isSticky:NO
+							   clickContext:nil];
+}
+
+-(void)notifyLogin:(NSString *)account {
+	[GrowlApplicationBridge notifyWithTitle:@"Logged In"
+								description:[NSString stringWithFormat:@"User: %@", account]
+						   notificationName:SMGrowlLogin
+								   iconData:nil
+								   priority:0
+								   isSticky:NO
+							   clickContext:nil];
+}
+
+-(void)notifyLougout:(NSString *)account {
+	[GrowlApplicationBridge notifyWithTitle:@"Logged Out"
+								description:[NSString stringWithFormat:@"User: %@", account]
+						   notificationName:SMGrowlLogout
+								   iconData:nil
+								   priority:0
+								   isSticky:NO
+							   clickContext:nil];
+}
+
+-(void)notifyUploadCompleted {
+	[GrowlApplicationBridge notifyWithTitle:@"Upload Complete"
+								description:[NSString stringWithFormat:@"Uploaded %d images", imagesUploaded]
+						   notificationName:SMGrowlUploadCompleted
+								   iconData:nil
+								   priority:0
+								   isSticky:NO
+							   clickContext:[[self uploadSiteUrl] description]];
+}
+
+-(void)notifyUploadError:(NSString *)error {
+	[GrowlApplicationBridge notifyWithTitle:@"Upload Error"
+								description:error
+						   notificationName:SMGrowlUploadError
+								   iconData:nil
+								   priority:0
+								   isSticky:NO
+							   clickContext:nil];			
 }
 
 @end
