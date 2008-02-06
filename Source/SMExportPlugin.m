@@ -16,6 +16,7 @@
 #import "NSUserDefaultsAdditions.h"
 #import "NSDataAdditions.h"
 #import "NSStringAdditions.h"
+#import "SMRequest.h"
 
 @interface SMExportPlugin (Private)
 -(ExportMgr *)exportManager;
@@ -169,11 +170,11 @@ NSString *SMUpdateCheckInterval = @"SMUpdateCheckInterval";
 NSString *SMContinueUploadOnFileIOError = @"SMContinueUploadOnFileIOError";
 
 // Growl Notification Keys
-NSString *SMGrowlUploadCompleted = @"Upload Completed";
-NSString *SMGrowlUploadError = @"Upload Error";
-NSString *SMGrowlImageUploaded = @"Image Uploaded";
-NSString *SMGrowlLogin = @"Logged In";
-NSString *SMGrowlLogout = @"Logged Out";
+NSString *SMGrowlUploadCompleted = nil;
+NSString *SMGrowlUploadError = nil;
+NSString *SMGrowlImageUploaded = nil;
+NSString *SMGrowlLogin = nil;
+NSString *SMGrowlLogout = nil;
 
 
 // two additional attempts to upload an image if the upload fails
@@ -217,6 +218,13 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	NullSubcategoryLabel = NSLocalizedString(@"None", @"Text for Null SubCategory");
 	SMUploadedFilenameOptionFilename = NSLocalizedString(@"filename", @"filename option for upload filename preference");
 	SMUploadedFilenameOptionTitle = NSLocalizedString(@"title", @"title option for upload filename preference");
+	
+	// Growl stuff
+	SMGrowlUploadCompleted = NSLocalizedString(@"Upload Completed", @"Upload completed growl notification name");
+	SMGrowlUploadError = NSLocalizedString(@"Upload Error", @"Upload error growl notification name");
+	SMGrowlImageUploaded = NSLocalizedString(@"Image Uploaded", @"Image uploaded growl notification name");
+	SMGrowlLogin = NSLocalizedString(@"Logged In", @"Logged in growl notification name");
+	SMGrowlLogout = NSLocalizedString(@"Logged Out", @"Logged out growl notification name");
 }
 
 -(void)dealloc {
@@ -1077,7 +1085,8 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[[self smAccess] fetchImageUrls:smImageId];
 	}
 	
-	[self notifyImageUploaded:[requestDict objectForKey:@"filename"] image:[requestDict objectForKey:@"imageData"]];
+	[self notifyImageUploaded:[requestDict objectForKey:@"filename"]
+						image:[requestDict objectForKey:SMUploadKeyImageData]];
 	[self uploadNextImage];
 }
 
@@ -1114,9 +1123,9 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[self showLoginSheet:self];
 		return;
 	}
-
+	
 	// an unknown account
-	NSAssert( [[self accounts] containsObject:account], @"Selected account is unknown");
+	NSAssert( [[self accounts] containsObject:account], NSLocalizedString(@"Selected account is unknown", @"Error for unknown accounts"));
 	
 	// if we're already logged into the newly selected account, return
 	if([[self selectedAccount] isEqual:account]) {
@@ -1431,11 +1440,9 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)unlockProgress {
-	NSLog(@"SmugMugExport -- unlockProgress");
 }
 
 -(void)lockProgress {
-	NSLog(@"SmugMugExport -- lockProgress");
 }
 
 -(void *)progress {
@@ -1443,7 +1450,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)performExport:(id)fp8 {
-	NSLog(@"SmugMugExport -- performExport");
 }
 
 -(void)startExport:(id)fp8 {
@@ -1463,7 +1469,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(id)defaultFileName {
-	return [NSString stringWithFormat:@"%@-%d",[[NSCalendarDate calendarDate] descriptionWithCalendarFormat:@"%Y-%m-%d"], [NSDate timeIntervalSinceReferenceDate]];;
+	return nil;
 }
 
 -(id)getDestinationPath {
@@ -1506,7 +1512,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)clickExport {
-	NSLog(@"SMExportPlugin -- clickExport");
 }
 
 - (BOOL)handlesMovieFiles {
@@ -1529,7 +1534,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 									 nil];				 
 	return [NSDictionary dictionaryWithObjectsAndKeys:
 			allNotifications, GROWL_NOTIFICATIONS_ALL,
-			allNotifications, GROWL_NOTIFICATIONS_DEFAULT,
+			defaultNotifications, GROWL_NOTIFICATIONS_DEFAULT,
 			[NSNumber numberWithInt:1], GROWL_TICKET_VERSION,
 			nil];
 }
@@ -1539,12 +1544,11 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	return appName;
 }
 
-//-(NSData *)applicationIconDataForGrowl {
-//	return nil;
-//}
+-(NSData *)applicationIconDataForGrowl {
+	return nil;
+}
 
 -(void)growlIsReady {
-
 }
 
 -(void)growlNotificationWasClicked:(id)clickContext {
@@ -1552,8 +1556,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:(NSString *)clickContext]];
 }
 
-- (void) growlNotificationTimedOut:(id)clickContext {
-
+-(void)growlNotificationTimedOut:(id)clickContext {
 }
 
 #pragma mark Growl Notification
@@ -1596,7 +1599,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)notifyImageUploaded:(NSString *)imageFilename image:(NSData *)image{	
-	[GrowlApplicationBridge notifyWithTitle:@"Image Uploaded"
+	[GrowlApplicationBridge notifyWithTitle:NSLocalizedString(@"Image Uploaded", @"Growl notification title for image uploaded event")
 								description:imageFilename
 						   notificationName:SMGrowlImageUploaded
 								   iconData:[self notificationThumbnail:image]
@@ -1606,8 +1609,8 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)notifyLogin:(NSString *)account {
-	[GrowlApplicationBridge notifyWithTitle:@"Logged In"
-								description:[NSString stringWithFormat:@"User: %@", account]
+	[GrowlApplicationBridge notifyWithTitle:NSLocalizedString(@"Logged In", @"Growl Notification title for logged in event")
+								description:[NSString stringWithFormat:NSLocalizedString(@"User: %@", @"User logged in growl description"), account]
 						   notificationName:SMGrowlLogin
 								   iconData:nil
 								   priority:0
@@ -1616,8 +1619,8 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)notifyLougout:(NSString *)account {
-	[GrowlApplicationBridge notifyWithTitle:@"Logged Out"
-								description:[NSString stringWithFormat:@"User: %@", account]
+	[GrowlApplicationBridge notifyWithTitle:NSLocalizedString(@"Logged Out", @"Growl Message Title: (Logged Out)")
+								description:[NSString stringWithFormat:NSLocalizedString(@"User: %@", @"User logged out growl description"), account]
 						   notificationName:SMGrowlLogout
 								   iconData:nil
 								   priority:0
@@ -1627,7 +1630,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)notifyUploadCompleted {
 	[GrowlApplicationBridge notifyWithTitle:@"Upload Complete"
-								description:[NSString stringWithFormat:@"Uploaded %d images", imagesUploaded]
+								description:[NSString stringWithFormat:NSLocalizedString(@"Uploaded %d images", @"Description for upload complete Growl message"), imagesUploaded]
 						   notificationName:SMGrowlUploadCompleted
 								   iconData:nil
 								   priority:0
@@ -1636,7 +1639,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)notifyUploadError:(NSString *)error {
-	[GrowlApplicationBridge notifyWithTitle:@"Upload Error"
+	[GrowlApplicationBridge notifyWithTitle:NSLocalizedString(@"Upload Error", @"Growl title for upload error notification")
 								description:error
 						   notificationName:SMGrowlUploadError
 								   iconData:nil

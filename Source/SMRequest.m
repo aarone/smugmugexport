@@ -60,6 +60,13 @@
 }
 @end
 
+NSString *SMUploadKeyImageData = @"SMImageData";
+NSString *SMUploadKeyFilename = @"SMFilename";
+NSString *SMUploadKeySessionId = @"SMSessionId";
+NSString *SMUploadKeyCaption = @"SMCaption";
+NSString *SMUploadKeyKeywords = @"SMKeywords";
+NSString *SMUploadKeyAlbumId = @"SMAlbumId";
+
 double UploadProgressTimerInterval = 0.125/2.0;
 
 static const CFOptionFlags DAClientNetworkEvents = 
@@ -104,6 +111,9 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 
 +(NSString *)UserAgent {
 	return [[[NSString alloc] initWithFormat:@"iPhoto SMExportPlugin/%@", [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey]] autorelease];
+}
+
++(void)initialize {
 }
 
 -(void)dealloc {
@@ -497,13 +507,14 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 			  keywords:(NSArray *)keywords
 			  observer:(NSObject<SMUploadObserver> *)anObserver {
 	NSDictionary *args = [NSDictionary dictionaryWithObjectsAndKeys:
-								 theImageData, @"imageData",
-								 filename, @"filename",
-								 sessionId, @"sessionId",
-								 albumId, @"albumId",
-								 caption, @"caption",
-								 keywords, @"keywords",
-								 anObserver, @"observer", nil];
+								 theImageData, SMUploadKeyImageData,
+								 filename, SMUploadKeyFilename,
+								 sessionId, SMUploadKeySessionId,
+								 albumId, SMUploadKeyAlbumId,
+								 caption, SMUploadKeyCaption,
+								 keywords, SMUploadKeyKeywords,
+								 anObserver, @"observer", 
+						  nil];
 	[self setRequestDict:args];
 	[NSThread detachNewThreadSelector:@selector(startImageUpload:) 
 							 toTarget:self 
@@ -513,12 +524,12 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 
 -(void)startImageUpload:(NSDictionary *)args {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSData *theImageData = [args objectForKey:@"imageData"];
-	NSString *filename = [args objectForKey:@"filename"];
-	NSString *sessionId = [args objectForKey:@"sessionId"];
-	NSString *albumId = [args objectForKey: @"albumId"];
-	NSString *caption = [args objectForKey:@"caption"];
-	NSArray *keywords = [args objectForKey:@"keywords"];
+	NSData *theImageData = [args objectForKey:SMUploadKeyImageData];
+	NSString *filename = [args objectForKey:SMUploadedFilename];
+	NSString *sessionId = [args objectForKey:SMUploadKeySessionId];
+	NSString *albumId = [args objectForKey: SMUploadKeyAlbumId];
+	NSString *caption = [args objectForKey:SMUploadKeyCaption];
+	NSArray *keywords = [args objectForKey:SMUploadKeyKeywords];
 	NSObject<SMUploadObserver> *anObserver = [args objectForKey:@"observer"];
 
 	[self setObserver:anObserver];

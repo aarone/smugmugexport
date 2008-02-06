@@ -10,6 +10,22 @@
 #import "SMDecoder.h"
 #import "SMUploadObserver.h"
 
+/*
+ NSData *theImageData = [args objectForKey:@"imageData"];
+ NSString *filename = [args objectForKey:@"filename"];
+ NSString *sessionId = [args objectForKey:@"sessionId"];
+ NSString *albumId = [args objectForKey: @"albumId"];
+ NSString *caption = [args objectForKey:@"caption"];
+ NSArray *keywords = [args objectForKey:@"keywords"];
+*/ 
+
+extern NSString *SMUploadKeyImageData;
+extern NSString *SMUploadKeyFilename;
+extern NSString *SMUploadKeySessionId;
+extern NSString *SMUploadKeyCaption;
+extern NSString *SMUploadKeyAlbumId;
+extern NSString *SMUploadKeyKeywords;
+
 @interface SMRequest : NSObject {
 	NSURLConnection *connection;
 	NSMutableData *response;
