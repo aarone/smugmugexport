@@ -1531,7 +1531,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	NSArray *defaultNotifications = [NSArray arrayWithObjects:
 									 SMGrowlUploadCompleted,
 									 SMGrowlUploadError,
-									 nil];				 
+									 nil];
 	return [NSDictionary dictionaryWithObjectsAndKeys:
 			allNotifications, GROWL_NOTIFICATIONS_ALL,
 			defaultNotifications, GROWL_NOTIFICATIONS_DEFAULT,
@@ -1629,7 +1629,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)notifyUploadCompleted {
-	[GrowlApplicationBridge notifyWithTitle:@"Upload Complete"
+	[GrowlApplicationBridge notifyWithTitle:NSLocalizedString(@"Upload Complete", @"Growl title for upload completed notification")
 								description:[NSString stringWithFormat:NSLocalizedString(@"Uploaded %d images", @"Description for upload complete Growl message"), imagesUploaded]
 						   notificationName:SMGrowlUploadCompleted
 								   iconData:nil
