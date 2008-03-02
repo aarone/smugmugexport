@@ -525,7 +525,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 -(void)startImageUpload:(NSDictionary *)args {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSData *theImageData = [args objectForKey:SMUploadKeyImageData];
-	NSString *filename = [args objectForKey:SMUploadedFilename];
+	NSString *filename = [args objectForKey:SMUploadKeyFilename];
 	NSString *sessionId = [args objectForKey:SMUploadKeySessionId];
 	NSString *albumId = [args objectForKey: SMUploadKeyAlbumId];
 	NSString *caption = [args objectForKey:SMUploadKeyCaption];
