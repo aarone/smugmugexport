@@ -12,14 +12,14 @@
 @protocol SMAccessDelegate
 -(void)loginDidComplete:(NSNumber *)wasSuccessful;
 -(void)logoutDidComplete:(NSNumber *)wasSuccessful;
--(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId requestDict:(NSDictionary *)requestDict;
+-(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId imageKey:(NSString *)key requestDict:(NSDictionary *)requestDict;
 -(void)uploadDidFail:(NSData *)imageData reason:(NSString *)errorText;
 -(void)uploadMadeProgress:(NSData *)imageData bytesWritten:(long)bytesWritten ofTotalBytes:(long)totalBytes;
 -(void)uploadWasCanceled;
 -(void)categoryGetDidComplete:(NSNumber *)wasSuccessful;
 -(void)createNewAlbumDidComplete:(NSNumber *)wasSuccessful;
 -(void)deleteAlbumDidComplete:(NSNumber *)wasSuccessful;
--(void)imageUrlFetchDidCompleteForImageId:(NSString *)imageId imageUrls:(NSDictionary *)imageUrls;
+-(void)imageUrlFetchDidCompleteForImageId:(NSString *)imageId imageKey:(NSString *)imageKey imageUrls:(NSDictionary *)imageUrls;
 @end
 
 /*
@@ -74,7 +74,7 @@
 			  keywords:(NSArray *)keywords;
 -(void)stopUpload;
 
--(void)fetchImageUrls:(NSString *)imageId;
+-(void)fetchImageUrls:(NSString *)imageId imageKey:(NSString *)imageKey;
 
 -(void)createNewAlbumWithCategory:(NSString *)categoryId 
 					  subcategory:(NSString *)subCategoryId 

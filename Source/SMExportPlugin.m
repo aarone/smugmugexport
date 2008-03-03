@@ -831,14 +831,18 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 #pragma mark Image Url Fetching
 
--(void)imageUrlFetchDidCompleteForImageId:(NSString *)imageId imageUrls:(NSDictionary *)imageUrls {
+-(void)refetchImageUrlWithArgs:(NSArray *)args {
+	[[self smAccess] fetchImageUrls:[args objectAtIndex:0] imageKey:[args objectAtIndex:1]];
+}
+
+-(void)imageUrlFetchDidCompleteForImageId:(NSString *)imageId imageKey:(NSString *)imageKey imageUrls:(NSDictionary *)imageUrls {
 	if(imageUrls == nil && [self albumUrlFetchAttemptCount] < AlbumUrlFetchRetryCount) {
 		[self incrementAlbumUrlFetchAttemptCount];
 		// try again
-		[[self smAccess] performSelector:@selector(fetchImageUrls:) 
-				   withObject:imageId
-				   afterDelay:2.0
-					  inModes:[NSArray arrayWithObjects: NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];		
+		[[self smAccess] performSelector:@selector(refetchImageUrlWithArgs:) 
+							  withObject:[NSArray arrayWithObjects:imageId, imageKey, nil]
+							  afterDelay:2.0
+								 inModes:[NSArray arrayWithObjects: NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];		
 		return;
 	}
 	
@@ -1077,12 +1081,12 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	}	
 }
 
--(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId requestDict:(NSDictionary *)requestDict {
+-(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId imageKey:(NSString *)key requestDict:(NSDictionary *)requestDict {
 	
 	if(![self siteUrlHasBeenFetched]) {
 		[self resetAlbumUrlFetchAttemptCount];
 		[self setSiteUrlHasBeenFetched:NO];
-		[[self smAccess] fetchImageUrls:smImageId];
+		[[self smAccess] fetchImageUrls:smImageId imageKey:key];
 	}
 	
 	[self notifyImageUploaded:[requestDict objectForKey:@"filename"]
