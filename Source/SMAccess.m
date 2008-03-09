@@ -12,6 +12,7 @@
 #import "SMDecoder.h"
 #import "NSUserDefaultsAdditions.h"
 #import "SMJSONDecoder.h"
+#import "SMImageRef.h"
 
 @interface SMAccess (Private)
 -(NSString *)sessionID;
@@ -44,8 +45,8 @@
 -(void)categoryGetDidComplete:(SMRequest *)req;
 -(void)buildSubCategoryListWithCallback:(SEL)callback;
 -(void)subcategoryGetDidComplete:(SMRequest *)req;
--(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSString *)albumId;
--(void)getImageUrlsWithCallback:(SEL)callback imageId:(NSString *)imageId imageKey:(NSString *)imageKey;
+-(void)deleteAlbumWithCallback:(SEL)callback albumRef:(SMAlbumRef *)albumRef;
+-(void)getImageUrlsWithCallback:(SEL)callback imageRef:(SMImageRef *)ref;
 -(void)createNewAlbumCallback:(SEL)callback
 				 withCategory:(NSString *)categoryId 
 				  subcategory:(NSString *)subCategoryId
@@ -101,13 +102,6 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
 +(SMAccess *)smugmugManager {
 	return [[[[self class] alloc] init] autorelease];
-}
-
--(id)init {
-	if(![super init])
-		return nil;
-
-	return self;
 }
 
 -(void)dealloc {
@@ -431,7 +425,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
 -(void)uploadImageData:(NSData *)imageData
 			  filename:(NSString *)filename
-		   albumWithID:(NSString *)albumId 
+				 album:(SMAlbumRef *)albumRef
 			  caption:(NSString *)caption
 			  keywords:(NSArray *)keywords {
 	
@@ -440,7 +434,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	[uploadRequest uploadImageData:imageData
 						  filename:filename
 						 sessionId:[self sessionID]
-						   albumID:albumId
+							 album:albumRef
 						  caption:caption
 						  keywords:keywords
 						  observer:self];
@@ -477,8 +471,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
 -(void)notifyDelegateOfUploadSuccess:(NSArray *)args {
 	[[self delegate] uploadDidSucceeed:[args objectAtIndex:0] 
-							   imageId:[args objectAtIndex:1]
-							  imageKey:[args objectAtIndex:2]
+							  imageRef:[SMImageRef refWithId:[args objectAtIndex:1] key:[args objectAtIndex:2]]
 						   requestDict:[args objectAtIndex:3]];
 }
 
@@ -494,25 +487,26 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
 #pragma mark Misc SM Info Methods
 
--(void)fetchImageUrls:(NSString *)imageId imageKey:(NSString *)imageKey {
-	[self getImageUrlsWithCallback:@selector(getImageUrlsDidComplete:) imageId:imageId imageKey:imageKey];
+-(void)fetchImageUrls:(SMImageRef *)ref {
+	[self getImageUrlsWithCallback:@selector(getImageUrlsDidComplete:) imageRef:ref];
 }
 
--(void)getImageUrlsWithCallback:(SEL)callback imageId:(NSString *)imageId imageKey:(NSString *)imageKey {
+-(void)getImageUrlsWithCallback:(SEL)callback imageRef:(SMImageRef *)ref {
 	SMRequest *req = [self createRequest];
 	[req invokeMethodWithURL:[self baseRequestUrl]
 						 keys:[NSArray arrayWithObjects:@"method", @"SessionID", @"ImageID", @"ImageKey", nil]
-					   values:[NSArray arrayWithObjects:@"smugmug.images.getURLs", [self sessionID], imageId, imageKey, nil]
+					   values:[NSArray arrayWithObjects:@"smugmug.images.getURLs", [self sessionID], [ref imageId], [ref imageKey], nil]
 			 responseCallback:callback
 			   responseTarget:self];
 }
 
 -(void)getImageUrlsDidComplete:(SMRequest *)req {
 	NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-	[dict setObject:[[req requestDict] objectForKey:@"ImageID"] forKey:@"ImageID"];
+	SMImageRef *ref = [SMImageRef refWithId:[[req requestDict] objectForKey:@"ImageID"]
+											 key:[[req requestDict] objectForKey:@"ImageKey"]];
+	[dict setObject:ref forKey:@"ImageRef"];
 
 	if([self requestWasSuccessful:req]) {
-		[dict setObject:[[req decodedResponse] objectForKey:@"Image"] forKey:@"ImageKey"];
 		[dict setObject:[[req decodedResponse] objectForKey:@"Image"] forKey:@"Urls"];
 	}
 	
@@ -523,9 +517,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
 -(void)notifyDelegateOfFetchImageUrlCompletion:(NSDictionary *)args {
 	if([self delegate] != nil &&
-	   [[self delegate] respondsToSelector:@selector(imageUrlFetchDidCompleteForImageId:imageKey:imageUrls:)])
-		[[self delegate] imageUrlFetchDidCompleteForImageId:[args objectForKey:@"ImageID"]
-												   imageKey:[args objectForKey:@"ImageKey"]
+	   [[self delegate] respondsToSelector:@selector(imageUrlFetchDidCompleteForImageRef:imageUrls:)])
+		[[self delegate] imageUrlFetchDidCompleteForImageRef:[args objectForKey:@"ImageRef"]
 												  imageUrls:[args objectForKey:@"Urls"]];
 }
 
@@ -584,21 +577,21 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 #pragma mark Delete Album Methods
--(void)deleteAlbum:(NSString *)albumId {
-	if(![self isLoggedIn] || IsEmpty(albumId) ) {
+-(void)deleteAlbum:(SMAlbumRef *)albumRef {
+	if(![self isLoggedIn] || IsEmpty([albumRef albumId]) ) {
 	    NSBeep();
 		NSLog(@"Cannot delete an album without a title");
 		return;
 	}
 	
-	[self deleteAlbumWithCallback:@selector(albumDeleteDidEnd:) albumId:albumId];
+	[self deleteAlbumWithCallback:@selector(albumDeleteDidEnd:) albumRef:albumRef];
 }
 
--(void)deleteAlbumWithCallback:(SEL)callback albumId:(NSString *)albumId {
+-(void)deleteAlbumWithCallback:(SEL)callback albumRef:(SMAlbumRef *)albumRef {
 	SMRequest *req = [self createRequest];
 	[req invokeMethodWithURL:[self baseRequestUrl]
 						  keys:[NSArray arrayWithObjects:@"method", @"SessionID", @"AlbumID", nil]
-						values:[NSArray arrayWithObjects:@"smugmug.albums.delete", [self sessionID], albumId, nil]
+						values:[NSArray arrayWithObjects:@"smugmug.albums.delete", [self sessionID], [albumRef albumId], nil]
 			  responseCallback:callback
 				responseTarget:self];
 }

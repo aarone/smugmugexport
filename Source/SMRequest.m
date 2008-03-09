@@ -65,7 +65,7 @@ NSString *SMUploadKeyFilename = @"SMFilename";
 NSString *SMUploadKeySessionId = @"SMSessionId";
 NSString *SMUploadKeyCaption = @"SMCaption";
 NSString *SMUploadKeyKeywords = @"SMKeywords";
-NSString *SMUploadKeyAlbumId = @"SMAlbumId";
+NSString *SMUploadKeyAlbumRef = @"SMAlbumRef";
 
 double UploadProgressTimerInterval = 0.125/2.0;
 
@@ -95,7 +95,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 @implementation SMRequest
 
 -(id)initWithDecoder:(NSObject<SMDecoder> *)aDecoder {
-	if(![super init])
+	if((self = [super init]) == nil)
 		return nil;
 	
 	[self setDecoder:aDecoder];
@@ -111,9 +111,6 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 
 +(NSString *)UserAgent {
 	return [[[NSString alloc] initWithFormat:@"iPhoto SMExportPlugin/%@", [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey]] autorelease];
-}
-
-+(void)initialize {
 }
 
 -(void)dealloc {
@@ -502,7 +499,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 -(void)uploadImageData:(NSData *)theImageData
 			  filename:(NSString *)filename
 			 sessionId:(NSString *)sessionId
-			   albumID:(NSString *)albumId 
+				 album:(SMAlbumRef *)albumRef
 			   caption:(NSString *)caption
 			  keywords:(NSArray *)keywords
 			  observer:(NSObject<SMUploadObserver> *)anObserver {
@@ -510,7 +507,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 								 theImageData, SMUploadKeyImageData,
 								 filename, SMUploadKeyFilename,
 								 sessionId, SMUploadKeySessionId,
-								 albumId, SMUploadKeyAlbumId,
+								 albumRef, SMUploadKeyAlbumRef,
 								 caption, SMUploadKeyCaption,
 								 keywords, SMUploadKeyKeywords,
 								 anObserver, @"observer", 
@@ -527,7 +524,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	NSData *theImageData = [args objectForKey:SMUploadKeyImageData];
 	NSString *filename = [args objectForKey:SMUploadKeyFilename];
 	NSString *sessionId = [args objectForKey:SMUploadKeySessionId];
-	NSString *albumId = [args objectForKey: SMUploadKeyAlbumId];
+	SMAlbumRef *albumRef = [args objectForKey: SMUploadKeyAlbumRef];
 	NSString *caption = [args objectForKey:SMUploadKeyCaption];
 	NSArray *keywords = [args objectForKey:SMUploadKeyKeywords];
 	NSObject<SMUploadObserver> *anObserver = [args objectForKey:@"observer"];
@@ -549,7 +546,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Version"), (CFStringRef)[self uploadApiVersion]);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-ResponseType"), (CFStringRef)[self uploadResponseType]);	
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-FileName"), (CFStringRef)[self cleanNewlines:filename]);
-	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-AlbumID"), (CFStringRef)albumId);
+	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-AlbumID"), (CFStringRef)[albumRef albumId]);
 	
 	if(!IsEmpty(caption))
 		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Caption"), (CFStringRef)[self cleanNewlines:caption]);

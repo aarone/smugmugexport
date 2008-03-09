@@ -9,6 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "SMDecoder.h"
 #import "SMUploadObserver.h"
+#import "SMAlbumRef.h"
 
 /*
  NSData *theImageData = [args objectForKey:@"imageData"];
@@ -89,7 +90,7 @@ extern NSString *SMUploadKeyKeywords;
 -(void)uploadImageData:(NSData *)imageData
 			  filename:(NSString *)filename
 			 sessionId:(NSString *)sessionId
-			   albumID:(NSString *)albumId 
+				 album:(SMAlbumRef *)albumRef 
 			   caption:(NSString *)caption
 			  keywords:(NSArray *)keywords
 			  observer:(NSObject<SMUploadObserver> *)observer;

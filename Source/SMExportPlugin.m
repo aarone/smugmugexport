@@ -107,6 +107,7 @@
 -(void)resetAlbumUrlFetchAttemptCount;
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful;
 -(void)uploadNextImage;
+-(SMAlbumRef *)selectedAlbumRef;
 
 -(NSString *)GrowlFrameworkPath;
 -(BOOL)isGrowlLoaded;
@@ -131,6 +132,7 @@
 
 // Globals
 NSString *SMAlbumID = @"id";
+NSString *SMAlbumKey = @"Key";
 NSString *SMCategoryID = @"id";
 NSString *SMSubCategoryID = @"id";
 
@@ -189,8 +191,8 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 @implementation SMExportPlugin
 
 -(id)initWithExportImageObj:(id)exportMgr {
-	if(![super init])
-		return nil;
+	if((self = [super init]) == nil)
+		return nil; // fail!
 	
 	exportManager = exportMgr;	
 	[self loadGrowl];
@@ -805,7 +807,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[self setIsBusy:YES];
 	[self setIsDeletingAlbum:YES];
 	[self setStatusText:NSLocalizedString(@"Deleting Album...", @"Delete album status")];
-	[[self smAccess] deleteAlbum:[[self selectedAlbum] objectForKey:SMAlbumID]];
+	[[self smAccess] deleteAlbum:[self selectedAlbumRef]];
 }	
 
 -(void)sheetDidDismiss:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo {
@@ -831,16 +833,14 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 #pragma mark Image Url Fetching
 
--(void)refetchImageUrlWithArgs:(NSArray *)args {
-	[[self smAccess] fetchImageUrls:[args objectAtIndex:0] imageKey:[args objectAtIndex:1]];
-}
-
--(void)imageUrlFetchDidCompleteForImageId:(NSString *)imageId imageKey:(NSString *)imageKey imageUrls:(NSDictionary *)imageUrls {
+-(void)imageUrlFetchDidCompleteForImageRef:(SMImageRef *)ref imageUrls:(NSDictionary *)imageUrls {
+	
 	if(imageUrls == nil && [self albumUrlFetchAttemptCount] < AlbumUrlFetchRetryCount) {
 		[self incrementAlbumUrlFetchAttemptCount];
+	
 		// try again
-		[[self smAccess] performSelector:@selector(refetchImageUrlWithArgs:) 
-							  withObject:[NSArray arrayWithObjects:imageId, imageKey, nil]
+		[[self smAccess] performSelector:@selector(fetchImageUrls:) 
+							  withObject:ref
 							  afterDelay:2.0
 								 inModes:[NSArray arrayWithObjects: NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];		
 		return;
@@ -971,7 +971,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)uploadCurrentImage {
 	
-	NSString *selectedAlbumId = [[[self selectedAlbum] objectForKey:SMAlbumID] stringValue];
 	NSString *nextFile = [[self exportManager] imagePathAtIndex:[self imagesUploaded]];
 	NSString *error = nil;
 	NSData *imageData = [self imageDataForPath:nextFile errorString:&error];
@@ -997,9 +996,9 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 											  title:title];
 	[[self smAccess] uploadImageData:imageData
 							filename:filename
-							albumWithID:selectedAlbumId
-								caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
-								keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]];		
+							   album:[self selectedAlbumRef]
+							 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
+							keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]];		
 	
 }
 
@@ -1081,12 +1080,11 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	}	
 }
 
--(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId imageKey:(NSString *)key requestDict:(NSDictionary *)requestDict {
-	
+-(void)uploadDidSucceeed:(NSData *)imageData imageRef:(SMImageRef *)ref requestDict:(NSDictionary *)requestDict {	
 	if(![self siteUrlHasBeenFetched]) {
 		[self resetAlbumUrlFetchAttemptCount];
 		[self setSiteUrlHasBeenFetched:NO];
-		[[self smAccess] fetchImageUrls:smImageId imageKey:key];
+		[[self smAccess] fetchImageUrls:ref];
 	}
 	
 	[self notifyImageUploaded:[requestDict objectForKey:@"filename"]
@@ -1416,6 +1414,12 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[[self sessionUploadProgress] release];
 
 	sessionUploadProgress = [v retain];
+}
+
+-(SMAlbumRef *)selectedAlbumRef {
+	NSString *albumId = [[[self selectedAlbum] objectForKey:SMAlbumID] stringValue];
+	NSString *albumKey = [[self selectedAlbum] objectForKey:SMAlbumKey]; 
+	return [SMAlbumRef refWithId:albumId key:albumKey];
 }
 
 -(NSDictionary *)selectedAlbum {

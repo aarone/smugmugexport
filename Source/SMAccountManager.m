@@ -32,13 +32,6 @@ NSString *KeychainItemKind = @"application password";
 
 @implementation SMAccountManager
 
--(id)init {
-	if(![super init])
-		return nil;
-
-	return self;
-}
-
 +(SMAccountManager *)accountManager {
 	return [[[[self class] alloc] init] autorelease];
 }

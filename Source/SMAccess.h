@@ -8,18 +8,20 @@
 
 #import <Cocoa/Cocoa.h>
 #import "SMUploadObserver.h"
+@class SMImageRef;
+@class SMAlbumRef;
 
 @protocol SMAccessDelegate
 -(void)loginDidComplete:(NSNumber *)wasSuccessful;
 -(void)logoutDidComplete:(NSNumber *)wasSuccessful;
--(void)uploadDidSucceeed:(NSData *)imageData imageId:(NSString *)smImageId imageKey:(NSString *)key requestDict:(NSDictionary *)requestDict;
+-(void)uploadDidSucceeed:(NSData *)imageData imageRef:(SMImageRef *)ref requestDict:(NSDictionary *)requestDict;
 -(void)uploadDidFail:(NSData *)imageData reason:(NSString *)errorText;
 -(void)uploadMadeProgress:(NSData *)imageData bytesWritten:(long)bytesWritten ofTotalBytes:(long)totalBytes;
 -(void)uploadWasCanceled;
 -(void)categoryGetDidComplete:(NSNumber *)wasSuccessful;
 -(void)createNewAlbumDidComplete:(NSNumber *)wasSuccessful;
 -(void)deleteAlbumDidComplete:(NSNumber *)wasSuccessful;
--(void)imageUrlFetchDidCompleteForImageId:(NSString *)imageId imageKey:(NSString *)imageKey imageUrls:(NSDictionary *)imageUrls;
+-(void)imageUrlFetchDidCompleteForImageRef:(SMImageRef *)ref imageUrls:(NSDictionary *)imageUrls;
 @end
 
 /*
@@ -69,18 +71,18 @@
 
 -(void)uploadImageData:(NSData *)imageData
 			  filename:(NSString *)filename
-		   albumWithID:(NSString *)albumId 
+				 album:(SMAlbumRef *)albumRef
 			   caption:(NSString *)caption
 			  keywords:(NSArray *)keywords;
 -(void)stopUpload;
 
--(void)fetchImageUrls:(NSString *)imageId imageKey:(NSString *)imageKey;
+-(void)fetchImageUrls:(SMImageRef *)ref;
 
 -(void)createNewAlbumWithCategory:(NSString *)categoryId 
 					  subcategory:(NSString *)subCategoryId 
 							title:(NSString *)title 
 				  albumProperties:(NSDictionary *)newAlbumProperties;
--(void)deleteAlbum:(NSString *)albumId;
+-(void)deleteAlbum:(SMAlbumRef *)albumRef;
 -(NSDictionary *)createNullSubcategory;
 
 -(NSArray *)albums;
