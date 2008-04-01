@@ -11,7 +11,7 @@
 #import "ExportPluginProtocol.h"
 #import "SMAccess.h"
 
-@class SMAccess, ExportMgr, SMAccountManager;
+@class SMAccess, ExportMgr, SMAccountManager, SMAlbumEditController;
 @protocol ExportPluginProtocol, SMAccessDelegate;
 
 @interface SMExportPlugin : NSObject <ExportPluginProtocol, SMAccessDelegate, GrowlApplicationBridgeDelegate> {
@@ -25,8 +25,7 @@
 	IBOutlet NSArrayController *albumsArrayController;
 	IBOutlet NSPanel *newAlbumSheet;
 	IBOutlet NSPanel *preferencesPanel;
-	IBOutlet NSArrayController *categoriesArrayController;
-	IBOutlet NSArrayController *subCategoriesArrayController;
+	IBOutlet NSTableView *albumsTableView; 
 	
 	NSString *username;  // this is the username bound to the textfield, account manager holds the real username
 	NSString *password; // same goes for password..
@@ -51,15 +50,15 @@
 	BOOL siteUrlHasBeenFetched;
 	BOOL browserOpenedInGallery;
 	BOOL isDeletingAlbum;
-	BOOL isCreatingAlbum;
 	BOOL isUpdateInProgress;
 	int uploadRetryCount;
 	int imagesUploaded;
 	int albumUrlFetchAttemptCount;
-
+	
 	ExportMgr *exportManager;
 	SMAccess *smAccess;
 	SMAccountManager *accountManager;
+	SMAlbumEditController *albumEditController;
 }
 
 #pragma mark Upload Actions
@@ -77,11 +76,10 @@
 -(IBAction)showPreferences:(id)sender;
 -(IBAction)closePreferencesSheet:(id)sender;
 
-#pragma mark Album Creation Actions
--(IBAction)addNewAlbum:(id)sender;
+#pragma mark Album Editing Actions
+-(IBAction)showNewAlbumSheet:(id)sender;
 -(IBAction)removeAlbum:(id)sender;
--(IBAction)cancelNewAlbumSheet:(id)sender;
--(IBAction)createAlbum:(id)sender;
+-(IBAction)showEditAlbumSheet:(id)sender;
 
 #pragma mark Update
 -(IBAction)checkForUpdates:(id)sender;

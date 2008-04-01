@@ -34,6 +34,7 @@ extern NSString *SMUploadKeyKeywords;
 	CFRunLoopRef uploadRunLoop;
 	SEL callback;
 	id target;
+	void *context;
 	BOOL wasSuccessful;
 	BOOL connectionIsOpen;
 	NSError *error;
@@ -114,6 +115,7 @@ extern NSString *SMUploadKeyKeywords;
 
 -(NSDictionary *)decodedResponse;
 
-
+-(void *)context;
+-(void)setContext:(void *)context;
 
 @end

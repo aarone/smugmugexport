@@ -10,6 +10,7 @@
 #import "SMAccess.h"
 #import "ExportPluginProtocol.h"
 #import "ExportMgr.h"
+#import "SMAlbumEditController.h"
 #import "SMAccountManager.h"
 #import "SMGlobals.h"
 #import "NSBitmapImageRepAdditions.h"
@@ -17,6 +18,8 @@
 #import "NSDataAdditions.h"
 #import "NSStringAdditions.h"
 #import "SMRequest.h"
+#import "SMAlbum.h"
+#import "SMAlbumInfo.h"
 
 @interface SMExportPlugin (Private)
 -(ExportMgr *)exportManager;
@@ -46,7 +49,7 @@
 -(void)setLoginSheetStatusMessage:(NSString *)m;
 -(void)setSelectedAccount:(NSString *)account;
 -(NSString *)selectedAccount;
--(NSDictionary *)selectedAlbum;
+-(SMAlbum *)selectedAlbum;
 -(NSString *)statusText;
 -(void)setStatusText:(NSString *)t;
 -(BOOL)isBusy;
@@ -69,11 +72,8 @@
 -(void)beginAlbumDelete;
 -(BOOL)browserOpenedInGallery;
 -(void)setBrowserOpenedInGallery:(BOOL)v;	
--(BOOL)isCreatingAlbum;
--(void)setIsCreatingAlbum:(BOOL)v;
 -(NSString *)imageUploadProgressText;
 -(void)setImageUploadProgressText:(NSString *)text;
--(NSPanel *)newAlbumSheet;
 -(NSPanel *)uploadPanel;
 -(NSPanel *)loginPanel;
 -(BOOL)sheetIsDisplayed;
@@ -89,11 +89,10 @@
 -(NSURL *)uploadSiteUrl;
 -(void)setUploadSiteUrl:(NSURL *)url;
 -(void)selectFirstSubCategory;
--(NSDictionary *)defaultNewAlbumPreferences;
--(NSMutableDictionary *)newAlbumPreferences;
--(void)setNewAlbumPreferences:(NSMutableDictionary *)a;
--(NSDictionary *)newAlbumOptionalPrefDictionary;
--(void)clearAlbumCreationState;
+-(SMAlbumEditController *)albumEditController;
+-(void)setAlbumEditController:(SMAlbumEditController *)aController;	
+
+
 -(NSArray *)filenameSelectionOptions;
 -(NSString *)chooseUploadFilename:(NSString *)filename title:(NSString *)imageTitle;
 -(void)displayUserUpdatePolicy;
@@ -107,7 +106,6 @@
 -(void)resetAlbumUrlFetchAttemptCount;
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful;
 -(void)uploadNextImage;
--(SMAlbumRef *)selectedAlbumRef;
 
 -(NSString *)GrowlFrameworkPath;
 -(BOOL)isGrowlLoaded;
@@ -129,12 +127,6 @@
 -(void)notifyUploadCompleted;
 -(void)notifyUploadError:(NSString *)error;
 @end
-
-// Globals
-NSString *SMAlbumID = @"id";
-NSString *SMAlbumKey = @"Key";
-NSString *SMCategoryID = @"id";
-NSString *SMSubCategoryID = @"id";
 
 // UI keys
 NSString *ExistingAlbumTabIdentifier = @"existingAlbum";
@@ -201,15 +193,14 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	
 	[self setAccountManager:[SMAccountManager accountManager]];
 	[self setSMAccess:[SMAccess smugmugManager]];
+	[self setAlbumEditController:[SMAlbumEditController controller]];
+	[albumEditController setDelegate:self];
 	[[self smAccess] setDelegate:self];
-	
-	[self setNewAlbumPreferences:[NSMutableDictionary dictionaryWithDictionary:[self defaultNewAlbumPreferences]]]; 
 	[self setLoginAttempted:NO];
 	[self setSiteUrlHasBeenFetched:NO];
 	[self setImagesUploaded:0];
 	[self resetUploadRetryCount];
 	[self setIsUploading:NO];
-	[self setIsCreatingAlbum:NO];
 	[self resetAlbumUrlFetchAttemptCount];
 	
 	return self;
@@ -231,6 +222,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)dealloc {
 	[self unloadGrowl];
+	[[self albumEditController] release];
 	[[self postLogoutInvocation] release];
 	[[self uploadSiteUrl] release];
 	[[self smAccess] release];
@@ -244,8 +236,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[[self statusText] release];
 	[[self currentThumbnail] release];
 	[[self imageUploadProgressText] release];
-	[[self newAlbumPreferences] release];
-
 	[super dealloc];
 }
 
@@ -287,30 +277,12 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)awakeFromNib {
-	[categoriesArrayController addObserver:self forKeyPath:@"selectionIndex" options:NSKeyValueObservingOptionNew context:NULL];
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath
-					  ofObject:(id)object
-                        change:(NSDictionary *)change
-                       context:(void *)context {
-	if([keyPath isEqualToString:@"selectionIndex"]) {
-		if([categoriesArrayController selectedObjects] == nil || [[categoriesArrayController selectedObjects] count] == 0)
-			return;
-		
-		NSDictionary *selectedCategory = [[categoriesArrayController selectedObjects] objectAtIndex:0];
-		NSMutableArray *relevantSubCategories = [NSMutableArray arrayWithArray:[[self smAccess] subCategoriesForCategory:selectedCategory]];
-		
-		NSDictionary *nullSubCategory = [[self smAccess] createNullSubcategory];
-		[relevantSubCategories insertObject:nullSubCategory	atIndex:0];
-		[subCategoriesArrayController setContent:nil];
-		[subCategoriesArrayController setContent:[NSArray arrayWithArray:relevantSubCategories]];
-		[subCategoriesArrayController setSelectionIndex:0];
-	}
+	[albumsTableView setTarget:self];
+	[albumsTableView setDoubleAction:@selector(showEditAlbumSheet:)];
 }
 
 -(BOOL)sheetIsDisplayed {
-	return [[self newAlbumSheet] isVisible] ||
+	return [albumEditController isSheetOpen] ||
 		[[self loginPanel] isVisible] ||
 		[[self uploadPanel] isVisible] ||
 		errorAlertSheetIsVisisble;
@@ -650,44 +622,9 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[NSApp endSheet:[self preferencesPanel]];
 }
 
--(NSMutableDictionary *)newAlbumPreferences {
-	return newAlbumPreferences;
-}
-
--(void)setNewAlbumPreferences:(NSMutableDictionary *)a {
-	if([self newAlbumPreferences] != nil)
-		[[self newAlbumPreferences] release];
-	
-	newAlbumPreferences = [a retain];
-}
-
--(NSDictionary *)defaultNewAlbumPreferences {
-	NSNumber *Set = [NSNumber numberWithBool:YES];
-	//	NSNumber *NotSet = [NSNumber numberWithBool:NO];
-	
-	return [NSDictionary dictionaryWithObjectsAndKeys:
-		Set, IsPublicPref,
-		Set, ShowFilenamesPref,
-		Set, AllowCommentsPref,
-		Set, AllowExternalLinkingPref,
-		Set, DisplayEXIFInfoPref,
-		Set, EnableEasySharePref,
-		Set, AllowPurchasingPref,
-		Set, AllowOriginalsToBeViewedPref,
-		Set, AllowFriendsToEditPref,
-		nil];
-	
-	// unset:
-	//		nil, @"Title",
-	//		nil, @"Description",
-	//		nil, @"Keywords",
-	//		nil, @"Category"
-}
-
-
 #pragma mark Add Album
 
--(IBAction)addNewAlbum:(id)sender { // opens the create album sheet
+-(IBAction)showNewAlbumSheet:(id)sender { // opens the create album sheet
 	
 	if(![[[self exportManager] window] isVisible])
 		return;
@@ -700,37 +637,14 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		return;
 	}
 	
-	[self clearAlbumCreationState];
-	[NSApp beginSheet:[self newAlbumSheet]
-	   modalForWindow:[[self exportManager] window]
-		modalDelegate:self
-	   didEndSelector:@selector(newAlbumDidEndSheet:returnCode:contextInfo:)
-		  contextInfo:nil];
-
-	[self setInsertionPoint:[self newAlbumSheet]];
-}
-
--(IBAction)cancelNewAlbumSheet:(id)sender {
-	[NSApp endSheet:[self newAlbumSheet]];
-}
-
--(void)newAlbumDidEndSheet:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	[sheet orderOut:self];
-}
-
--(BOOL)isCreatingAlbum {
-	return isCreatingAlbum;
-}
-
--(void)setIsCreatingAlbum:(BOOL)v {
-	isCreatingAlbum = v;
+	[albumEditController showAlbumCreateSheet:self forWindow:[[self exportManager] window]];
 }
 
 -(void)createNewAlbumDidComplete:(NSNumber *)wasSuccessful {
 
-	[self setIsCreatingAlbum:NO];
+	[[self albumEditController] setIsBusy:NO];
 	if([wasSuccessful boolValue]) {
-		[NSApp endSheet:[self newAlbumSheet]];
+		[albumEditController closeSheet];
 		[albumsArrayController setSelectionIndex:0]; // default to selecting the new album which should be album 0
 	} else {
 		// album creation occurs in a sheet, don't try to show an error dialog in another sheet...
@@ -740,43 +654,22 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	}
 }
 
--(void)clearAlbumCreationState {
-	[[self newAlbumPreferences] removeObjectForKey:AlbumTitlePref];
-	[[self newAlbumPreferences] removeObjectForKey:AlbumDescriptionPref];
-	[[self newAlbumPreferences] removeObjectForKey:AlbumKeywordsPref];
-}
-
--(NSString *)selectedCategoryId {
-	return [[[categoriesArrayController selectedObjects] objectAtIndex:0] objectForKey:SMCategoryID];
-}
-
--(NSString *)selectedSubCategoryId {
-	return [[[subCategoriesArrayController selectedObjects] objectAtIndex:0] objectForKey:SMSubCategoryID];
-}
-
--(NSString *)albumTitle {
-	return [[self newAlbumPreferences] objectForKey:AlbumTitlePref];
-}
-
--(IBAction)createAlbum:(id)sender {
-	if(IsEmpty([self albumTitle])) {
+-(void)createAlbum:(SMAlbumInfo *)albumInfo {
+	if(IsEmpty([albumInfo title])) {
 		NSBeep();
 		return;
 	}
 	
-	[self setIsCreatingAlbum:YES];	
+	[[self albumEditController] setIsBusy:YES];
+	[[self smAccess] createNewAlbum:albumInfo];
 	
-	[[self smAccess] createNewAlbumWithCategory:[self selectedCategoryId]
-										  subcategory:[self selectedSubCategoryId]
-												title:[self albumTitle] 
-									  albumProperties:[self newAlbumPreferences]];
 	return;
 }
 
 #pragma mark Delete Album
 
 -(IBAction)removeAlbum:(id)sender {
-	if([[self selectedAlbum] objectForKey:SMAlbumID] == nil) { // no album is selected
+	if([[self selectedAlbum] albumId] == nil) { // no album is selected
 		NSBeep();
 		return;
 	}
@@ -807,7 +700,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[self setIsBusy:YES];
 	[self setIsDeletingAlbum:YES];
 	[self setStatusText:NSLocalizedString(@"Deleting Album...", @"Delete album status")];
-	[[self smAccess] deleteAlbum:[self selectedAlbumRef]];
+	[[self smAccess] deleteAlbum:[[self selectedAlbum] ref]];
 }	
 
 -(void)sheetDidDismiss:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo {
@@ -829,6 +722,49 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[self setIsBusy:NO];
 	[self setIsDeletingAlbum:NO];
 	[self setStatusText:@""];	
+}
+
+#pragma mark Album Edit
+-(IBAction)showEditAlbumSheet:(id)sender {
+	if([self selectedAlbum] == nil) {
+		NSBeep();
+		return;
+	}
+	
+	[self setIsBusy:YES];
+	[[self smAccess] fetchAlbumInfo:[[self selectedAlbum] ref]];		
+}
+
+-(void)albumInfoFetchDidComplete:(NSNumber *)wasSuccessful forAlbum:(SMAlbumRef *)ref info:(SMAlbumInfo *)info {
+	[self setIsBusy:NO];
+	if([wasSuccessful boolValue])
+		[albumEditController showAlbumEditSheet:self 
+									  forWindow:[[self exportManager] window] 
+									   forAlbum:ref
+								  withAlbumInfo:info];
+	else {
+		NSBeep();
+	}
+}
+
+-(void)albumsFetchDidComplete:(NSNumber *)wasSuccessful {
+	[[self albumEditController] setIsBusy:NO];
+	[[self albumEditController] closeSheet];
+}
+
+-(void)albumEditDidComplete:(NSNumber *)wasSuccessful forAlbum:(SMAlbumRef *)ref {	
+	// update fields for albums here...
+	if([wasSuccessful boolValue]) {
+		[[self smAccess] fetchAlbums];
+	} else {
+		[[self albumEditController] setIsBusy:NO];
+		[[self albumEditController] closeSheet];
+	}
+}
+
+-(void)editAlbum:(SMAlbumInfo *)albumInfo {
+	[[self albumEditController] setIsBusy:YES];
+	[[self smAccess] editAlbum:albumInfo];
 }
 
 #pragma mark Image Url Fetching
@@ -996,7 +932,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 											  title:title];
 	[[self smAccess] uploadImageData:imageData
 							filename:filename
-							   album:[self selectedAlbumRef]
+							   album:[[self selectedAlbum] ref]
 							 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
 							keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]];		
 	
@@ -1101,6 +1037,14 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 #pragma mark Get and Set properties
+
+-(NSArray *)categories {
+	return [[self smAccess] categories];
+}
+
+-(NSArray *)subcategories {
+	return [[self smAccess] subcategories];
+}
 
 -(NSString *)imageUploadProgressText {
 	return imageUploadProgressText;
@@ -1342,6 +1286,17 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	smAccess = [m retain];
 }
 
+-(SMAlbumEditController *)albumEditController {
+	return albumEditController;
+}
+
+-(void)setAlbumEditController:(SMAlbumEditController *)aController {
+	if(aController != albumEditController) {
+		[albumEditController release];
+		albumEditController = [aController retain];
+	}
+}
+
 -(id)description {
     return [[[self thisBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"];
 }
@@ -1416,21 +1371,11 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	sessionUploadProgress = [v retain];
 }
 
--(SMAlbumRef *)selectedAlbumRef {
-	NSString *albumId = [[[self selectedAlbum] objectForKey:SMAlbumID] stringValue];
-	NSString *albumKey = [[self selectedAlbum] objectForKey:SMAlbumKey]; 
-	return [SMAlbumRef refWithId:albumId key:albumKey];
-}
-
--(NSDictionary *)selectedAlbum {
+-(SMAlbum *)selectedAlbum {
 	if([[albumsArrayController selectedObjects] count] > 0)
 		return [[albumsArrayController selectedObjects] objectAtIndex:0];
 	
 	return nil;
-}
-
--(NSPanel *)newAlbumSheet {
-	return newAlbumSheet;
 }
 
 -(NSPanel *)uploadPanel {

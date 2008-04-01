@@ -28,6 +28,18 @@
 	return [[[self class] alloc] initWithId:anId key:key];
 }
 
+-(unsigned int)hash {
+	return 31 * [[self imageId] hash] + [[self imageKey] hash];
+}
+
+-(BOOL)isEqual:(id)anotherObject {
+	if(![anotherObject isKindOfClass:[self class]])
+		return NO;
+	
+	return [[self imageKey] isEqual:[anotherObject imageKey]] &&
+		[[self imageId] isEqual:[anotherObject imageId]];
+}
+
 -(NSString *)description {
 	return [NSString stringWithFormat:@"id: %@ key:%@", [self imageId], [self imageKey]];
 }

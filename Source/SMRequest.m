@@ -125,6 +125,14 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	[super dealloc];
 }
 
+-(void *)context {
+	return context;
+}
+
+-(void)setContext:(void *)_context {
+	context = _context;
+}
+
 -(NSString *)appName {
 	return @"SMExportPlugin";
 }

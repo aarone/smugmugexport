@@ -8,10 +8,12 @@
 
 #import <Cocoa/Cocoa.h>
 #import "SMUploadObserver.h"
-@class SMImageRef;
-@class SMAlbumRef;
+
+
+@class SMAlbumRef, SMImageRef, SMAlbumInfo;
 
 @protocol SMAccessDelegate
+// the asyncronous methods should have a void* context arg that is passed around
 -(void)loginDidComplete:(NSNumber *)wasSuccessful;
 -(void)logoutDidComplete:(NSNumber *)wasSuccessful;
 -(void)uploadDidSucceeed:(NSData *)imageData imageRef:(SMImageRef *)ref requestDict:(NSDictionary *)requestDict;
@@ -22,6 +24,9 @@
 -(void)createNewAlbumDidComplete:(NSNumber *)wasSuccessful;
 -(void)deleteAlbumDidComplete:(NSNumber *)wasSuccessful;
 -(void)imageUrlFetchDidCompleteForImageRef:(SMImageRef *)ref imageUrls:(NSDictionary *)imageUrls;
+-(void)albumEditDidComplete:(NSNumber *)wasSuccessful forAlbum:(SMAlbumRef *)ref;
+-(void)albumInfoFetchDidComplete:(NSNumber *)wasSuccessful forAlbum:(SMAlbumRef *)ref info:(SMAlbumInfo *)info;
+-(void)albumsFetchDidComplete:(NSNumber *)wasSuccessful;
 @end
 
 /*
@@ -61,8 +66,9 @@
 -(BOOL)isLoggingIn;
 -(BOOL)isLoggedIn;
 
--(void)buildCategoryList; // must be logged in to call!
+-(void)buildCategoryList;
 -(void)buildSubCategoryList;
+-(void)fetchAlbums;
 
 -(NSString *)username;
 -(void)setUsername:(NSString *)n;
@@ -78,16 +84,12 @@
 
 -(void)fetchImageUrls:(SMImageRef *)ref;
 
--(void)createNewAlbumWithCategory:(NSString *)categoryId 
-					  subcategory:(NSString *)subCategoryId 
-							title:(NSString *)title 
-				  albumProperties:(NSDictionary *)newAlbumProperties;
+-(void)createNewAlbum:(SMAlbumInfo *)info;
 -(void)deleteAlbum:(SMAlbumRef *)albumRef;
--(NSDictionary *)createNullSubcategory;
-
+-(void)editAlbum:(SMAlbumInfo *)info;
 -(NSArray *)albums;
 -(NSArray *)categories;
 -(NSArray *)subcategories;
--(NSArray *)subCategoriesForCategory:(NSDictionary *)aCategory;
 
+-(void)fetchAlbumInfo:(SMAlbumRef *)ref;
 @end

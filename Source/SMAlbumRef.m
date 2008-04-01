@@ -20,8 +20,24 @@
 	return self;
 }
 
++(SMAlbumRef *)refWithRef:(SMAlbumRef *)ref {
+	return [SMAlbumRef refWithId:[ref albumId] key:[ref albumKey]];
+}
+
 +(SMAlbumRef *)refWithId:(NSString *)anId key:(NSString *)aKey {
 	return [[[self class] alloc] initWithId:anId key:aKey];
+}
+
+-(unsigned int)hash {
+	return 31 * [[self albumId] hash] + [[self albumKey] hash];
+}
+
+-(BOOL)isEqual:(id)anotherObject {
+	if(![anotherObject isKindOfClass:[self class]])
+		return NO;
+	
+	return [[self albumId] isEqual:[anotherObject albumId]] &&
+	[[self albumKey] isEqual:[anotherObject albumKey]];
 }
 
 -(NSString *)description {

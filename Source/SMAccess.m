@@ -12,7 +12,9 @@
 #import "SMDecoder.h"
 #import "NSUserDefaultsAdditions.h"
 #import "SMJSONDecoder.h"
+#import "SMAlbum.h"
 #import "SMImageRef.h"
+#import "SMAlbumInfo.h"
 
 @interface SMAccess (Private)
 -(NSString *)sessionID;
@@ -47,33 +49,18 @@
 -(void)subcategoryGetDidComplete:(SMRequest *)req;
 -(void)deleteAlbumWithCallback:(SEL)callback albumRef:(SMAlbumRef *)albumRef;
 -(void)getImageUrlsWithCallback:(SEL)callback imageRef:(SMImageRef *)ref;
--(void)createNewAlbumCallback:(SEL)callback
-				 withCategory:(NSString *)categoryId 
-				  subcategory:(NSString *)subCategoryId
-						title:(NSString *)title 
-			  albumProperties:(NSDictionary *)properties;
+-(void)createNewAlbumCallback:(SEL)callback withInfo:(SMAlbumInfo *)info;
 -(void)getImageUrlsDidComplete:(SMRequest *)req;
 -(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey;
 -(NSObject<SMDecoder> *)decoder;
 -(SMRequest *)createRequest;
 -(SMRequest *)lastUploadRequest;
 -(void)setLastUploadRequest:(SMRequest *)request;	
--(NSPredicate *)createRelevantSubCategoryFilterForCategory:(NSDictionary *)aCategory;
+-(void)fetchAlbumWithCallback:(SEL)callback forAlbum:(SMAlbumRef *)ref;
+-(void)notifyDelegateOfAlbumInfoCompletionWithArgs:(NSArray *)args;
+-(void)initializeAlbumsFromResponse:(id)response;
+-(void)notifyDelegateOfEditCompletionWithArgs:(NSArray *)args;
 @end
-
-NSString *IsPublicPref = @"IsPublic";
-NSString *ShowFilenamesPref = @"ShowFilenames";
-NSString *AllowCommentsPref = @"AllowComments";
-NSString *AllowExternalLinkingPref = @"AllowExternalLinking";
-NSString *DisplayEXIFInfoPref = @"DisplayEXIFInfo";
-NSString *EnableEasySharePref = @"EnableEasySharing";
-NSString *AllowPurchasingPref = @"AllowPurchasing";
-NSString *AllowOriginalsToBeViewedPref = @"AllowOriginalsToBeViewed";
-NSString *AllowFriendsToEditPref = @"AllowFriendsToEdit";
-NSString *AlbumTitlePref = @"AlbumTitle";
-NSString *AlbumDescriptionPref = @"AlbumDescription";
-NSString *AlbumKeywordsPref = @"AlbumKeywords";
-NSString *AlbumCategoryPref = @"AlbumCategory";
 
 static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
@@ -84,13 +71,13 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 @implementation NSDictionary (SMAdditions)
 -(NSComparisonResult)compareByAlbumId:(NSDictionary *)aDict {
 	
-	if([self objectForKey:SMAlbumID] == nil)
+	if([self objectForKey:@"id"] == nil)
 		return NSOrderedAscending;
 	
-	if([aDict objectForKey:SMAlbumID] == nil)
+	if([aDict objectForKey:@"id"] == nil)
 		return NSOrderedDescending;
 		
-	return [[aDict objectForKey:SMAlbumID] intValue] - [[self objectForKey:SMAlbumID] intValue];
+	return [[aDict objectForKey:@"id"] intValue] - [[self objectForKey:@"id"] intValue];
 }
 
 -(NSComparisonResult)compareByTitle:(NSDictionary *)aDict {
@@ -133,18 +120,6 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
 -(NSString *)apiKey {
 	return @"98LHI74dS6P0A8cQ1M6h0R1hXsbIPDXc";
-}
-
--(NSArray *)subCategoriesForCategory:(NSDictionary *)aCategory {
-	NSArray *relevantSubCategories = [[self subcategories] filteredArrayUsingPredicate:[self createRelevantSubCategoryFilterForCategory:aCategory]];
-	return (relevantSubCategories == nil) ? [NSArray array] : relevantSubCategories;
-}
-
--(NSPredicate *)createRelevantSubCategoryFilterForCategory:(NSDictionary *)aCategory {
-	if(IsEmpty([self categories]) || IsEmpty([self subcategories]) || aCategory == nil)
-		return [NSPredicate predicateWithValue:YES];
-	
-	return [NSPredicate predicateWithFormat:@"Category.id = %@", [aCategory objectForKey:@"id"]];
 }
 
 -(NSArray *)subcategories {
@@ -315,6 +290,18 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	[self setUserID:[uid stringValue]];
 }
 
+#pragma mark Album Fetch
+-(void)fetchAlbums {
+	[self buildAlbumListWithCallback:@selector(fetchAlbumsComplete:)];
+}
+
+-(void)fetchAlbumsComplete:(SMRequest *)req {
+	if([self requestWasSuccessful:req])
+		[self initializeAlbumsFromResponse:[req decodedResponse]];
+	
+	[[self delegate] performSelectorOnMainThread:@selector(albumsFetchDidComplete:) withObject:[NSNumber numberWithBool:[self requestWasSuccessful:req]] waitUntilDone:NO];	
+}
+
 /* 
  * This method is called to build the list of known albums and after an album is 
  * added or deleted.  See the workaround below.
@@ -324,7 +311,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
 	/*
 	 * If we add or delete an album and then refresh the list using this method,
-	 * we occaisonally get a list returned that includes the deleted album or 
+	 * we occasionally get a list returned that includes the deleted album or 
 	 * doesn't include the album that was just added.  My suspicion is that this
 	 * is because I'm refreshing the list too quickly after modifying the album
 	 * list.  To workaround this, we insert a delay here and hope for the best.
@@ -339,12 +326,24 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 				responseTarget:self];
 }
 
+// transform an array of dicts given to use by SM to an array of SMAlbum
+-(NSArray *)transformSMAlbums:(NSArray *)smAlbums {
+	NSMutableArray *result = [NSMutableArray array];
+	
+	NSEnumerator *albumEnum = [smAlbums objectEnumerator];
+	NSDictionary *anAlbum = nil;
+	while(anAlbum = [albumEnum nextObject])
+		[result addObject:[SMAlbum albumWithSMResponse:anAlbum]];
+	
+	return [NSArray arrayWithArray:result];
+}
+
 -(void)initializeAlbumsFromResponse:(id)response {
 	NSMutableArray *returnedAlbums = [NSMutableArray arrayWithArray:[response objectForKey:@"Albums"]];
 	[returnedAlbums sortUsingSelector:@selector(compareByAlbumId:)];
 	
 	[self performSelectorOnMainThread:@selector(setAlbums:)	
-							   withObject:[NSArray arrayWithArray:returnedAlbums] waitUntilDone:false];	
+							   withObject:[self transformSMAlbums:returnedAlbums] waitUntilDone:false];
 }
 
 -(void)notifyDelegateOfLoginCompleted:(NSNumber *)wasSuccessful {
@@ -547,11 +546,6 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	
 }
 
--(NSDictionary *)createNullSubcategory {
-	return [NSDictionary dictionaryWithObjectsAndKeys:@"None", @"Title",
-		@"0", @"id", nil];
-}
-
 -(void)buildSubCategoryList {
 	[self buildSubCategoryListWithCallback:@selector(subcategoryGetDidComplete:)];
 }
@@ -626,92 +620,30 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
 #pragma mark New Album Creation Methods
 
--(NSDictionary *)resovleNewAlbumPreferenceKeys:(NSDictionary *)smePrefs {
-	NSMutableDictionary *returnDict = [NSMutableDictionary dictionary];
-	NSArray *prefKeys = [NSArray arrayWithObjects: IsPublicPref,ShowFilenamesPref,AllowCommentsPref,AllowExternalLinkingPref,DisplayEXIFInfoPref,EnableEasySharePref,AllowPurchasingPref,AllowOriginalsToBeViewedPref,AllowFriendsToEditPref,AlbumDescriptionPref,AlbumKeywordsPref,nil];
-	NSEnumerator *keyEnumerator = [prefKeys objectEnumerator];
-	NSString *thisKey;
-	while(thisKey = [keyEnumerator nextObject]) {
-		if(!IsEmpty([smePrefs objectForKey:thisKey])) {
-			[returnDict setObject:[smePrefs objectForKey:thisKey]
-						   forKey:[self smugMugNewAlbumKeyForPref:thisKey]];
-		}
-	}
-	
-	return [NSDictionary dictionaryWithDictionary:returnDict];
-}
-
--(void)createNewAlbumWithCategory:(NSString *)categoryId subcategory:(NSString *)subCategoryId title:(NSString *)title albumProperties:(NSDictionary *)newAlbumProperties {
-		
+-(void)createNewAlbum:(SMAlbumInfo *)info {		
 	// don't try to create an album if we're not logged in
 	if(![self isLoggedIn])
 		[self performSelectorOnMainThread:@selector(notifyDelegateOfAlbumCompletion:) withObject:[NSNumber numberWithBool:NO] waitUntilDone:NO];
 	else {
-		[self createNewAlbumCallback:@selector(newAlbumCreationDidComplete:) withCategory:categoryId subcategory:subCategoryId  title:title albumProperties:newAlbumProperties];
+		[self createNewAlbumCallback:@selector(newAlbumCreationDidComplete:) withInfo:info];
 	}
 }
 
--(NSDictionary *)smNewAlbuMKeysForNewAlbumPrefs:(NSDictionary *)newAlbumProps {
-	NSMutableDictionary *returnDict = [NSMutableDictionary dictionaryWithCapacity:[[newAlbumProps allKeys] count]];
-	
-	NSEnumerator *keyEnumerator = [newAlbumProps keyEnumerator];
-	NSString *aKey;
-	while(aKey = [keyEnumerator nextObject])
-		if([self smugMugNewAlbumKeyForPref:aKey] != nil)
-			[returnDict setObject:[newAlbumProps objectForKey:aKey] forKey:[self smugMugNewAlbumKeyForPref:aKey]];
-
-	return returnDict;
-}
-
--(void)createNewAlbumCallback:(SEL)callback withCategory:(NSString *)categoryId subcategory:(NSString *)subCategoryId title:(NSString *)title albumProperties:(NSDictionary *)properties {
+-(void)createNewAlbumCallback:(SEL)callback withInfo:(SMAlbumInfo *)info {
 	
 	SMRequest *req = [self createRequest];
-	NSMutableDictionary *newAlbumProperties = [NSMutableDictionary dictionaryWithDictionary:[self smNewAlbuMKeysForNewAlbumPrefs:properties]];
 	
-	[newAlbumProperties setObject:@"smugmug.albums.create" forKey:@"method"];
-	[newAlbumProperties setObject:categoryId forKey:@"CategoryID"];
-	[newAlbumProperties setObject:subCategoryId forKey:@"SubCategoryID"];
-	[newAlbumProperties setObject:[self sessionID] forKey:@"SessionID"];
-	[newAlbumProperties setObject:title forKey:@"Title"];
+	NSMutableDictionary *props = [NSMutableDictionary dictionaryWithDictionary:[info toDictionary]];
+	[props setObject:@"smugmug.albums.create" forKey:@"method"];
+	[props setObject:[self sessionID] forKey:@"SessionID"];
 	
 	[req invokeMethodWithURL:[self baseRequestUrl]
-						  keys:[newAlbumProperties allKeys]
-					 valueDict:newAlbumProperties
-			  responseCallback:callback
-				responseTarget:self];
+						keys:[props allKeys]
+				   valueDict:props
+			responseCallback:callback
+			  responseTarget:self];
 }
 
--(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey {
-	
-	if([preferenceKey isEqualToString:IsPublicPref])
-		return @"Public";
-	else if([preferenceKey isEqualToString:ShowFilenamesPref])
-		return @"Filenames";
-	else if([preferenceKey isEqualToString:AllowCommentsPref])
-		return @"Comments";
-	else if([preferenceKey isEqualToString:AllowExternalLinkingPref])
-		return @"External";
-	else if([preferenceKey isEqualToString:DisplayEXIFInfoPref])
-		return @"EXIF";
-	else if([preferenceKey isEqualToString:EnableEasySharePref])
-		return @"Share";
-	else if([preferenceKey isEqualToString:AllowPurchasingPref])
-		return @"Printable";
-	else if([preferenceKey isEqualToString:AllowOriginalsToBeViewedPref])
-		return @"Originals";
-	else if([preferenceKey isEqualToString:AllowFriendsToEditPref])
-		return @"FamilyEdit";
-	else if([preferenceKey isEqualToString:AlbumTitlePref])
-		return @"Title";
-	else if([preferenceKey isEqualToString:AlbumDescriptionPref])
-		return @"Description";
-	else if([preferenceKey isEqualToString:AlbumKeywordsPref])
-		return @"Keywords";
-	else if([preferenceKey isEqualToString:AlbumCategoryPref])
-		return @"CategoryID";
-	
-	return nil;
-}
 
 -(void)newAlbumCreationDidComplete:(SMRequest *)req {
 	if([self requestWasSuccessful:req])
@@ -727,5 +659,84 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
 	[self performSelectorOnMainThread:@selector(notifyDelegateOfAlbumCompletion:) withObject:[NSNumber numberWithBool:[self requestWasSuccessful:req]] waitUntilDone:NO];
 }
+
+#pragma mark Album Info Fetch Methods
+-(void)fetchAlbumInfo:(SMAlbumRef *)ref {
+	if(![self isLoggedIn])
+		[self performSelectorOnMainThread:@selector(notifyDelegateOfAlbumInfoCompletionWithArgs:) 
+							   withObject:[NSArray arrayWithObjects:[NSNumber numberWithBool:NO], ref, [NSNull null], nil]
+							waitUntilDone:NO];
+	[self fetchAlbumWithCallback:@selector(albumFetchDidComplete:) forAlbum:ref];
+}
+
+-(void)fetchAlbumWithCallback:(SEL)callback forAlbum:(SMAlbumRef *)ref{
+	SMRequest *req = [self createRequest];
+	
+	NSMutableDictionary *props = [NSMutableDictionary dictionaryWithCapacity:5];
+	[props setObject:@"smugmug.albums.getInfo" forKey:@"method"];
+	[props setObject:[self sessionID] forKey:@"SessionID"];
+	[props setObject:[ref albumId] forKey:@"AlbumID"];
+	[props setObject:[ref albumKey] forKey:@"AlbumKey"];
+	
+	[req setContext:[ref retain]];
+	[req invokeMethodWithURL:[self baseRequestUrl]
+						keys:[props allKeys]
+				   valueDict:props
+			responseCallback:callback
+			  responseTarget:self];
+	
+}
+
+-(void)albumFetchDidComplete:(SMRequest *)req {
+	SMAlbumRef *ref = (SMAlbumRef *)[req context];
+	[ref release];
+	id info = [req wasSuccessful] ? 
+						 (id)[SMAlbumInfo albumInfoWithSMResponse:[[req decodedResponse] objectForKey:@"Album"]
+												   categories:categories
+												subcategories:subcategories] : (id)[NSNull null];
+	
+	[self performSelectorOnMainThread:@selector(notifyDelegateOfAlbumInfoCompletionWithArgs:) 
+						   withObject:[NSArray arrayWithObjects:[NSNumber numberWithBool:[self requestWasSuccessful:req]], ref, info, nil] 
+						waitUntilDone:NO];
+}
+
+-(void)notifyDelegateOfAlbumInfoCompletionWithArgs:(NSArray *)args {	
+	[[self delegate] albumInfoFetchDidComplete:[args objectAtIndex:0]
+									  forAlbum:[args objectAtIndex:1]
+										  info:[args objectAtIndex:2]];
+}
+
+#pragma mark Edit Album
+
+-(void)editAlbum:(SMAlbumInfo *)info {
+	SMRequest *req = [self createRequest];
+	
+	[req setContext:[[info ref] retain]];
+	NSMutableDictionary *args = [NSMutableDictionary dictionaryWithDictionary:[info toDictionary]];
+	[args setObject:[self sessionID] forKey:@"SessionID"];
+	[args setObject:@"smugmug.albums.changeSettings" forKey:@"method"];
+	[req invokeMethodWithURL:[self baseRequestUrl]
+						keys:[args allKeys]
+				   valueDict:args
+			responseCallback:@selector(editDidComplete:)
+			  responseTarget:self];
+}
+
+-(void)editDidComplete:(SMRequest *)req {
+	SMAlbumInfo *info = (SMAlbumInfo *)[req context];
+	SMAlbumRef *ref = [SMAlbumRef refWithId:[info albumId]  key:[info albumKey]];
+	[(SMAlbumInfo *)[req context] release];
+	[self notifyDelegateOfEditCompletionWithArgs:[NSArray arrayWithObjects:[NSNumber numberWithBool:[req wasSuccessful]], ref, nil]];
+}
+		 
+-(void)notifyDelegateOfEditCompletionWithArgs:(NSArray *)args {
+	 SEL delegateCallback = @selector(albumEditDidComplete:forAlbum:);
+	 if([self delegate] == nil || ![[self delegate] respondsToSelector:delegateCallback])
+		 return;
+	
+	[[self delegate] albumEditDidComplete:[args objectAtIndex:0] forAlbum:[args objectAtIndex:1]];
+}
+		 
+
 
 @end

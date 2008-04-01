@@ -34,28 +34,9 @@ extern NSString *SMEnableAlbumFetchDelay;
 // jpeg quality factor v to use when scaling images v : 0 <= v <= 1 
 extern NSString *SMJpegQualityFactor;
 
-extern NSString *SMAlbumID;
-extern NSString *SMCategoryID;
-extern NSString *SMSubCategoryID;
-
 extern NSString *SMUploadedFilename;
 extern NSString *SMUploadedFilenameOptionFilename;
 extern NSString *SMUploadedFilenameOptionTitle;
-
-// new album property keys
-extern NSString *IsPublicPref;
-extern NSString *ShowFilenamesPref;
-extern NSString *AllowCommentsPref;
-extern NSString *AllowExternalLinkingPref;
-extern NSString *DisplayEXIFInfoPref;
-extern NSString *EnableEasySharePref;
-extern NSString *AllowPurchasingPref;
-extern NSString *AllowOriginalsToBeViewedPref;
-extern NSString *AllowFriendsToEditPref;
-extern NSString *AlbumTitlePref;
-extern NSString *AlbumDescriptionPref;
-extern NSString *AlbumKeywordsPref;
-extern NSString *AlbumCategoryPref;
 
 
 // conveinent macros

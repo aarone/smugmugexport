@@ -16,6 +16,7 @@
 
 -(id)initWithId:(NSString *)id key:(NSString *)key;
 +(SMAlbumRef *)refWithId:(NSString *)anId key:(NSString *)aKey;
++(SMAlbumRef *)refWithRef:(SMAlbumRef *)ref;
 -(NSString *)albumId;
 -(NSString *)albumKey;
 

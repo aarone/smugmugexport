@@ -20,10 +20,12 @@
 		[exporter removeAlbum:self];
 	} else if ([[theEvent characters] isEqualToString:@"+"] &&
 			   [self numberOfRows] > 0 && [self selectedRow] != -1) {
-		[exporter addNewAlbum:self];
+		[exporter showNewAlbumSheet:self];
 	} else {
 		[super keyDown:theEvent];
 	}
 }
+
+
 
 @end
