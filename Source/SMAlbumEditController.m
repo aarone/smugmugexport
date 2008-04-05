@@ -22,7 +22,7 @@ NSString *SMSubCategoryID = @"id";
 -(NSArray *)subcategories;
 -(NSPredicate *)createRelevantSubCategoryFilterForCategory:(NSDictionary *)aCategory;
 -(SMAlbumInfo *)albumInfo;
--(void)refreshCategorySelections;
+-(void)refreshCategorySelections:(BOOL)clearsSubcategory;
 -(SMAlbumInfo *)albumInfo;
 -(void)setAlbumInfo:(SMAlbumInfo *)info;	
 -(BOOL)isEditing;
@@ -57,17 +57,17 @@ NSString *SMSubCategoryID = @"id";
 -(void)awakeFromNib {
 	[albumInfoController addObserver:self forKeyPath:@"selection.category" options:NSKeyValueObservingOptionNew context:NULL];
 	[[self albumInfo] setCategory:[[self categories] objectAtIndex:0]];
-	[self refreshCategorySelections];
+	[self refreshCategorySelections:YES];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
 					  ofObject:(id)object
                         change:(NSDictionary *)change
                        context:(void *)context {
-	[self refreshCategorySelections];
+	[self refreshCategorySelections:YES];
 }
 
--(void)refreshCategorySelections {
+-(void)refreshCategorySelections:(BOOL)clearsSubcategory {
 	NSDictionary *selectedCategory = [[self albumInfo] category];
 	NSMutableArray *relevantSubCategories = [NSMutableArray arrayWithArray:[self subCategoriesForCategory:selectedCategory]];
 	
@@ -75,7 +75,8 @@ NSString *SMSubCategoryID = @"id";
 	[relevantSubCategories insertObject:nullSubCategory	atIndex:0];
 	[subCategoriesArrayController setContent:nil];
 	[subCategoriesArrayController setContent:[NSArray arrayWithArray:relevantSubCategories]];
-	if([[self albumInfo] subCategory] == nil)
+	
+	if(clearsSubcategory || [[self albumInfo] subCategory] == nil)
 		[[self albumInfo] setSubCategory:nullSubCategory];
 }
 
@@ -124,7 +125,7 @@ NSString *SMSubCategoryID = @"id";
 	[self setIsEditing:NO];
 	[self setAlbumInfo:[SMAlbumInfo albumInfo]];
 	[[self albumInfo] setCategory:[[self categories] objectAtIndex:0]];
-	[self refreshCategorySelections];
+	[[self albumInfo] setSubCategory:[self createNullSubcategory]];
 	
 	[NSApp beginSheet:[self newAlbumSheet]
 	   modalForWindow:aWindow
@@ -173,9 +174,20 @@ NSString *SMSubCategoryID = @"id";
 			withAlbumInfo:(SMAlbumInfo *)info {
 	[self loadNibIfNecessary];
 	
+	// temporarily stop observing category changes: the observation is supposed to 
+	// only be effective when the user changes the selected category in the UI
+	[albumInfoController removeObserver:self 
+							 forKeyPath:@"selection.category"];
 	[self setAlbumInfo:info];
+	[self refreshCategorySelections:NO];
+	[albumInfoController addObserver:self 
+						  forKeyPath:@"selection.category" 
+							 options:NSKeyValueObservingOptionNew 
+							 context:NULL];
+	
+	
 	[self setIsEditing:YES];
-
+	
 	isSheetOpen = YES;
 	[NSApp beginSheet:[self newAlbumSheet]
 	   modalForWindow:aWindow
