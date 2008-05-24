@@ -100,6 +100,7 @@ while ([self scanCharacter:'}'] == NO)
 
 	if ([self scanCharacter:','] == NO)
 		{
+		[self skipJSONWhitespace];
 		if ([self currentCharacter] != '}')
 			{
 			[self setScanLocation:theScanLocation];
