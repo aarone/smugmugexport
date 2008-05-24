@@ -39,7 +39,7 @@ else
 
 - (void)skipWhitespace
 {
-[self scanCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:NULL];
+[self scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
 }
 
 - (void)backtrack:(unsigned)inCount
