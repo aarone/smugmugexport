@@ -9,6 +9,13 @@
 /* Begin PBXBuildFile section */
 		930961BB0C66A164002B8DAA /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 930961BA0C66A164002B8DAA /* libcrypto.dylib */; };
 		930DE5F30B4831D2008120ED /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 930DE5BE0B4831D2008120ED /* Security.framework */; };
+		93188E1C0DE9D65D00DBC3FC /* JSON.framework in Resources */ = {isa = PBXBuildFile; fileRef = 93DE06380DE98DD60029F0FA /* JSON.framework */; };
+		93188E1D0DE9D65D00DBC3FC /* Growl.framework in Resources */ = {isa = PBXBuildFile; fileRef = 93CE121E0D5504A800C96591 /* Growl.framework */; };
+		93188E1E0DE9D67400DBC3FC /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E27470C0F4DE10059F26B /* NSStringAdditions.m */; };
+		93188E1F0DE9D67B00DBC3FC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
+		93188E200DE9D67B00DBC3FC /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 930DE5BE0B4831D2008120ED /* Security.framework */; };
+		93188E210DE9D67B00DBC3FC /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 930961BA0C66A164002B8DAA /* libcrypto.dylib */; };
+		93188E300DE9D77C00DBC3FC /* TestVersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 93188D920DE9D51A00DBC3FC /* TestVersionComparison.m */; };
 		9319DE360CB91B560037023F /* SMAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = 9319DE330CB91B560037023F /* SMAccess.m */; };
 		9319DE3B0CB91B5D0037023F /* SMAccountManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9319DE390CB91B5D0037023F /* SMAccountManager.m */; };
 		9319DE3F0CB91B690037023F /* SMJSONDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 9319DE3D0CB91B690037023F /* SMJSONDecoder.m */; };
@@ -35,6 +42,16 @@
 		93EE86870C8085850028A598 /* NSBitmapImageRepAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EE86850C8085850028A598 /* NSBitmapImageRepAdditions.m */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		93188E240DE9D6B500DBC3FC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 93BD6F160AD84A49007CE525 /* SmugMugExport */;
+			remoteInfo = SmugMugExport;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		93CE107A0D54F53E00C96591 /* Copy Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -56,6 +73,11 @@
 		1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		930961BA0C66A164002B8DAA /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
 		930DE5BE0B4831D2008120ED /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
+		93188D910DE9D51A00DBC3FC /* TestVersionComparison.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestVersionComparison.h; path = Source/TestVersionComparison.h; sourceTree = "<group>"; };
+		93188D920DE9D51A00DBC3FC /* TestVersionComparison.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestVersionComparison.m; path = Source/TestVersionComparison.m; sourceTree = "<group>"; };
+		93188D970DE9D5C600DBC3FC /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = /System/Library/Frameworks/SenTestingKit.framework; sourceTree = "<absolute>"; };
+		93188DB20DE9D5D900DBC3FC /* Tests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		93188E3D0DE9D83700DBC3FC /* Tests-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "Tests-Info.plist"; path = "Resources/Tests-Info.plist"; sourceTree = "<group>"; };
 		9319DE320CB91B560037023F /* SMAccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMAccess.h; path = Source/SMAccess.h; sourceTree = "<group>"; };
 		9319DE330CB91B560037023F /* SMAccess.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMAccess.m; path = Source/SMAccess.m; sourceTree = "<group>"; };
 		9319DE340CB91B560037023F /* SMGlobals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMGlobals.h; path = Source/SMGlobals.h; sourceTree = "<group>"; };
@@ -111,6 +133,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		93188DAF0DE9D5D900DBC3FC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				93188E1F0DE9D67B00DBC3FC /* Cocoa.framework in Frameworks */,
+				93188E200DE9D67B00DBC3FC /* Security.framework in Frameworks */,
+				93188E210DE9D67B00DBC3FC /* libcrypto.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		93BD6F150AD84A49007CE525 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -130,6 +162,7 @@
 				9319DE340CB91B560037023F /* SMGlobals.h */,
 				08FB77AFFE84173DC02AAC07 /* Classes */,
 				32C88E010371C26100C91783 /* Other Sources */,
+				93188D8E0DE9D4ED00DBC3FC /* Tests */,
 				089C167CFE841241C02AAC07 /* Resources */,
 				089C1671FE841209C02AAC07 /* Frameworks and Libraries */,
 				19C28FB8FE9D52D311CA2CBB /* Products */,
@@ -149,6 +182,7 @@
 		089C167CFE841241C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				93188E3D0DE9D83700DBC3FC /* Tests-Info.plist */,
 				93BD6F180AD84A49007CE525 /* SmugMugExport-Info.plist */,
 				932164810B2F78F500624A8D /* SmugMugExport.nib */,
 				93C23EA60D96B8DF0022EEE1 /* AlbumEdit.nib */,
@@ -177,6 +211,7 @@
 		1058C7ACFEA557BF11CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				93188D970DE9D5C600DBC3FC /* SenTestingKit.framework */,
 				93DE06380DE98DD60029F0FA /* JSON.framework */,
 				93CE121E0D5504A800C96591 /* Growl.framework */,
 				930DE5BE0B4831D2008120ED /* Security.framework */,
@@ -199,6 +234,7 @@
 			isa = PBXGroup;
 			children = (
 				93BD6F170AD84A49007CE525 /* SmugMugExport.iPhotoExporter */,
+				93188DB20DE9D5D900DBC3FC /* Tests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -223,6 +259,15 @@
 				932164780B2F78D600624A8D /* ExportPluginProtocol.h */,
 			);
 			name = "iPhoto Interface";
+			sourceTree = "<group>";
+		};
+		93188D8E0DE9D4ED00DBC3FC /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				93188D910DE9D51A00DBC3FC /* TestVersionComparison.h */,
+				93188D920DE9D51A00DBC3FC /* TestVersionComparison.m */,
+			);
+			name = Tests;
 			sourceTree = "<group>";
 		};
 		933A9E5B0CB7C59F00B7B2A5 /* Misc */ = {
@@ -279,6 +324,25 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		93188DB10DE9D5D900DBC3FC /* Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 93188DB60DE9D5D900DBC3FC /* Build configuration list for PBXNativeTarget "Tests" */;
+			buildPhases = (
+				93188DAD0DE9D5D900DBC3FC /* Resources */,
+				93188DAE0DE9D5D900DBC3FC /* Sources */,
+				93188DAF0DE9D5D900DBC3FC /* Frameworks */,
+				93188DB00DE9D5D900DBC3FC /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				93188E250DE9D6B500DBC3FC /* PBXTargetDependency */,
+			);
+			name = Tests;
+			productName = Tests;
+			productReference = 93188DB20DE9D5D900DBC3FC /* Tests.octest */;
+			productType = "com.apple.product-type.bundle";
+		};
 		93BD6F160AD84A49007CE525 /* SmugMugExport */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 93BD6F190AD84A49007CE525 /* Build configuration list for PBXNativeTarget "SmugMugExport" */;
@@ -311,11 +375,21 @@
 			projectRoot = "";
 			targets = (
 				93BD6F160AD84A49007CE525 /* SmugMugExport */,
+				93188DB10DE9D5D900DBC3FC /* Tests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		93188DAD0DE9D5D900DBC3FC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				93188E1C0DE9D65D00DBC3FC /* JSON.framework in Resources */,
+				93188E1D0DE9D65D00DBC3FC /* Growl.framework in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		93BD6F130AD84A49007CE525 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -328,6 +402,19 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		93188DB00DE9D5D900DBC3FC /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
 		932166140B32120800624A8D /* Install */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 12;
@@ -345,6 +432,15 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		93188DAE0DE9D5D900DBC3FC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				93188E300DE9D77C00DBC3FC /* TestVersionComparison.m in Sources */,
+				93188E1E0DE9D67400DBC3FC /* NSStringAdditions.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		93BD6F140AD84A49007CE525 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -373,6 +469,14 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		93188E250DE9D6B500DBC3FC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 93BD6F160AD84A49007CE525 /* SmugMugExport */;
+			targetProxy = 93188E240DE9D6B500DBC3FC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
 		1DEB913F08733D840010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -396,6 +500,60 @@
 			};
 			name = Release;
 		};
+		93188DB40DE9D5D900DBC3FC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Cocoa.framework/Headers/Cocoa.h";
+				INFOPLIST_FILE = "Resources/Tests-Info.plist";
+				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Cocoa,
+					"-framework",
+					SenTestingKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Tests;
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Debug;
+		};
+		93188DB50DE9D5D900DBC3FC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Cocoa.framework/Headers/Cocoa.h";
+				INFOPLIST_FILE = "Resources/Tests-Info.plist";
+				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Cocoa,
+					"-framework",
+					SenTestingKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Tests;
+				WRAPPER_EXTENSION = octest;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		93BD6F1A0AD84A49007CE525 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -405,9 +563,11 @@
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_3)",
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/Resources/Frameworks\"";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/Resources/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_3 = "\"$(DEVELOPER_FRAMEWORKS_DIR)\"";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -444,9 +604,11 @@
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_3)",
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/Resources/Frameworks\"";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/Resources/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_3 = "\"$(DEVELOPER_FRAMEWORKS_DIR)\"";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
@@ -476,6 +638,15 @@
 			buildConfigurations = (
 				1DEB913F08733D840010E9CD /* Debug */,
 				1DEB914008733D840010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		93188DB60DE9D5D900DBC3FC /* Build configuration list for PBXNativeTarget "Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				93188DB40DE9D5D900DBC3FC /* Debug */,
+				93188DB50DE9D5D900DBC3FC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
