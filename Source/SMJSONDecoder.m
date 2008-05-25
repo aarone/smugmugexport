@@ -7,8 +7,8 @@
 //
 
 #import "SMJSONDecoder.h"
-#import "CJSONDeserializer.h"
 #import "SMGlobals.h"
+#import <JSON/JSON.h>
 
 @implementation SMJSONDecoder
 
@@ -19,7 +19,7 @@
 -(NSDictionary *)decodedResponse:(NSData *)smResponse {
 	NSString *responseString = [[[NSString alloc] initWithData:smResponse encoding:NSUTF8StringEncoding] autorelease];
 	
-	return (NSDictionary *)[[CJSONDeserializer deserializer] deserialize:responseString];
+	return (NSDictionary *)[responseString JSONValue];
 }
 
 @end

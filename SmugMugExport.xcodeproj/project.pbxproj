@@ -20,11 +20,6 @@
 		933AA0B30CB8273000B7B2A5 /* SMUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0B10CB8273000B7B2A5 /* SMUserDefaults.m */; };
 		933AA0CC0CB827CF00B7B2A5 /* SMExportPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0CA0CB827CF00B7B2A5 /* SMExportPlugin.m */; };
 		935A1A870C1CC2CC00043E12 /* NSUserDefaultsAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 935A1A850C1CC2CC00043E12 /* NSUserDefaultsAdditions.m */; };
-		938E26870C0F46E50059F26B /* CJSONDeserializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26810C0F46E50059F26B /* CJSONDeserializer.m */; };
-		938E26890C0F46E50059F26B /* CJSONScanner.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26830C0F46E50059F26B /* CJSONScanner.m */; };
-		938E268B0C0F46E50059F26B /* CJSONSerializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26850C0F46E50059F26B /* CJSONSerializer.m */; };
-		938E26910C0F46FA0059F26B /* NSCharacterSet_Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E268D0C0F46FA0059F26B /* NSCharacterSet_Extensions.m */; };
-		938E26930C0F46FA0059F26B /* NSScanner_Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E268F0C0F46FA0059F26B /* NSScanner_Extensions.m */; };
 		938E26AB0C0F47EA0059F26B /* NSURLAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26A90C0F47EA0059F26B /* NSURLAdditions.m */; };
 		938E27490C0F4DE10059F26B /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E27470C0F4DE10059F26B /* NSStringAdditions.m */; };
 		93BD6F2F0AD84AAC007CE525 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
@@ -34,6 +29,7 @@
 		93C23EA70D96B8DF0022EEE1 /* AlbumEdit.nib in Resources */ = {isa = PBXBuildFile; fileRef = 93C23EA60D96B8DF0022EEE1 /* AlbumEdit.nib */; };
 		93CE12270D5504B200C96591 /* Growl.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 93CE121E0D5504A800C96591 /* Growl.framework */; };
 		93DD89D80C8C526100A6131B /* SMRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD89D60C8C526100A6131B /* SMRequest.m */; };
+		93DE06B00DE990ED0029F0FA /* JSON.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 93DE06380DE98DD60029F0FA /* JSON.framework */; };
 		93E58BE10D84690C00DA6105 /* SMImageRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 93E58BE00D84690C00DA6105 /* SMImageRef.m */; };
 		93E58C820D84732E00DA6105 /* SMAlbumRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 93E58C800D84732E00DA6105 /* SMAlbumRef.m */; };
 		93EE86870C8085850028A598 /* NSBitmapImageRepAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EE86850C8085850028A598 /* NSBitmapImageRepAdditions.m */; };
@@ -46,6 +42,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				93DE06B00DE990ED0029F0FA /* JSON.framework in Copy Frameworks */,
 				93CE12270D5504B200C96591 /* Growl.framework in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
@@ -86,16 +83,6 @@
 		933AA0CA0CB827CF00B7B2A5 /* SMExportPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMExportPlugin.m; path = Source/SMExportPlugin.m; sourceTree = "<group>"; };
 		935A1A840C1CC2CC00043E12 /* NSUserDefaultsAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSUserDefaultsAdditions.h; path = Source/NSUserDefaultsAdditions.h; sourceTree = "<group>"; };
 		935A1A850C1CC2CC00043E12 /* NSUserDefaultsAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSUserDefaultsAdditions.m; path = Source/NSUserDefaultsAdditions.m; sourceTree = "<group>"; };
-		938E26800C0F46E50059F26B /* CJSONDeserializer.h */ = {isa = PBXFileReference; comments = "http://toxicsoftware.com/cocoajson/"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CJSONDeserializer.h; path = Source/CJSONDeserializer.h; sourceTree = "<group>"; };
-		938E26810C0F46E50059F26B /* CJSONDeserializer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CJSONDeserializer.m; path = Source/CJSONDeserializer.m; sourceTree = "<group>"; };
-		938E26820C0F46E50059F26B /* CJSONScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CJSONScanner.h; path = Source/CJSONScanner.h; sourceTree = "<group>"; };
-		938E26830C0F46E50059F26B /* CJSONScanner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CJSONScanner.m; path = Source/CJSONScanner.m; sourceTree = "<group>"; };
-		938E26840C0F46E50059F26B /* CJSONSerializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CJSONSerializer.h; path = Source/CJSONSerializer.h; sourceTree = "<group>"; };
-		938E26850C0F46E50059F26B /* CJSONSerializer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CJSONSerializer.m; path = Source/CJSONSerializer.m; sourceTree = "<group>"; };
-		938E268C0C0F46FA0059F26B /* NSCharacterSet_Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSCharacterSet_Extensions.h; path = Source/NSCharacterSet_Extensions.h; sourceTree = "<group>"; };
-		938E268D0C0F46FA0059F26B /* NSCharacterSet_Extensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSCharacterSet_Extensions.m; path = Source/NSCharacterSet_Extensions.m; sourceTree = "<group>"; };
-		938E268E0C0F46FA0059F26B /* NSScanner_Extensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSScanner_Extensions.h; path = Source/NSScanner_Extensions.h; sourceTree = "<group>"; };
-		938E268F0C0F46FA0059F26B /* NSScanner_Extensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSScanner_Extensions.m; path = Source/NSScanner_Extensions.m; sourceTree = "<group>"; };
 		938E26A80C0F47EA0059F26B /* NSURLAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSURLAdditions.h; path = Source/NSURLAdditions.h; sourceTree = "<group>"; };
 		938E26A90C0F47EA0059F26B /* NSURLAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSURLAdditions.m; path = Source/NSURLAdditions.m; sourceTree = "<group>"; };
 		938E27460C0F4DE10059F26B /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSStringAdditions.h; path = Source/NSStringAdditions.h; sourceTree = "<group>"; };
@@ -113,6 +100,7 @@
 		93DD88F60C8C4AE000A6131B /* SMDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMDecoder.h; path = Source/SMDecoder.h; sourceTree = "<group>"; };
 		93DD89D50C8C526100A6131B /* SMRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMRequest.h; path = Source/SMRequest.h; sourceTree = "<group>"; };
 		93DD89D60C8C526100A6131B /* SMRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMRequest.m; path = Source/SMRequest.m; sourceTree = "<group>"; };
+		93DE06380DE98DD60029F0FA /* JSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JSON.framework; path = Resources/Frameworks/JSON.framework; sourceTree = "<group>"; };
 		93E58BDF0D84690C00DA6105 /* SMImageRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMImageRef.h; path = Source/SMImageRef.h; sourceTree = "<group>"; };
 		93E58BE00D84690C00DA6105 /* SMImageRef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMImageRef.m; path = Source/SMImageRef.m; sourceTree = "<group>"; };
 		93E58C800D84732E00DA6105 /* SMAlbumRef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMAlbumRef.m; path = Source/SMAlbumRef.m; sourceTree = "<group>"; };
@@ -189,6 +177,7 @@
 		1058C7ACFEA557BF11CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				93DE06380DE98DD60029F0FA /* JSON.framework */,
 				93CE121E0D5504A800C96591 /* Growl.framework */,
 				930DE5BE0B4831D2008120ED /* Security.framework */,
 				930961BA0C66A164002B8DAA /* libcrypto.dylib */,
@@ -220,7 +209,6 @@
 				932164B00B2F7BBC00624A8D /* SmugmugExport_Prefix.pch */,
 				933A9E5B0CB7C59F00B7B2A5 /* Misc */,
 				9394BC8D0ADDBF390066CD67 /* Categories */,
-				938E26540C0F45CB0059F26B /* CocoaJSON */,
 				930453550AD82E5600B932C9 /* iPhoto Interface */,
 			);
 			name = "Other Sources";
@@ -246,23 +234,6 @@
 				933A9E540CB7C53900B7B2A5 /* SMTableView.m */,
 			);
 			name = Misc;
-			sourceTree = "<group>";
-		};
-		938E26540C0F45CB0059F26B /* CocoaJSON */ = {
-			isa = PBXGroup;
-			children = (
-				938E268C0C0F46FA0059F26B /* NSCharacterSet_Extensions.h */,
-				938E268D0C0F46FA0059F26B /* NSCharacterSet_Extensions.m */,
-				938E268E0C0F46FA0059F26B /* NSScanner_Extensions.h */,
-				938E268F0C0F46FA0059F26B /* NSScanner_Extensions.m */,
-				938E26800C0F46E50059F26B /* CJSONDeserializer.h */,
-				938E26810C0F46E50059F26B /* CJSONDeserializer.m */,
-				938E26820C0F46E50059F26B /* CJSONScanner.h */,
-				938E26830C0F46E50059F26B /* CJSONScanner.m */,
-				938E26840C0F46E50059F26B /* CJSONSerializer.h */,
-				938E26850C0F46E50059F26B /* CJSONSerializer.m */,
-			);
-			name = CocoaJSON;
 			sourceTree = "<group>";
 		};
 		938E26DE0C0F49180059F26B /* SmugMug Access */ = {
@@ -380,11 +351,6 @@
 			files = (
 				932164520B2F78B000624A8D /* NSDataAdditions.m in Sources */,
 				932165820B2F921E00624A8D /* KeychainManager.m in Sources */,
-				938E26870C0F46E50059F26B /* CJSONDeserializer.m in Sources */,
-				938E26890C0F46E50059F26B /* CJSONScanner.m in Sources */,
-				938E268B0C0F46E50059F26B /* CJSONSerializer.m in Sources */,
-				938E26910C0F46FA0059F26B /* NSCharacterSet_Extensions.m in Sources */,
-				938E26930C0F46FA0059F26B /* NSScanner_Extensions.m in Sources */,
 				938E26AB0C0F47EA0059F26B /* NSURLAdditions.m in Sources */,
 				938E27490C0F4DE10059F26B /* NSStringAdditions.m in Sources */,
 				935A1A870C1CC2CC00043E12 /* NSUserDefaultsAdditions.m in Sources */,
@@ -438,8 +404,10 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/Resources/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/Resources/Frameworks\"";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -475,8 +443,10 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/Resources/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/Resources/Frameworks\"";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";

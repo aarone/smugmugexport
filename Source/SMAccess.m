@@ -282,9 +282,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	NSString *passHash = [[response objectForKey:@"Login"] objectForKey:@"PasswordHash"];
 	NSNumber *uid = [[[response objectForKey:@"Login"] objectForKey:@"User"] objectForKey:@"id"];
 	
-				
 	NSAssert(sessId != nil && passHash != nil && uid != nil, NSLocalizedString(@"Unexpected response for login", @"Error string when the response returned by the login method is malformed."));
-
+	
 	[self setSessionID:sessId];
 	[self setPasswordHash:passHash];
 	[self setUserID:[uid stringValue]];

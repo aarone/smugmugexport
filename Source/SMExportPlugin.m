@@ -111,6 +111,13 @@
 -(BOOL)isGrowlLoaded;
 -(void)loadGrowl;
 -(void)unloadGrowl;
+-(BOOL)isFrameworkLoaded:(NSString *)fwPath;
+-(NSString *)JSONFrameworkPath;
+-(BOOL)isJSONLoaded;
+-(void)loadJSON;
+-(void)unloadJSON;
+-(void)unloadFramework:(NSString *)fwPath;
+
 -(void)notifyImageUploaded:(NSString *)imageFilename image:(NSData *)image;
 -(NSData *)notificationThumbnail:(NSData *)fullsizeImageData;
 @end
@@ -188,6 +195,8 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	
 	exportManager = exportMgr;	
 	[self loadGrowl];
+	[self loadJSON];
+	
 	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
 	
 	
@@ -222,6 +231,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)dealloc {
 	[self unloadGrowl];
+	[self unloadJSON];
 	[[self albumEditController] release];
 	[[self postLogoutInvocation] release];
 	[[self uploadSiteUrl] release];
@@ -567,10 +577,17 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[self setLoginSheetStatusMessage:@""];
 	
 	if(![wasSuccessful boolValue]) {
-		[self setLoginSheetStatusMessage:NSLocalizedString(@"Login Failed", @"Status text for failed login")];
-		/* we act like we haven't atttempted a log in if the login fails.  
-		*/
-		[self setLoginAttempted:NO];
+		NSString *err = NSLocalizedString(@"Login Failed", @"Status text for failed login");
+		// login request spawned from login sheet
+		if([[self loginPanel] isVisible]) {
+			[self setLoginSheetStatusMessage:err];
+			/* we act like we haven't atttempted a log in if the login fails. */
+			[self setLoginAttempted:NO];			
+		} else { // autologin via keychain info
+			[self setStatusText:err];
+			[self showLoginSheet:self];
+		}
+		
 		return;
 	}
 	
@@ -1523,9 +1540,31 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	return [[[NSBundle bundleForClass:[self class]] privateFrameworksPath] stringByAppendingPathComponent:@"Growl.framework"];
 }
 
--(BOOL)isGrowlLoaded {
-	NSBundle *frameworkBundle = [NSBundle bundleWithPath:[self GrowlFrameworkPath]];
+-(NSString *)JSONFrameworkPath {
+	return [[[NSBundle bundleForClass:[self class]] privateFrameworksPath] stringByAppendingPathComponent:@"JSON.framework"];
+}
+
+-(BOOL)isFrameworkLoaded:(NSString *)fwPath {
+	NSBundle *frameworkBundle = [NSBundle bundleWithPath:fwPath];
 	return frameworkBundle != nil && [frameworkBundle isLoaded];
+}
+
+-(BOOL)isGrowlLoaded {
+	return [self isFrameworkLoaded:[self GrowlFrameworkPath]];
+}
+
+-(BOOL)isJSONLoaded {
+	return [self isFrameworkLoaded:[self JSONFrameworkPath]];
+}
+
+-(void)loadJSON {
+	if([self isJSONLoaded]) {
+		return;
+	}
+	
+	NSBundle *jsonBundle = [NSBundle bundleWithPath:[self JSONFrameworkPath]];
+	if(jsonBundle)
+		[jsonBundle load];
 }
 
 -(void)loadGrowl {
@@ -1541,14 +1580,23 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	}
 }
 
--(void)unloadGrowl {
-	if(![self isGrowlLoaded])
-		return;
+-(void)unloadFramework:(NSString *)fwPath {
+//	if(![self isFrameworkLoaded:fwPath])
+//		return;
 
-	// NSBundle unload is strictly >= 10.5
-//	NSBundle *growlBundle = [NSBundle bundleWithPath:[self GrowlFrameworkPath]];
-//	if (growlBundle)
-//		[growlBundle unload];		
+//	// NSBundle unload is strictly >= 10.5
+//	NSBundle *bundle = [NSBundle bundleWithPath:fwPath];
+//	if (bundle)
+//		[bundle unload];			
+}
+
+
+-(void)unloadJSON {
+	[self unloadFramework:[self JSONFrameworkPath]];
+}
+
+-(void)unloadGrowl {
+	[self unloadFramework:[self GrowlFrameworkPath]];
 }
 
 -(void)notifyImageUploaded:(NSString *)imageFilename image:(NSData *)image{	
