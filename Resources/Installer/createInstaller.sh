@@ -8,10 +8,9 @@ VERSION=`/usr/libexec/PlistBuddy ../SmugMugExport-Info.plist -c "Print :CFBundle
 ZIP_FILE=${PKG%%.pkg}-${VERSION}.zip
 
 sudo rm -Rf $DST &&
-sudo $PKG_MAKER --doc $DOC -o $DST &&
+sudo $PKG_MAKER --doc $DOC -o $DST --id org.aarone.smugmugexport --version ${VERSION} --title "SmugMugExport" &&
 cd ${DST}/.. &&
-sudo zip -r ${ZIP_FILE} ${PKG} 
-
-echo "Installer created: " ${DST}
-echo "Zipped installer created: " ${ZIP_FILE}
+sudo zip -r ${ZIP_FILE} ${PKG} &&
+echo "Installer created: " ${DST} &&
+echo "Zipped installer created: " ${ZIP_FILE} || echo "FAIL!"
 
