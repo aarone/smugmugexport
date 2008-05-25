@@ -44,6 +44,8 @@ extern NSString *SMUploadedFilenameOptionTitle;
 #define IsNetworkTracingEnabled() ([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEnableNetworkTracing] boolValue])
 #define EnableAlbumFetchDelay() ([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEnableAlbumFetchDelay] boolValue])
 
+#define kCFBundleShortVersionStringKey @"CFBundleShortVersionString"
+
 static inline BOOL IsEmpty(id thing) {
     return thing == nil
 	|| ([thing respondsToSelector:@selector(length)]

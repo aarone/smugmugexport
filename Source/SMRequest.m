@@ -110,7 +110,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 +(NSString *)UserAgent {
-	return [[[NSString alloc] initWithFormat:@"iPhoto SMExportPlugin/%@", [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey]] autorelease];
+	return [[[NSString alloc] initWithFormat:@"iPhoto SMExportPlugin/%@", [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:(NSString *)kCFBundleShortVersionStringKey]] autorelease];
 }
 
 -(void)dealloc {
