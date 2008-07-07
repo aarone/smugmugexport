@@ -1,5 +1,5 @@
 //
-//  KeychainManager.h
+//  SMEKeychainManager.h
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 11/14/06.
@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 
 /*!
-    @class		KeychainManager
+    @class	 SMEKeychainManager
     @abstract   A Cocoa interface for the Keychain.
     @discussion  
  
@@ -29,7 +29,7 @@
  
  I made some changes to this class.
 */
-@interface KeychainManager : NSObject {
+@interface SMEKeychainManager : NSObject {
 
 }
 
@@ -37,7 +37,7 @@
     @method     sharedKeychainManager
     @abstract   Returns the singleton manager.
 */
-+(KeychainManager *)sharedKeychainManager;
++(SMEKeychainManager *)sharedKeychainManager;
 
 /*!
     @method     keychainItemsForKind:

@@ -6,6 +6,30 @@
 	<array>
 		<dict>
 			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>doubleClick</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>SMETableView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>exporter</key>
+				<string>SMExportPlugin</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSTableView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
 			<string>SMExportBox</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
@@ -81,30 +105,6 @@
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
 			<string>NSObject</string>
-		</dict>
-		<dict>
-			<key>CLASS</key>
-			<string>NSObject</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-		</dict>
-		<dict>
-			<key>ACTIONS</key>
-			<dict>
-				<key>doubleClick</key>
-				<string>id</string>
-			</dict>
-			<key>CLASS</key>
-			<string>SMTableView</string>
-			<key>LANGUAGE</key>
-			<string>ObjC</string>
-			<key>OUTLETS</key>
-			<dict>
-				<key>exporter</key>
-				<string>SMExportPlugin</string>
-			</dict>
-			<key>SUPERCLASS</key>
-			<string>NSTableView</string>
 		</dict>
 	</array>
 	<key>IBVersion</key>

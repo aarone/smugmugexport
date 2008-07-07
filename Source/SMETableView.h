@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 @class SMExportPlugin;
 
-@interface SMTableView : NSTableView {
+@interface SMETableView : NSTableView {
 	IBOutlet SMExportPlugin *exporter;
 }
 

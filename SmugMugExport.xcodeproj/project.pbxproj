@@ -20,8 +20,8 @@
 		9319DE3F0CB91B690037023F /* SMJSONDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 9319DE3D0CB91B690037023F /* SMJSONDecoder.m */; };
 		932164520B2F78B000624A8D /* SMEDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9321644E0B2F78B000624A8D /* SMEDataAdditions.m */; };
 		932164860B2F78F500624A8D /* SmugMugExport.nib in Resources */ = {isa = PBXBuildFile; fileRef = 932164810B2F78F500624A8D /* SmugMugExport.nib */; };
-		932165820B2F921E00624A8D /* KeychainManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 932165800B2F921E00624A8D /* KeychainManager.m */; };
-		933A9E560CB7C53900B7B2A5 /* SMTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 933A9E540CB7C53900B7B2A5 /* SMTableView.m */; };
+		932165820B2F921E00624A8D /* SMEKeychainManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 932165800B2F921E00624A8D /* SMEKeychainManager.m */; };
+		933A9E560CB7C53900B7B2A5 /* SMETableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 933A9E540CB7C53900B7B2A5 /* SMETableView.m */; };
 		933AA0920CB825CA00B7B2A5 /* SMExportBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0900CB825C900B7B2A5 /* SMExportBox.m */; };
 		933AA0B30CB8273000B7B2A5 /* SMUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0B10CB8273000B7B2A5 /* SMUserDefaults.m */; };
 		933AA0CC0CB827CF00B7B2A5 /* SMExportPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0CA0CB827CF00B7B2A5 /* SMExportPlugin.m */; };
@@ -98,10 +98,10 @@
 		932164780B2F78D600624A8D /* ExportPluginProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ExportPluginProtocol.h; path = Source/ExportPluginProtocol.h; sourceTree = "<group>"; };
 		932164810B2F78F500624A8D /* SmugMugExport.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = SmugMugExport.nib; path = Resources/SmugMugExport.nib; sourceTree = "<group>"; };
 		932164B00B2F7BBC00624A8D /* SmugmugExport_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SmugmugExport_Prefix.pch; path = Source/SmugmugExport_Prefix.pch; sourceTree = "<group>"; };
-		9321657F0B2F921D00624A8D /* KeychainManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KeychainManager.h; path = Source/KeychainManager.h; sourceTree = "<group>"; };
-		932165800B2F921E00624A8D /* KeychainManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KeychainManager.m; path = Source/KeychainManager.m; sourceTree = "<group>"; };
-		933A9E530CB7C53900B7B2A5 /* SMTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMTableView.h; path = Source/SMTableView.h; sourceTree = "<group>"; };
-		933A9E540CB7C53900B7B2A5 /* SMTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMTableView.m; path = Source/SMTableView.m; sourceTree = "<group>"; };
+		9321657F0B2F921D00624A8D /* SMEKeychainManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEKeychainManager.h; path = Source/SMEKeychainManager.h; sourceTree = "<group>"; };
+		932165800B2F921E00624A8D /* SMEKeychainManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEKeychainManager.m; path = Source/SMEKeychainManager.m; sourceTree = "<group>"; };
+		933A9E530CB7C53900B7B2A5 /* SMETableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMETableView.h; path = Source/SMETableView.h; sourceTree = "<group>"; };
+		933A9E540CB7C53900B7B2A5 /* SMETableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMETableView.m; path = Source/SMETableView.m; sourceTree = "<group>"; };
 		933AA08F0CB825C900B7B2A5 /* SMExportBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMExportBox.h; path = Source/SMExportBox.h; sourceTree = "<group>"; };
 		933AA0900CB825C900B7B2A5 /* SMExportBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMExportBox.m; path = Source/SMExportBox.m; sourceTree = "<group>"; };
 		933AA0B00CB8273000B7B2A5 /* SMUserDefaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMUserDefaults.h; path = Source/SMUserDefaults.h; sourceTree = "<group>"; };
@@ -290,10 +290,10 @@
 		933A9E5B0CB7C59F00B7B2A5 /* Misc */ = {
 			isa = PBXGroup;
 			children = (
-				9321657F0B2F921D00624A8D /* KeychainManager.h */,
-				932165800B2F921E00624A8D /* KeychainManager.m */,
-				933A9E530CB7C53900B7B2A5 /* SMTableView.h */,
-				933A9E540CB7C53900B7B2A5 /* SMTableView.m */,
+				9321657F0B2F921D00624A8D /* SMEKeychainManager.h */,
+				932165800B2F921E00624A8D /* SMEKeychainManager.m */,
+				933A9E530CB7C53900B7B2A5 /* SMETableView.h */,
+				933A9E540CB7C53900B7B2A5 /* SMETableView.m */,
 			);
 			name = Misc;
 			sourceTree = "<group>";
@@ -483,12 +483,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				932164520B2F78B000624A8D /* SMEDataAdditions.m in Sources */,
-				932165820B2F921E00624A8D /* KeychainManager.m in Sources */,
+				932165820B2F921E00624A8D /* SMEKeychainManager.m in Sources */,
 				938E26AB0C0F47EA0059F26B /* SMEURLAdditions.m in Sources */,
 				938E27490C0F4DE10059F26B /* SMEStringAdditions.m in Sources */,
 				935A1A870C1CC2CC00043E12 /* SMEUserDefaultsAdditions.m in Sources */,
 				93DD89D80C8C526100A6131B /* SMRequest.m in Sources */,
-				933A9E560CB7C53900B7B2A5 /* SMTableView.m in Sources */,
+				933A9E560CB7C53900B7B2A5 /* SMETableView.m in Sources */,
 				933AA0920CB825CA00B7B2A5 /* SMExportBox.m in Sources */,
 				933AA0B30CB8273000B7B2A5 /* SMUserDefaults.m in Sources */,
 				933AA0CC0CB827CF00B7B2A5 /* SMExportPlugin.m in Sources */,

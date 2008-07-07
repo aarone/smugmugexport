@@ -7,7 +7,7 @@
 //
 
 #import "SMAccountManager.h"
-#import "KeychainManager.h"
+#import "SMEKeychainManager.h"
 #import "SMGlobals.h"
 #import "SMEUserDefaultsAdditions.h"
 
@@ -45,23 +45,23 @@ NSString *KeychainItemKind = @"application password";
 }
 
 -(BOOL)passwordExistsInKeychainForAccount:(NSString *)account {
-	return [[KeychainManager sharedKeychainManager] checkForExistanceOfKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:account];
+	return [[SMEKeychainManager sharedKeychainManager] checkForExistanceOfKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:account];
 }
 
 -(void)addAccountToKeychain:(NSString *)account password:(NSString *)password {
 	if([self passwordExistsInKeychainForAccount:account])
 		return;
 
-	[[KeychainManager sharedKeychainManager] addKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:account withPassword:password];
+	[[SMEKeychainManager sharedKeychainManager] addKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:account withPassword:password];
 }
 
 -(void)removeAccountFromKeychain:(NSString *)account {
-	[[KeychainManager sharedKeychainManager] deleteKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:KeychainItemKind];
+	[[SMEKeychainManager sharedKeychainManager] deleteKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:KeychainItemKind];
 }
 
 -(void)modifyAccountInKeychain:(NSString *)account newPassword:(NSString *)newPassword {
 	if([self passwordForAccount:account] != nil)
-		[[KeychainManager sharedKeychainManager] modifyKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:account withNewPassword:newPassword];
+		[[SMEKeychainManager sharedKeychainManager] modifyKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:account withNewPassword:newPassword];
 	else
 		[self addAccountToKeychain:account password:newPassword];
 }
@@ -79,7 +79,7 @@ NSString *KeychainItemKind = @"application password";
 }
 
 -(NSString *)passwordForAccount:(NSString *)account {
-	return [[KeychainManager sharedKeychainManager] passwordFromKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:account];
+	return [[SMEKeychainManager sharedKeychainManager] passwordFromKeychainItem:[self keychainItemNameForAccount:account] withItemKind:KeychainItemKind forUsername:account];
 }
 
 -(void)addAccount:(NSString *)account {

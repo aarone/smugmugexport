@@ -1,5 +1,5 @@
 //
-//  KeychainManager.m
+//  SMEKeychainManager.m
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 11/14/06.
@@ -7,19 +7,19 @@
 //
 
 
-#import "KeychainManager.h"
+#import "SMEKeychainManager.h"
 #import <Security/Security.h>
 #import <CoreFoundation/CoreFoundation.h>
 
-static KeychainManager *sharedKeychainManager = nil;
+static SMEKeychainManager *sharedKeychainManager = nil;
 
-@interface KeychainManager (Private)
+@interface SMEKeychainManager (Private)
 -(NSString *)passwordFromSecKeychainItemRef:(SecKeychainItemRef)item;
 @end
 
-@implementation KeychainManager
+@implementation SMEKeychainManager
 
-+(KeychainManager *)sharedKeychainManager {
++(SMEKeychainManager *)sharedKeychainManager {
 	@synchronized(self) {
         if (sharedKeychainManager == nil) {
             [[self alloc] init]; // assignment not done here

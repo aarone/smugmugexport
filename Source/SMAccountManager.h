@@ -7,7 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-@class KeychainManager;
+@class SMEKeychainManager;
 
 /**
  * Interface between exporter instance and the known user accounts.  Does not actually

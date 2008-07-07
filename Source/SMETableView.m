@@ -6,10 +6,10 @@
 //  Copyright 2007 Aaron Evans. All rights reserved.
 //
 
-#import "SMTableView.h"
+#import "SMETableView.h"
 #import "SMExportPlugin.h"
 
-@implementation SMTableView
+@implementation SMETableView
 
 /* make tableview 'Delete' button remove a selected album */
 -(void)keyDown:(NSEvent *)theEvent {
