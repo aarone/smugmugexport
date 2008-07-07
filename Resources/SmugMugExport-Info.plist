@@ -25,6 +25,6 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.8</string>
 	<key>NSPrincipalClass</key>
-	<string>SMExportPlugin</string>
+	<string>SMEExportPlugin</string>
 </dict>
 </plist>

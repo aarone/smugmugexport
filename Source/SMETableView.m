@@ -7,7 +7,7 @@
 //
 
 #import "SMETableView.h"
-#import "SMExportPlugin.h"
+#import "SMEExportPlugin.h"
 
 @implementation SMETableView
 

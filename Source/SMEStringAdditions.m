@@ -7,7 +7,7 @@
 //
 
 #import "SMEDataAdditions.h"
-#import "SMGlobals.h"
+#import "SMEGlobals.h"
 
 @implementation NSString (SMEDataAdditions)
 

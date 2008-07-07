@@ -7,17 +7,17 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "SMRequest.h"
+#import "SMERequest.h"
 
 
-@class SMAlbumRef, SMImageRef, SMAlbum;
+@class SMEAlbumRef, SMEImageRef, SMEAlbum;
 
 /*
  */
-@interface SMESession : NSObject<SMUploadRequestObserver> {
+@interface SMESession : NSObject<SMEUploadRequestObserver> {
 	NSString *sessionID;
-	SMRequest *lastUploadRequest;
-	NSObject<SMUploadObserver>* observer;
+	SMERequest *lastUploadRequest;
+	NSObject<SMEUploadObserver>* observer;
 }
 
 +(SMESession *)session;
@@ -36,22 +36,22 @@
 
 -(void)fetchSubCategoriesWithTarget:(id)target callback:(SEL)callback;
 
--(void)deleteAlbum:(SMAlbumRef *)ref withTarget:(id)target callback:(SEL)callback;
+-(void)deleteAlbum:(SMEAlbumRef *)ref withTarget:(id)target callback:(SEL)callback;
 
--(void)createNewAlbum:(SMAlbum *)album withTarget:(id)target callback:(SEL)callback;
+-(void)createNewAlbum:(SMEAlbum *)album withTarget:(id)target callback:(SEL)callback;
 
--(void)editAlbum:(SMAlbum *)album withTarget:(id)target callback:(SEL)callback;
+-(void)editAlbum:(SMEAlbum *)album withTarget:(id)target callback:(SEL)callback;
 
--(void)fetchExtendedAlbumInfo:(SMAlbumRef *)ref withTarget:(id)target callback:(SEL)callback;
+-(void)fetchExtendedAlbumInfo:(SMEAlbumRef *)ref withTarget:(id)target callback:(SEL)callback;
 
--(void)fetchImageURLs:(SMImageRef *)imageRef withTarget:(id)target callback:(SEL)callback;
+-(void)fetchImageURLs:(SMEImageRef *)imageRef withTarget:(id)target callback:(SEL)callback;
 
 -(void)uploadImageData:(NSData *)imageData
 			  filename:(NSString *)filename
-				 album:(SMAlbumRef *)albumRef
+				 album:(SMEAlbumRef *)albumRef
 			   caption:(NSString *)caption
 			  keywords:(NSArray *)keywords
-			  observer:(NSObject<SMUploadObserver>*)observer;
+			  observer:(NSObject<SMEUploadObserver>*)observer;
 -(void)stopUpload;
 
 

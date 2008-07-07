@@ -16,36 +16,36 @@
 		93188E200DE9D67B00DBC3FC /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 930DE5BE0B4831D2008120ED /* Security.framework */; };
 		93188E210DE9D67B00DBC3FC /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 930961BA0C66A164002B8DAA /* libcrypto.dylib */; };
 		93188E300DE9D77C00DBC3FC /* TestCategories.m in Sources */ = {isa = PBXBuildFile; fileRef = 93188D920DE9D51A00DBC3FC /* TestCategories.m */; };
-		9319DE3B0CB91B5D0037023F /* SMAccountManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9319DE390CB91B5D0037023F /* SMAccountManager.m */; };
-		9319DE3F0CB91B690037023F /* SMJSONDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 9319DE3D0CB91B690037023F /* SMJSONDecoder.m */; };
+		9319DE3B0CB91B5D0037023F /* SMEAccountManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9319DE390CB91B5D0037023F /* SMEAccountManager.m */; };
+		9319DE3F0CB91B690037023F /* SMEJSONDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 9319DE3D0CB91B690037023F /* SMEJSONDecoder.m */; };
 		932164520B2F78B000624A8D /* SMEDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9321644E0B2F78B000624A8D /* SMEDataAdditions.m */; };
 		932164860B2F78F500624A8D /* SmugMugExport.nib in Resources */ = {isa = PBXBuildFile; fileRef = 932164810B2F78F500624A8D /* SmugMugExport.nib */; };
 		932165820B2F921E00624A8D /* SMEKeychainManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 932165800B2F921E00624A8D /* SMEKeychainManager.m */; };
 		933A9E560CB7C53900B7B2A5 /* SMETableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 933A9E540CB7C53900B7B2A5 /* SMETableView.m */; };
-		933AA0920CB825CA00B7B2A5 /* SMExportBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0900CB825C900B7B2A5 /* SMExportBox.m */; };
-		933AA0B30CB8273000B7B2A5 /* SMUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0B10CB8273000B7B2A5 /* SMUserDefaults.m */; };
-		933AA0CC0CB827CF00B7B2A5 /* SMExportPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0CA0CB827CF00B7B2A5 /* SMExportPlugin.m */; };
+		933AA0920CB825CA00B7B2A5 /* SMEExportBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0900CB825C900B7B2A5 /* SMEExportBox.m */; };
+		933AA0B30CB8273000B7B2A5 /* SMEUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0B10CB8273000B7B2A5 /* SMEUserDefaults.m */; };
+		933AA0CC0CB827CF00B7B2A5 /* SMEExportPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0CA0CB827CF00B7B2A5 /* SMEExportPlugin.m */; };
 		935A1A870C1CC2CC00043E12 /* SMEUserDefaultsAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 935A1A850C1CC2CC00043E12 /* SMEUserDefaultsAdditions.m */; };
-		9382617F0E1E7F6700A29C9F /* SMData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9382617E0E1E7F6700A29C9F /* SMData.m */; };
-		938261820E1E7F7000A29C9F /* SMSessionInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 938261810E1E7F7000A29C9F /* SMSessionInfo.m */; };
-		938261870E1E7F8100A29C9F /* SMSubCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 938261840E1E7F8100A29C9F /* SMSubCategory.m */; };
-		938261880E1E7F8100A29C9F /* SMCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 938261850E1E7F8100A29C9F /* SMCategory.m */; };
+		9382617F0E1E7F6700A29C9F /* SMEData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9382617E0E1E7F6700A29C9F /* SMEData.m */; };
+		938261820E1E7F7000A29C9F /* SMESessionInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 938261810E1E7F7000A29C9F /* SMESessionInfo.m */; };
+		938261870E1E7F8100A29C9F /* SMESubCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 938261840E1E7F8100A29C9F /* SMESubCategory.m */; };
+		938261880E1E7F8100A29C9F /* SMECategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 938261850E1E7F8100A29C9F /* SMECategory.m */; };
 		938E26AB0C0F47EA0059F26B /* SMEURLAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26A90C0F47EA0059F26B /* SMEURLAdditions.m */; };
 		938E27490C0F4DE10059F26B /* SMEStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E27470C0F4DE10059F26B /* SMEStringAdditions.m */; };
 		93BD6F2F0AD84AAC007CE525 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
-		93C23E0C0D968FE60022EEE1 /* SMAlbum.m in Sources */ = {isa = PBXBuildFile; fileRef = 93C23E0B0D968FE60022EEE1 /* SMAlbum.m */; };
-		93C23E820D96B4290022EEE1 /* SMAlbumEditController.m in Sources */ = {isa = PBXBuildFile; fileRef = 93C23E800D96B4290022EEE1 /* SMAlbumEditController.m */; };
+		93C23E0C0D968FE60022EEE1 /* SMEAlbum.m in Sources */ = {isa = PBXBuildFile; fileRef = 93C23E0B0D968FE60022EEE1 /* SMEAlbum.m */; };
+		93C23E820D96B4290022EEE1 /* SMEAlbumEditController.m in Sources */ = {isa = PBXBuildFile; fileRef = 93C23E800D96B4290022EEE1 /* SMEAlbumEditController.m */; };
 		93C23EA70D96B8DF0022EEE1 /* AlbumEdit.nib in Resources */ = {isa = PBXBuildFile; fileRef = 93C23EA60D96B8DF0022EEE1 /* AlbumEdit.nib */; };
 		93CE12270D5504B200C96591 /* Growl.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 93CE121E0D5504A800C96591 /* Growl.framework */; };
-		93DD11EB0E17EC8C00275408 /* SMResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD11EA0E17EC8C00275408 /* SMResponse.m */; };
-		93DD11EC0E17EC8C00275408 /* SMResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD11EA0E17EC8C00275408 /* SMResponse.m */; };
+		93DD11EB0E17EC8C00275408 /* SMEResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD11EA0E17EC8C00275408 /* SMEResponse.m */; };
+		93DD11EC0E17EC8C00275408 /* SMEResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD11EA0E17EC8C00275408 /* SMEResponse.m */; };
 		93DD12D70E182D5100275408 /* SMESession.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD12D60E182D5100275408 /* SMESession.m */; };
 		93DD12D80E182D5100275408 /* SMESession.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD12D60E182D5100275408 /* SMESession.m */; };
-		93DD89D80C8C526100A6131B /* SMRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD89D60C8C526100A6131B /* SMRequest.m */; };
+		93DD89D80C8C526100A6131B /* SMERequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD89D60C8C526100A6131B /* SMERequest.m */; };
 		93DE06B00DE990ED0029F0FA /* JSON.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 93DE06380DE98DD60029F0FA /* JSON.framework */; };
-		93E58BE10D84690C00DA6105 /* SMImageRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 93E58BE00D84690C00DA6105 /* SMImageRef.m */; };
-		93E58C820D84732E00DA6105 /* SMAlbumRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 93E58C800D84732E00DA6105 /* SMAlbumRef.m */; };
-		93ED9DC20E22BEF800572F50 /* SMImageURLs.m in Sources */ = {isa = PBXBuildFile; fileRef = 93ED9DC10E22BEF800572F50 /* SMImageURLs.m */; };
+		93E58BE10D84690C00DA6105 /* SMEImageRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 93E58BE00D84690C00DA6105 /* SMEImageRef.m */; };
+		93E58C820D84732E00DA6105 /* SMEAlbumRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 93E58C800D84732E00DA6105 /* SMEAlbumRef.m */; };
+		93ED9DC20E22BEF800572F50 /* SMEImageURLs.m in Sources */ = {isa = PBXBuildFile; fileRef = 93ED9DC10E22BEF800572F50 /* SMEImageURLs.m */; };
 		93ED9E1B0E22C5A800572F50 /* SMEBitmapImageRepAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 93ED9E1A0E22C5A800572F50 /* SMEBitmapImageRepAdditions.m */; };
 /* End PBXBuildFile section */
 
@@ -85,11 +85,11 @@
 		93188D970DE9D5C600DBC3FC /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = /System/Library/Frameworks/SenTestingKit.framework; sourceTree = "<absolute>"; };
 		93188DB20DE9D5D900DBC3FC /* Tests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		93188E3D0DE9D83700DBC3FC /* Tests-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "Tests-Info.plist"; path = "Resources/Tests-Info.plist"; sourceTree = "<group>"; };
-		9319DE340CB91B560037023F /* SMGlobals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMGlobals.h; path = Source/SMGlobals.h; sourceTree = "<group>"; };
-		9319DE380CB91B5D0037023F /* SMAccountManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMAccountManager.h; path = Source/SMAccountManager.h; sourceTree = "<group>"; };
-		9319DE390CB91B5D0037023F /* SMAccountManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMAccountManager.m; path = Source/SMAccountManager.m; sourceTree = "<group>"; };
-		9319DE3C0CB91B690037023F /* SMJSONDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMJSONDecoder.h; path = Source/SMJSONDecoder.h; sourceTree = "<group>"; };
-		9319DE3D0CB91B690037023F /* SMJSONDecoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMJSONDecoder.m; path = Source/SMJSONDecoder.m; sourceTree = "<group>"; };
+		9319DE340CB91B560037023F /* SMEGlobals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEGlobals.h; path = Source/SMEGlobals.h; sourceTree = "<group>"; };
+		9319DE380CB91B5D0037023F /* SMEAccountManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEAccountManager.h; path = Source/SMEAccountManager.h; sourceTree = "<group>"; };
+		9319DE390CB91B5D0037023F /* SMEAccountManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEAccountManager.m; path = Source/SMEAccountManager.m; sourceTree = "<group>"; };
+		9319DE3C0CB91B690037023F /* SMEJSONDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEJSONDecoder.h; path = Source/SMEJSONDecoder.h; sourceTree = "<group>"; };
+		9319DE3D0CB91B690037023F /* SMEJSONDecoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEJSONDecoder.m; path = Source/SMEJSONDecoder.m; sourceTree = "<group>"; };
 		9321644D0B2F78B000624A8D /* SMEDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEDataAdditions.h; path = Source/SMEDataAdditions.h; sourceTree = "<group>"; };
 		9321644E0B2F78B000624A8D /* SMEDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEDataAdditions.m; path = Source/SMEDataAdditions.m; sourceTree = "<group>"; };
 		932164750B2F78D600624A8D /* ExportImageProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ExportImageProtocol.h; path = Source/ExportImageProtocol.h; sourceTree = "<group>"; };
@@ -102,49 +102,49 @@
 		932165800B2F921E00624A8D /* SMEKeychainManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEKeychainManager.m; path = Source/SMEKeychainManager.m; sourceTree = "<group>"; };
 		933A9E530CB7C53900B7B2A5 /* SMETableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMETableView.h; path = Source/SMETableView.h; sourceTree = "<group>"; };
 		933A9E540CB7C53900B7B2A5 /* SMETableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMETableView.m; path = Source/SMETableView.m; sourceTree = "<group>"; };
-		933AA08F0CB825C900B7B2A5 /* SMExportBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMExportBox.h; path = Source/SMExportBox.h; sourceTree = "<group>"; };
-		933AA0900CB825C900B7B2A5 /* SMExportBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMExportBox.m; path = Source/SMExportBox.m; sourceTree = "<group>"; };
-		933AA0B00CB8273000B7B2A5 /* SMUserDefaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMUserDefaults.h; path = Source/SMUserDefaults.h; sourceTree = "<group>"; };
-		933AA0B10CB8273000B7B2A5 /* SMUserDefaults.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMUserDefaults.m; path = Source/SMUserDefaults.m; sourceTree = "<group>"; };
-		933AA0C90CB827CF00B7B2A5 /* SMExportPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMExportPlugin.h; path = Source/SMExportPlugin.h; sourceTree = "<group>"; };
-		933AA0CA0CB827CF00B7B2A5 /* SMExportPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMExportPlugin.m; path = Source/SMExportPlugin.m; sourceTree = "<group>"; };
+		933AA08F0CB825C900B7B2A5 /* SMEExportBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEExportBox.h; path = Source/SMEExportBox.h; sourceTree = "<group>"; };
+		933AA0900CB825C900B7B2A5 /* SMEExportBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEExportBox.m; path = Source/SMEExportBox.m; sourceTree = "<group>"; };
+		933AA0B00CB8273000B7B2A5 /* SMEUserDefaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEUserDefaults.h; path = Source/SMEUserDefaults.h; sourceTree = "<group>"; };
+		933AA0B10CB8273000B7B2A5 /* SMEUserDefaults.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEUserDefaults.m; path = Source/SMEUserDefaults.m; sourceTree = "<group>"; };
+		933AA0C90CB827CF00B7B2A5 /* SMEExportPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEExportPlugin.h; path = Source/SMEExportPlugin.h; sourceTree = "<group>"; };
+		933AA0CA0CB827CF00B7B2A5 /* SMEExportPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEExportPlugin.m; path = Source/SMEExportPlugin.m; sourceTree = "<group>"; };
 		935A1A840C1CC2CC00043E12 /* SMEUserDefaultsAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEUserDefaultsAdditions.h; path = Source/SMEUserDefaultsAdditions.h; sourceTree = "<group>"; };
 		935A1A850C1CC2CC00043E12 /* SMEUserDefaultsAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEUserDefaultsAdditions.m; path = Source/SMEUserDefaultsAdditions.m; sourceTree = "<group>"; };
-		9382617D0E1E7F6700A29C9F /* SMData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMData.h; path = Source/SMData.h; sourceTree = "<group>"; };
-		9382617E0E1E7F6700A29C9F /* SMData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMData.m; path = Source/SMData.m; sourceTree = "<group>"; };
-		938261800E1E7F7000A29C9F /* SMSessionInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMSessionInfo.h; path = Source/SMSessionInfo.h; sourceTree = "<group>"; };
-		938261810E1E7F7000A29C9F /* SMSessionInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMSessionInfo.m; path = Source/SMSessionInfo.m; sourceTree = "<group>"; };
-		938261830E1E7F8100A29C9F /* SMSubCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMSubCategory.h; path = Source/SMSubCategory.h; sourceTree = "<group>"; };
-		938261840E1E7F8100A29C9F /* SMSubCategory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMSubCategory.m; path = Source/SMSubCategory.m; sourceTree = "<group>"; };
-		938261850E1E7F8100A29C9F /* SMCategory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMCategory.m; path = Source/SMCategory.m; sourceTree = "<group>"; };
-		938261860E1E7F8100A29C9F /* SMCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMCategory.h; path = Source/SMCategory.h; sourceTree = "<group>"; };
+		9382617D0E1E7F6700A29C9F /* SMEData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEData.h; path = Source/SMEData.h; sourceTree = "<group>"; };
+		9382617E0E1E7F6700A29C9F /* SMEData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEData.m; path = Source/SMEData.m; sourceTree = "<group>"; };
+		938261800E1E7F7000A29C9F /* SMESessionInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMESessionInfo.h; path = Source/SMESessionInfo.h; sourceTree = "<group>"; };
+		938261810E1E7F7000A29C9F /* SMESessionInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMESessionInfo.m; path = Source/SMESessionInfo.m; sourceTree = "<group>"; };
+		938261830E1E7F8100A29C9F /* SMESubCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMESubCategory.h; path = Source/SMESubCategory.h; sourceTree = "<group>"; };
+		938261840E1E7F8100A29C9F /* SMESubCategory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMESubCategory.m; path = Source/SMESubCategory.m; sourceTree = "<group>"; };
+		938261850E1E7F8100A29C9F /* SMECategory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMECategory.m; path = Source/SMECategory.m; sourceTree = "<group>"; };
+		938261860E1E7F8100A29C9F /* SMECategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMECategory.h; path = Source/SMECategory.h; sourceTree = "<group>"; };
 		938E26A80C0F47EA0059F26B /* SMEURLAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEURLAdditions.h; path = Source/SMEURLAdditions.h; sourceTree = "<group>"; };
 		938E26A90C0F47EA0059F26B /* SMEURLAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEURLAdditions.m; path = Source/SMEURLAdditions.m; sourceTree = "<group>"; };
 		938E27460C0F4DE10059F26B /* SMEStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEStringAdditions.h; path = Source/SMEStringAdditions.h; sourceTree = "<group>"; };
 		938E27470C0F4DE10059F26B /* SMEStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEStringAdditions.m; path = Source/SMEStringAdditions.m; sourceTree = "<group>"; };
 		93BD6F170AD84A49007CE525 /* SmugMugExport.iPhotoExporter */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SmugMugExport.iPhotoExporter; sourceTree = BUILT_PRODUCTS_DIR; };
 		93BD6F180AD84A49007CE525 /* SmugMugExport-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "SmugMugExport-Info.plist"; path = "Resources/SmugMugExport-Info.plist"; sourceTree = "<group>"; };
-		93C23E0A0D968FE60022EEE1 /* SMAlbum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMAlbum.h; path = Source/SMAlbum.h; sourceTree = "<group>"; };
-		93C23E0B0D968FE60022EEE1 /* SMAlbum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMAlbum.m; path = Source/SMAlbum.m; sourceTree = "<group>"; };
-		93C23E800D96B4290022EEE1 /* SMAlbumEditController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMAlbumEditController.m; path = Source/SMAlbumEditController.m; sourceTree = "<group>"; };
-		93C23E810D96B4290022EEE1 /* SMAlbumEditController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMAlbumEditController.h; path = Source/SMAlbumEditController.h; sourceTree = "<group>"; };
+		93C23E0A0D968FE60022EEE1 /* SMEAlbum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEAlbum.h; path = Source/SMEAlbum.h; sourceTree = "<group>"; };
+		93C23E0B0D968FE60022EEE1 /* SMEAlbum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEAlbum.m; path = Source/SMEAlbum.m; sourceTree = "<group>"; };
+		93C23E800D96B4290022EEE1 /* SMEAlbumEditController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEAlbumEditController.m; path = Source/SMEAlbumEditController.m; sourceTree = "<group>"; };
+		93C23E810D96B4290022EEE1 /* SMEAlbumEditController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEAlbumEditController.h; path = Source/SMEAlbumEditController.h; sourceTree = "<group>"; };
 		93C23EA60D96B8DF0022EEE1 /* AlbumEdit.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = AlbumEdit.nib; path = Resources/AlbumEdit.nib; sourceTree = "<group>"; };
 		93CE121E0D5504A800C96591 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Growl.framework; path = Resources/Frameworks/Growl.framework; sourceTree = "<group>"; };
-		93DD11E90E17EC8C00275408 /* SMResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMResponse.h; path = Source/SMResponse.h; sourceTree = "<group>"; };
-		93DD11EA0E17EC8C00275408 /* SMResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMResponse.m; path = Source/SMResponse.m; sourceTree = "<group>"; };
+		93DD11E90E17EC8C00275408 /* SMEResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEResponse.h; path = Source/SMEResponse.h; sourceTree = "<group>"; };
+		93DD11EA0E17EC8C00275408 /* SMEResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEResponse.m; path = Source/SMEResponse.m; sourceTree = "<group>"; };
 		93DD12D50E182D5100275408 /* SMESession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMESession.h; path = Source/SMESession.h; sourceTree = "<group>"; };
 		93DD12D60E182D5100275408 /* SMESession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMESession.m; path = Source/SMESession.m; sourceTree = "<group>"; };
-		93DD88F60C8C4AE000A6131B /* SMDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMDecoder.h; path = Source/SMDecoder.h; sourceTree = "<group>"; };
-		93DD89D50C8C526100A6131B /* SMRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMRequest.h; path = Source/SMRequest.h; sourceTree = "<group>"; };
-		93DD89D60C8C526100A6131B /* SMRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMRequest.m; path = Source/SMRequest.m; sourceTree = "<group>"; };
+		93DD88F60C8C4AE000A6131B /* SMEDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEDecoder.h; path = Source/SMEDecoder.h; sourceTree = "<group>"; };
+		93DD89D50C8C526100A6131B /* SMERequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMERequest.h; path = Source/SMERequest.h; sourceTree = "<group>"; };
+		93DD89D60C8C526100A6131B /* SMERequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMERequest.m; path = Source/SMERequest.m; sourceTree = "<group>"; };
 		93DE06380DE98DD60029F0FA /* JSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JSON.framework; path = Resources/Frameworks/JSON.framework; sourceTree = "<group>"; };
-		93E58BDF0D84690C00DA6105 /* SMImageRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMImageRef.h; path = Source/SMImageRef.h; sourceTree = "<group>"; };
-		93E58BE00D84690C00DA6105 /* SMImageRef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMImageRef.m; path = Source/SMImageRef.m; sourceTree = "<group>"; };
-		93E58C800D84732E00DA6105 /* SMAlbumRef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMAlbumRef.m; path = Source/SMAlbumRef.m; sourceTree = "<group>"; };
-		93E58C810D84732E00DA6105 /* SMAlbumRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMAlbumRef.h; path = Source/SMAlbumRef.h; sourceTree = "<group>"; };
-		93EBDDE30C8CF5EA00905273 /* SMUploadObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMUploadObserver.h; path = Source/SMUploadObserver.h; sourceTree = "<group>"; };
-		93ED9DC00E22BEF800572F50 /* SMImageURLs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMImageURLs.h; path = Source/SMImageURLs.h; sourceTree = "<group>"; };
-		93ED9DC10E22BEF800572F50 /* SMImageURLs.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMImageURLs.m; path = Source/SMImageURLs.m; sourceTree = "<group>"; };
+		93E58BDF0D84690C00DA6105 /* SMEImageRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEImageRef.h; path = Source/SMEImageRef.h; sourceTree = "<group>"; };
+		93E58BE00D84690C00DA6105 /* SMEImageRef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEImageRef.m; path = Source/SMEImageRef.m; sourceTree = "<group>"; };
+		93E58C800D84732E00DA6105 /* SMEAlbumRef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEAlbumRef.m; path = Source/SMEAlbumRef.m; sourceTree = "<group>"; };
+		93E58C810D84732E00DA6105 /* SMEAlbumRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEAlbumRef.h; path = Source/SMEAlbumRef.h; sourceTree = "<group>"; };
+		93EBDDE30C8CF5EA00905273 /* SMEUploadObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEUploadObserver.h; path = Source/SMEUploadObserver.h; sourceTree = "<group>"; };
+		93ED9DC00E22BEF800572F50 /* SMEImageURLs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEImageURLs.h; path = Source/SMEImageURLs.h; sourceTree = "<group>"; };
+		93ED9DC10E22BEF800572F50 /* SMEImageURLs.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEImageURLs.m; path = Source/SMEImageURLs.m; sourceTree = "<group>"; };
 		93ED9E190E22C5A800572F50 /* SMEBitmapImageRepAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEBitmapImageRepAdditions.h; path = Source/SMEBitmapImageRepAdditions.h; sourceTree = "<group>"; };
 		93ED9E1A0E22C5A800572F50 /* SMEBitmapImageRepAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEBitmapImageRepAdditions.m; path = Source/SMEBitmapImageRepAdditions.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -176,7 +176,6 @@
 		089C166AFE841209C02AAC07 /* smugmugExport */ = {
 			isa = PBXGroup;
 			children = (
-				9319DE340CB91B560037023F /* SMGlobals.h */,
 				08FB77AFFE84173DC02AAC07 /* Classes */,
 				32C88E010371C26100C91783 /* Other Sources */,
 				93188D8E0DE9D4ED00DBC3FC /* Tests */,
@@ -210,16 +209,16 @@
 		08FB77AFFE84173DC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				933AA0C90CB827CF00B7B2A5 /* SMExportPlugin.h */,
-				933AA0CA0CB827CF00B7B2A5 /* SMExportPlugin.m */,
-				93C23E810D96B4290022EEE1 /* SMAlbumEditController.h */,
-				93C23E800D96B4290022EEE1 /* SMAlbumEditController.m */,
-				933AA08F0CB825C900B7B2A5 /* SMExportBox.h */,
-				933AA0900CB825C900B7B2A5 /* SMExportBox.m */,
-				933AA0B00CB8273000B7B2A5 /* SMUserDefaults.h */,
-				933AA0B10CB8273000B7B2A5 /* SMUserDefaults.m */,
-				9319DE380CB91B5D0037023F /* SMAccountManager.h */,
-				9319DE390CB91B5D0037023F /* SMAccountManager.m */,
+				933AA0C90CB827CF00B7B2A5 /* SMEExportPlugin.h */,
+				933AA0CA0CB827CF00B7B2A5 /* SMEExportPlugin.m */,
+				93C23E810D96B4290022EEE1 /* SMEAlbumEditController.h */,
+				93C23E800D96B4290022EEE1 /* SMEAlbumEditController.m */,
+				933AA08F0CB825C900B7B2A5 /* SMEExportBox.h */,
+				933AA0900CB825C900B7B2A5 /* SMEExportBox.m */,
+				933AA0B00CB8273000B7B2A5 /* SMEUserDefaults.h */,
+				933AA0B10CB8273000B7B2A5 /* SMEUserDefaults.m */,
+				9319DE380CB91B5D0037023F /* SMEAccountManager.h */,
+				9319DE390CB91B5D0037023F /* SMEAccountManager.m */,
 				938E26DE0C0F49180059F26B /* SmugMug Access */,
 			);
 			name = Classes;
@@ -259,6 +258,7 @@
 		32C88E010371C26100C91783 /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				9319DE340CB91B560037023F /* SMEGlobals.h */,
 				932164B00B2F7BBC00624A8D /* SmugmugExport_Prefix.pch */,
 				933A9E5B0CB7C59F00B7B2A5 /* Misc */,
 				9394BC8D0ADDBF390066CD67 /* Categories */,
@@ -304,14 +304,14 @@
 				93DD12D50E182D5100275408 /* SMESession.h */,
 				93DD12D60E182D5100275408 /* SMESession.m */,
 				93DD12080E17F04E00275408 /* Types */,
-				93EBDDE30C8CF5EA00905273 /* SMUploadObserver.h */,
-				93DD89D50C8C526100A6131B /* SMRequest.h */,
-				93DD89D60C8C526100A6131B /* SMRequest.m */,
-				93DD11E90E17EC8C00275408 /* SMResponse.h */,
-				93DD11EA0E17EC8C00275408 /* SMResponse.m */,
-				93DD88F60C8C4AE000A6131B /* SMDecoder.h */,
-				9319DE3C0CB91B690037023F /* SMJSONDecoder.h */,
-				9319DE3D0CB91B690037023F /* SMJSONDecoder.m */,
+				93EBDDE30C8CF5EA00905273 /* SMEUploadObserver.h */,
+				93DD89D50C8C526100A6131B /* SMERequest.h */,
+				93DD89D60C8C526100A6131B /* SMERequest.m */,
+				93DD11E90E17EC8C00275408 /* SMEResponse.h */,
+				93DD11EA0E17EC8C00275408 /* SMEResponse.m */,
+				93DD88F60C8C4AE000A6131B /* SMEDecoder.h */,
+				9319DE3C0CB91B690037023F /* SMEJSONDecoder.h */,
+				9319DE3D0CB91B690037023F /* SMEJSONDecoder.m */,
 			);
 			name = "SmugMug Access";
 			sourceTree = "<group>";
@@ -336,22 +336,22 @@
 		93DD12080E17F04E00275408 /* Types */ = {
 			isa = PBXGroup;
 			children = (
-				9382617D0E1E7F6700A29C9F /* SMData.h */,
-				9382617E0E1E7F6700A29C9F /* SMData.m */,
-				938261800E1E7F7000A29C9F /* SMSessionInfo.h */,
-				938261810E1E7F7000A29C9F /* SMSessionInfo.m */,
-				93C23E0A0D968FE60022EEE1 /* SMAlbum.h */,
-				93C23E0B0D968FE60022EEE1 /* SMAlbum.m */,
-				93E58C810D84732E00DA6105 /* SMAlbumRef.h */,
-				93E58C800D84732E00DA6105 /* SMAlbumRef.m */,
-				93E58BDF0D84690C00DA6105 /* SMImageRef.h */,
-				93E58BE00D84690C00DA6105 /* SMImageRef.m */,
-				938261830E1E7F8100A29C9F /* SMSubCategory.h */,
-				938261840E1E7F8100A29C9F /* SMSubCategory.m */,
-				938261860E1E7F8100A29C9F /* SMCategory.h */,
-				938261850E1E7F8100A29C9F /* SMCategory.m */,
-				93ED9DC00E22BEF800572F50 /* SMImageURLs.h */,
-				93ED9DC10E22BEF800572F50 /* SMImageURLs.m */,
+				9382617D0E1E7F6700A29C9F /* SMEData.h */,
+				9382617E0E1E7F6700A29C9F /* SMEData.m */,
+				938261800E1E7F7000A29C9F /* SMESessionInfo.h */,
+				938261810E1E7F7000A29C9F /* SMESessionInfo.m */,
+				93C23E0A0D968FE60022EEE1 /* SMEAlbum.h */,
+				93C23E0B0D968FE60022EEE1 /* SMEAlbum.m */,
+				93E58C810D84732E00DA6105 /* SMEAlbumRef.h */,
+				93E58C800D84732E00DA6105 /* SMEAlbumRef.m */,
+				93E58BDF0D84690C00DA6105 /* SMEImageRef.h */,
+				93E58BE00D84690C00DA6105 /* SMEImageRef.m */,
+				938261830E1E7F8100A29C9F /* SMESubCategory.h */,
+				938261840E1E7F8100A29C9F /* SMESubCategory.m */,
+				938261860E1E7F8100A29C9F /* SMECategory.h */,
+				938261850E1E7F8100A29C9F /* SMECategory.m */,
+				93ED9DC00E22BEF800572F50 /* SMEImageURLs.h */,
+				93ED9DC10E22BEF800572F50 /* SMEImageURLs.m */,
 			);
 			name = Types;
 			sourceTree = "<group>";
@@ -473,7 +473,7 @@
 			files = (
 				93188E300DE9D77C00DBC3FC /* TestCategories.m in Sources */,
 				93188E1E0DE9D67400DBC3FC /* SMEStringAdditions.m in Sources */,
-				93DD11EB0E17EC8C00275408 /* SMResponse.m in Sources */,
+				93DD11EB0E17EC8C00275408 /* SMEResponse.m in Sources */,
 				93DD12D70E182D5100275408 /* SMESession.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -487,24 +487,24 @@
 				938E26AB0C0F47EA0059F26B /* SMEURLAdditions.m in Sources */,
 				938E27490C0F4DE10059F26B /* SMEStringAdditions.m in Sources */,
 				935A1A870C1CC2CC00043E12 /* SMEUserDefaultsAdditions.m in Sources */,
-				93DD89D80C8C526100A6131B /* SMRequest.m in Sources */,
+				93DD89D80C8C526100A6131B /* SMERequest.m in Sources */,
 				933A9E560CB7C53900B7B2A5 /* SMETableView.m in Sources */,
-				933AA0920CB825CA00B7B2A5 /* SMExportBox.m in Sources */,
-				933AA0B30CB8273000B7B2A5 /* SMUserDefaults.m in Sources */,
-				933AA0CC0CB827CF00B7B2A5 /* SMExportPlugin.m in Sources */,
-				9319DE3B0CB91B5D0037023F /* SMAccountManager.m in Sources */,
-				9319DE3F0CB91B690037023F /* SMJSONDecoder.m in Sources */,
-				93E58BE10D84690C00DA6105 /* SMImageRef.m in Sources */,
-				93E58C820D84732E00DA6105 /* SMAlbumRef.m in Sources */,
-				93C23E0C0D968FE60022EEE1 /* SMAlbum.m in Sources */,
-				93C23E820D96B4290022EEE1 /* SMAlbumEditController.m in Sources */,
-				93DD11EC0E17EC8C00275408 /* SMResponse.m in Sources */,
+				933AA0920CB825CA00B7B2A5 /* SMEExportBox.m in Sources */,
+				933AA0B30CB8273000B7B2A5 /* SMEUserDefaults.m in Sources */,
+				933AA0CC0CB827CF00B7B2A5 /* SMEExportPlugin.m in Sources */,
+				9319DE3B0CB91B5D0037023F /* SMEAccountManager.m in Sources */,
+				9319DE3F0CB91B690037023F /* SMEJSONDecoder.m in Sources */,
+				93E58BE10D84690C00DA6105 /* SMEImageRef.m in Sources */,
+				93E58C820D84732E00DA6105 /* SMEAlbumRef.m in Sources */,
+				93C23E0C0D968FE60022EEE1 /* SMEAlbum.m in Sources */,
+				93C23E820D96B4290022EEE1 /* SMEAlbumEditController.m in Sources */,
+				93DD11EC0E17EC8C00275408 /* SMEResponse.m in Sources */,
 				93DD12D80E182D5100275408 /* SMESession.m in Sources */,
-				9382617F0E1E7F6700A29C9F /* SMData.m in Sources */,
-				938261820E1E7F7000A29C9F /* SMSessionInfo.m in Sources */,
-				938261870E1E7F8100A29C9F /* SMSubCategory.m in Sources */,
-				938261880E1E7F8100A29C9F /* SMCategory.m in Sources */,
-				93ED9DC20E22BEF800572F50 /* SMImageURLs.m in Sources */,
+				9382617F0E1E7F6700A29C9F /* SMEData.m in Sources */,
+				938261820E1E7F7000A29C9F /* SMESessionInfo.m in Sources */,
+				938261870E1E7F8100A29C9F /* SMESubCategory.m in Sources */,
+				938261880E1E7F8100A29C9F /* SMECategory.m in Sources */,
+				93ED9DC20E22BEF800572F50 /* SMEImageURLs.m in Sources */,
 				93ED9E1B0E22C5A800572F50 /* SMEBitmapImageRepAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -7,10 +7,10 @@
 //
 
 #import <Cocoa/Cocoa.h>
-@class SMExportPlugin;
+@class SMEExportPlugin;
 
 @interface SMETableView : NSTableView {
-	IBOutlet SMExportPlugin *exporter;
+	IBOutlet SMEExportPlugin *exporter;
 }
 
 @end

@@ -23,14 +23,14 @@
 			<key>OUTLETS</key>
 			<dict>
 				<key>exporter</key>
-				<string>SMExportPlugin</string>
+				<string>SMEExportPlugin</string>
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSTableView</string>
 		</dict>
 		<dict>
 			<key>CLASS</key>
-			<string>SMExportBox</string>
+			<string>SMEExportBox</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>SUPERCLASS</key>
@@ -69,7 +69,7 @@
 				<string>id</string>
 			</dict>
 			<key>CLASS</key>
-			<string>SMExportPlugin</string>
+			<string>SMEExportPlugin</string>
 			<key>LANGUAGE</key>
 			<string>ObjC</string>
 			<key>OUTLETS</key>

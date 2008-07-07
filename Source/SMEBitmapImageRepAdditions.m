@@ -8,7 +8,7 @@
 
 #import "SMEBitmapImageRepAdditions.h"
 #import "SMEUserDefaultsAdditions.h"
-#import "SMGlobals.h"
+#import "SMEGlobals.h"
 
 static const float DefaultJpegScalingFactor = 0.9;
 
