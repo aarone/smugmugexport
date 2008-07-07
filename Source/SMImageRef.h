@@ -15,7 +15,9 @@
 }
 
 -(id)initWithId:(NSString *)anId key:(NSString *)aKey;
+-(id)initWithDictionary:(NSDictionary *)aDict;
 +(SMImageRef *)refWithId:(NSString *)imageId key:(NSString *)key;
++(SMImageRef *)refWithDictionary:(NSDictionary *)aDict;
 
 -(NSString *)imageId;
 -(NSString *)imageKey;

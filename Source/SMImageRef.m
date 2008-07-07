@@ -28,6 +28,14 @@
 	return [[[self class] alloc] initWithId:anId key:key];
 }
 
+-(id)initWithDictionary:(NSDictionary *)aDict {
+	return [self initWithId:[aDict objectForKey:@"id"] key:[aDict objectForKey:@"Key"]];
+}
+
++(SMImageRef *)refWithDictionary:(NSDictionary *)aDict {
+	return [[[[self class] alloc] initWithDictionary:aDict] autorelease];
+}
+
 -(unsigned int)hash {
 	return 31 * [[self imageId] hash] + [[self imageKey] hash];
 }

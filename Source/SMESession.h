@@ -44,6 +44,8 @@
 
 -(void)fetchExtendedAlbumInfo:(SMAlbumRef *)ref withTarget:(id)target callback:(SEL)callback;
 
+-(void)fetchImageURLs:(SMImageRef *)imageRef withTarget:(id)target callback:(SEL)callback;
+
 -(void)uploadImageData:(NSData *)imageData
 			  filename:(NSString *)filename
 				 album:(SMAlbumRef *)albumRef

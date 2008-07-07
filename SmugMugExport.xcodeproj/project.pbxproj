@@ -45,6 +45,7 @@
 		93DE06B00DE990ED0029F0FA /* JSON.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 93DE06380DE98DD60029F0FA /* JSON.framework */; };
 		93E58BE10D84690C00DA6105 /* SMImageRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 93E58BE00D84690C00DA6105 /* SMImageRef.m */; };
 		93E58C820D84732E00DA6105 /* SMAlbumRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 93E58C800D84732E00DA6105 /* SMAlbumRef.m */; };
+		93ED9DC20E22BEF800572F50 /* SMImageURLs.m in Sources */ = {isa = PBXBuildFile; fileRef = 93ED9DC10E22BEF800572F50 /* SMImageURLs.m */; };
 		93EE86870C8085850028A598 /* NSBitmapImageRepAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EE86850C8085850028A598 /* NSBitmapImageRepAdditions.m */; };
 /* End PBXBuildFile section */
 
@@ -142,6 +143,8 @@
 		93E58C800D84732E00DA6105 /* SMAlbumRef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMAlbumRef.m; path = Source/SMAlbumRef.m; sourceTree = "<group>"; };
 		93E58C810D84732E00DA6105 /* SMAlbumRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMAlbumRef.h; path = Source/SMAlbumRef.h; sourceTree = "<group>"; };
 		93EBDDE30C8CF5EA00905273 /* SMUploadObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMUploadObserver.h; path = Source/SMUploadObserver.h; sourceTree = "<group>"; };
+		93ED9DC00E22BEF800572F50 /* SMImageURLs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMImageURLs.h; path = Source/SMImageURLs.h; sourceTree = "<group>"; };
+		93ED9DC10E22BEF800572F50 /* SMImageURLs.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMImageURLs.m; path = Source/SMImageURLs.m; sourceTree = "<group>"; };
 		93EE86840C8085850028A598 /* NSBitmapImageRepAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSBitmapImageRepAdditions.h; path = Source/NSBitmapImageRepAdditions.h; sourceTree = "<group>"; };
 		93EE86850C8085850028A598 /* NSBitmapImageRepAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSBitmapImageRepAdditions.m; path = Source/NSBitmapImageRepAdditions.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -347,6 +350,8 @@
 				938261840E1E7F8100A29C9F /* SMSubCategory.m */,
 				938261860E1E7F8100A29C9F /* SMCategory.h */,
 				938261850E1E7F8100A29C9F /* SMCategory.m */,
+				93ED9DC00E22BEF800572F50 /* SMImageURLs.h */,
+				93ED9DC10E22BEF800572F50 /* SMImageURLs.m */,
 			);
 			name = Types;
 			sourceTree = "<group>";
@@ -500,6 +505,7 @@
 				938261820E1E7F7000A29C9F /* SMSessionInfo.m in Sources */,
 				938261870E1E7F8100A29C9F /* SMSubCategory.m in Sources */,
 				938261880E1E7F8100A29C9F /* SMCategory.m in Sources */,
+				93ED9DC20E22BEF800572F50 /* SMImageURLs.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

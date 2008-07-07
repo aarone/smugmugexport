@@ -16,6 +16,6 @@
 
 -(void)uploadMadeProgress:(NSData *)imageData bytesWritten:(long)bytesWritten ofTotalBytes:(long)totalBytes;
 
--(void)uploadDidSucceed:(SMResponse *)resp;
+-(void)uploadDidSucceed:(SMResponse *)resp filename:(NSString *)filename data:(NSData *)imageData;
 
 @end

@@ -22,6 +22,7 @@
 #import "SMResponse.h"
 #import "SMSubCategory.h"
 #import "SMCategory.h"
+#import "SMImageURLs.h"
 
 @interface SMExportPlugin (Private)
 -(ExportMgr *)exportManager;
@@ -838,16 +839,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 								   forAlbum:[resp smData]];
 }
 
--(void)albumEditDidComplete:(NSNumber *)wasSuccessful forAlbum:(SMAlbumRef *)ref {	
-	// update fields for albums here...
-	if([wasSuccessful boolValue]) {
-//		[[self session] fetchAlbums:NULL];
-	} else {
-		[[self albumEditController] setIsBusy:NO];
-		[[self albumEditController] closeSheet];
-	}
-}
-
 -(void)editAlbum:(SMAlbum *)album {
 	[[self albumEditController] setIsBusy:YES];
 	[[self session] editAlbum:album withTarget:self callback:@selector(albumEditDidEnd:)];
@@ -867,9 +858,11 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 #pragma mark Image Url Fetching
 
--(void)imageUrlFetchDidCompleteForImageRef:(SMImageRef *)ref imageUrls:(NSDictionary *)imageUrls {
+-(void)imageUrlFetchDidCompleteForImageRef:(SMResponse *)resp {
+ 
+	SMImageURLs *urls = [resp smData];
 	
-	if(imageUrls == nil && [self albumUrlFetchAttemptCount] < AlbumUrlFetchRetryCount) {
+	if(![resp wasSuccessful] && [self albumUrlFetchAttemptCount] < AlbumUrlFetchRetryCount) {
 		[self incrementAlbumUrlFetchAttemptCount];
 	
 		// try again
@@ -880,7 +873,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		return;
 	}
 	
-	NSString *siteUrlString = [imageUrls objectForKey:@"AlbumURL"];
+	NSString *siteUrlString = [urls albumURL];
 	if(siteUrlString != nil) {
 		[self setUploadSiteUrl:[NSURL URLWithString:siteUrlString]];
 		[self setSiteUrlHasBeenFetched:YES];
@@ -1133,8 +1126,13 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	float baselinePercentageCompletion = 100.0*((float)[self imagesUploaded])/((float)[[self exportManager] imageCount]);
 	float estimatedFileContribution = (100.0/((float)[[self exportManager] imageCount]))*((float)bytesWritten)/((float)totalBytes);
 	[self setSessionUploadProgress:[NSNumber numberWithFloat:MIN(100.0, ceil(baselinePercentageCompletion+estimatedFileContribution))]];
-	
-	[self setImageUploadProgressText:[NSString stringWithFormat:@"%0.0fKB of %0.0fKB", bytesWritten/1024.0, totalBytes/1024.0]];
+	if(progressForFile < 100.0) {
+		[self setImageUploadProgressText:[NSString stringWithFormat:
+										  NSLocalizedString(@"%0.0fKB of %0.0fKB", @"upload progress expression"), 
+										  bytesWritten/1024.0, totalBytes/1024.0]];
+	} else {
+		[self setImageUploadProgressText:NSLocalizedString(@"Waiting for response...", @"status indicator to display when all bytes have been sent but we're waiting for a resonse from SmugMug")];
+	}
 }
 
 -(void)uploadWasCanceled {
@@ -1159,15 +1157,15 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	}	
 }
 
--(void)uploadDidSucceed:(SMResponse *)resp {
+-(void)uploadDidSucceed:(SMResponse *)resp filename:(NSString *)filename data:(NSData *)imageData {
+	SMImageRef *ref = [resp smData];
 	if(![self siteUrlHasBeenFetched]) {
 		[self resetAlbumUrlFetchAttemptCount];
 		[self setSiteUrlHasBeenFetched:NO];
-//		[[self session] fetchImageUrls:ref];
+		[[self session] fetchImageURLs:ref withTarget:self callback:@selector(imageUrlFetchDidCompleteForImageRef:)];
 	}
-	
-//	[self notifyImageUploaded:[requestDict objectForKey:@"filename"]
-//						image:[requestDict objectForKey:SMUploadKeyImageData]];
+
+	[self notifyImageUploaded:filename image:imageData];
 	[self uploadNextImage];
 }
 

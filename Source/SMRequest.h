@@ -21,7 +21,7 @@
 
 
 extern NSString *SMUploadKeyImageData;
-//extern NSString *SMUploadKeyFilename;
+extern NSString *SMUploadKeyFilename;
 //extern NSString *SMUploadKeySessionId;
 //extern NSString *SMUploadKeyCaption;
 //extern NSString *SMUploadKeyAlbumId;

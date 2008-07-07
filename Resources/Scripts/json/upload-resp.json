@@ -1,0 +1,9 @@
+{
+    Image =     {
+        Key = hkkeh;
+        URL = "http://aarone.smugmug.com/gallery/5343304_icy3R#327488638_hkkeh";
+        id = 327488638;
+    };
+    method = "smugmug.images.upload";
+    stat = ok;
+}

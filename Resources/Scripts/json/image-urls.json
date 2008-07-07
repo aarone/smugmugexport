@@ -1,0 +1,17 @@
+
+{
+    "stat":"ok",
+    "method":"smugmug.images.getURLs",
+    "Image":
+    {
+        "id":327499875,
+        "AlbumURL":"http:\/\/aarone.smugmug.com\/gallery\/5343304_icy3R#327499875_65DBf",
+        "TinyURL":"http:\/\/aarone.smugmug.com\/photos\/327499875_65DBf-Ti-0.jpg",
+        "ThumbURL":"http:\/\/aarone.smugmug.com\/photos\/327499875_65DBf-Th-0.jpg",
+        "SmallURL":"http:\/\/aarone.smugmug.com\/photos\/327499875_65DBf-S-0.jpg",
+        "MediumURL":"http:\/\/aarone.smugmug.com\/photos\/327499875_65DBf-M-0.jpg",
+        "LargeURL":"http:\/\/aarone.smugmug.com\/photos\/327499875_65DBf-L-0.jpg",
+        "OriginalURL":"http:\/\/aarone.smugmug.com\/photos\/327499875_65DBf-O-0.jpg"
+    }
+}
+
