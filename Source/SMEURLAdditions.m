@@ -1,15 +1,16 @@
 //
-//  NSURLAdditions.m
+//  SMEDataAdditions.m
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 5/31/07.
 //  Copyright 2007 Aaron Evans. All rights reserved.
 //
 
-#import "NSURLAdditions.h"
-#import "NSStringAdditions.h"
+#import "SMEDataAdditions.h"
+#import "SMEStringAdditions.h"
 
-@implementation NSURL (NSURLAdditions)
+
+@implementation NSURL (SMEDataAdditions)
 
 -(NSURL *)URLByAppendingParameterList:(NSDictionary *)params {
 	NSMutableString *parameterList = [NSMutableString stringWithString:@"?"];

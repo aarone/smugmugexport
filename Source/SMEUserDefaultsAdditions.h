@@ -1,5 +1,5 @@
 //
-//  NSUserDefaultsAdditions.h
+//  SMEUserDefaultsAdditions.h
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 6/10/07.
@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 @class SMUserDefaults;
 
-@interface NSUserDefaults (NSUserDefaultsAdditions)
+@interface NSUserDefaults (SMEUserDefaultsAdditions)
 
 +(SMUserDefaults *)smugMugUserDefaults;
 

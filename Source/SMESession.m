@@ -10,7 +10,7 @@
 #import "SMGlobals.h"
 #import "SMRequest.h"
 #import "SMDecoder.h"
-#import "NSUserDefaultsAdditions.h"
+#import "SMEUserDefaultsAdditions.h"
 #import "SMJSONDecoder.h"
 #import "SMAlbum.h"
 #import "SMImageRef.h"

@@ -8,11 +8,12 @@
 
 #import "SMRequest.h"
 
-#import "NSURLAdditions.h"
+#import "SMEDataAdditions.h"
 #import "SMGlobals.h"
-#import "NSUserDefaultsAdditions.h"
-#import "NSDataAdditions.h"
+#import "SMEUserDefaultsAdditions.h"
+#import "SMEDataAdditions.h"
 #import "SMUploadObserver.h"
+#import "SMEURLAdditions.h"
 
 @interface SMRequest (Private)
 -(NSURLConnection *)connection;

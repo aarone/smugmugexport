@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface NSBitmapImageRep (NSBitmapImageRepAdditions)
+@interface NSBitmapImageRep (SMEBitmapImageRepAdditions)
 
 +(float)defaultJpegScalingFactor;
 -(NSData *)scaledRepToMaxWidth:(float)maxWidth maxHeight:(float)maxFactor;

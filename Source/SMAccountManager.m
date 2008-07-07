@@ -9,7 +9,7 @@
 #import "SMAccountManager.h"
 #import "KeychainManager.h"
 #import "SMGlobals.h"
-#import "NSUserDefaultsAdditions.h"
+#import "SMEUserDefaultsAdditions.h"
 
 NSString *KeychainItemName = @"SmugMug Exporter";
 NSString *KeychainItemKind = @"application password";

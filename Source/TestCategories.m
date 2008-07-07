@@ -8,7 +8,7 @@
 
 #import "TestCategories.h"
 
-#import "NSStringAdditions.h"
+#import "SMEDataAdditions.h"
 #import "NSObjectAdditions.h"
 
 @implementation TestCategories

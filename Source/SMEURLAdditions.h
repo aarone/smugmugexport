@@ -1,5 +1,5 @@
 //
-//  NSURLAdditions.h
+//  SMEDataAdditions.h
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 5/31/07.
@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface NSURL (NSURLAdditions)
+@interface NSURL (SMEDataAdditions)
 
 -(NSURL *)URLByAppendingParameterList:(NSDictionary *)params;
 @end

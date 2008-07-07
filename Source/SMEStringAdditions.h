@@ -1,5 +1,5 @@
 //
-//  NSStringAdditions.h
+//  SMEDataAdditions.h
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 5/31/07.
@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface NSString (NSStringAdditions)
+@interface NSString (SMEDataAdditions)
 
 -(NSString *)urlEscapedString;
 -(NSComparisonResult)compareVersionToVersion:(NSString *)aVersion;

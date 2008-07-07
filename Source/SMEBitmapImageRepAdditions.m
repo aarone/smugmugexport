@@ -1,13 +1,13 @@
 //
-//  NSBitmapImageRepAdditions.m
+//  SMEBitmapImageRepAdditions.m
 //  SmugMugExport
 //
 //  Created by Aaron Evans on 8/25/07.
 //  Copyright 2007 Aaron Evans. All rights reserved.
 //
 
-#import "NSBitmapImageRepAdditions.h"
-#import "NSUserDefaultsAdditions.h"
+#import "SMEBitmapImageRepAdditions.h"
+#import "SMEUserDefaultsAdditions.h"
 #import "SMGlobals.h"
 
 static const float DefaultJpegScalingFactor = 0.9;
@@ -18,7 +18,7 @@ static const float DefaultJpegScalingFactor = 0.9;
  *  2) it accesses a default value for scaling quality that should probably be
  *     an argument to the methods
  */
-@implementation NSBitmapImageRep (NSBitmapImageRepAdditions)
+@implementation NSBitmapImageRep (SMEBitmapImageRepAdditions)
 
 +(float)defaultJpegScalingFactor {
 	return DefaultJpegScalingFactor;
