@@ -7,7 +7,7 @@
 //
 
 #import "SMExportPlugin.h"
-#import "SMAccess.h"
+#import "SMESession.h"
 #import "ExportPluginProtocol.h"
 #import "ExportMgr.h"
 #import "SMAlbumEditController.h"
@@ -19,13 +19,17 @@
 #import "NSStringAdditions.h"
 #import "SMRequest.h"
 #import "SMAlbum.h"
-#import "SMAlbumInfo.h"
+#import "SMResponse.h"
+#import "SMSubCategory.h"
+#import "SMCategory.h"
 
 @interface SMExportPlugin (Private)
 -(ExportMgr *)exportManager;
 -(void)setExportManager:(ExportMgr *)m;
--(SMAccess *)smAccess;
--(void)setSMAccess:(SMAccess *)m;
+-(SMESession *)session;
+-(void)setSession:(SMESession *)m;
+-(SMSessionInfo *)sessionInfo;
+-(void)setSessionInfo:(SMSessionInfo *)m;
 -(NSString *)username;
 -(void)setUsername:(NSString *)n;
 -(NSString *)password;
@@ -61,11 +65,7 @@
 -(void)setCurrentThumbnail:(NSImage *)d;
 -(BOOL)loginSheetIsBusy;
 -(void)setLoginSheetIsBusy:(BOOL)v;
--(void)setUploadRetryCount:(int)v;
--(int)uploadRetryCount;
 -(void)setInsertionPoint:(NSWindow *)aWindow;
--(void)incrementUploadRetryCount;
--(void)resetUploadRetryCount;
 -(void)presentError:(NSString *)errorText;
 -(BOOL)isUploading;
 -(void)setIsUploading:(BOOL)v;
@@ -91,7 +91,12 @@
 -(void)selectFirstSubCategory;
 -(SMAlbumEditController *)albumEditController;
 -(void)setAlbumEditController:(SMAlbumEditController *)aController;	
-
+-(NSArray *)albums;
+-(void)setAlbums:(NSArray *)a;
+-(NSArray *)categories;
+-(void)setCategories:(NSArray *)v;
+-(NSArray *)subcategories;
+-(void)setSubcategories:(NSArray *)v;	
 
 -(NSArray *)filenameSelectionOptions;
 -(NSString *)chooseUploadFilename:(NSString *)filename title:(NSString *)imageTitle;
@@ -120,15 +125,17 @@
 
 -(void)notifyImageUploaded:(NSString *)imageFilename image:(NSData *)image;
 -(NSData *)notificationThumbnail:(NSData *)fullsizeImageData;
+
+-(void)presentRemoteError:(SMResponse *)resp;
 @end
 
 @interface SMExportPlugin (GrowlDelegate)
-- (NSDictionary *) registrationDictionaryForGrowl;
-- (NSString *) applicationNameForGrowl;
-- (NSData *) applicationIconDataForGrowl;
-- (void) growlIsReady;
-- (void) growlNotificationWasClicked:(id)clickContext;
-- (void) growlNotificationTimedOut:(id)clickContext;
+-(NSDictionary *) registrationDictionaryForGrowl;
+-(NSString *) applicationNameForGrowl;
+-(NSData *) applicationIconDataForGrowl;
+-(void) growlIsReady;
+-(void) growlNotificationWasClicked:(id)clickContext;
+-(void) growlNotificationTimedOut:(id)clickContext;
 -(void)notifyLogin:(NSString *)account;
 -(void)notifyLougout:(NSString *)account;
 -(void)notifyUploadCompleted;
@@ -177,9 +184,6 @@ NSString *SMGrowlImageUploaded = nil;
 NSString *SMGrowlLogin = nil;
 NSString *SMGrowlLogout = nil;
 
-
-// two additional attempts to upload an image if the upload fails
-static const int UploadFailureRetryCount = 2; 
 static const int AlbumUrlFetchRetryCount = 5;
 static const int SMDefaultScaledHeight = 2592;
 static const int SMDefaultScaledWidth = 2592;
@@ -201,14 +205,12 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	
 	
 	[self setAccountManager:[SMAccountManager accountManager]];
-	[self setSMAccess:[SMAccess smugmugManager]];
+	[self setSession:[SMESession session]];
 	[self setAlbumEditController:[SMAlbumEditController controller]];
 	[albumEditController setDelegate:self];
-	[[self smAccess] setDelegate:self];
 	[self setLoginAttempted:NO];
 	[self setSiteUrlHasBeenFetched:NO];
 	[self setImagesUploaded:0];
-	[self resetUploadRetryCount];
 	[self setIsUploading:NO];
 	[self resetAlbumUrlFetchAttemptCount];
 	
@@ -232,10 +234,13 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 -(void)dealloc {
 	[self unloadGrowl];
 	[self unloadJSON];
+	[[self subcategories] release];
+	[[self categories] release];
+	[[self albums] release];
 	[[self albumEditController] release];
 	[[self postLogoutInvocation] release];
 	[[self uploadSiteUrl] release];
-	[[self smAccess] release];
+	[[self session] release];
 	[[self username] release];
 	[[self password] release];
 	[[self sessionUploadStatusText] release];
@@ -246,6 +251,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[[self statusText] release];
 	[[self currentThumbnail] release];
 	[[self imageUploadProgressText] release];
+	
 	[super dealloc];
 }
 
@@ -316,8 +322,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 #pragma mark Error Handling
 -(void)presentError:(NSString *)errorText {
-	if([self sheetIsDisplayed])
-		return;
+	if([self sheetIsDisplayed]) {
+		NSLog(errorText);
+		return; // TODO display somewhere else
+	}
 	
 	NSAlert *alert = [[NSAlert alloc] init];
 	[alert setAlertStyle:NSWarningAlertStyle];
@@ -466,8 +474,20 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[alert release];
 }
 
+-(NSString *)apiKey {
+	return @"98LHI74dS6P0A8cQ1M6h0R1hXsbIPDXc";
+}
+
 
 #pragma mark Login Methods
+
+-(BOOL)isLoggedIn {
+	return sessionInfo != nil; 
+}
+
+-(BOOL)isLoggingIn {
+	return NO;
+}
 
 -(void)attemptLoginIfNecessary {
 	// try to automatically show the login sheet 
@@ -479,14 +499,14 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		return;
 	
 	/* don't try to login if we're already logged in or attempting to login */
-	if([[self smAccess] isLoggedIn] ||
-	   [[self smAccess] isLoggingIn])
+	if([self isLoggedIn] ||
+	   [self isLoggingIn])
 		return;
 	
 	/*
 	 * Show the login window if we're not logged in and there is no way to autologin
 	 */
-	if(![[self smAccess] isLoggedIn] && 
+	if(![self isLoggedIn] && 
 	   ![[self accountManager] canAttemptAutoLogin]) {
 		
 		// show the login panel after some delay
@@ -497,8 +517,8 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	/*
 	 *  If we have a saved password for the previously selected account, log in to that account.
 	 */
-	if(![[self smAccess] isLoggedIn] && 
-	   ![[self smAccess] isLoggingIn] &&
+	if(![self isLoggedIn] && 
+	   ![self isLoggingIn] &&
 	   [[[self accountManager] accounts] count] > 0 &&
 	   [[self accountManager] selectedAccount] != nil &&
 	   ![self loginAttempted] &&
@@ -507,9 +527,12 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[self setLoginAttempted:YES];
 		[self performSelectorOnMainThread:@selector(setIsBusyWithNumber:) withObject:[NSNumber numberWithBool:YES] waitUntilDone:NO];	
 		[self performSelectorOnMainThread:@selector(setStatusText:) withObject:NSLocalizedString(@"Logging in...", @"Status text for logginng in") waitUntilDone:NO];
-		[[self smAccess] setUsername:[[self accountManager] selectedAccount]];
-		[[self smAccess] setPassword:[[self accountManager] passwordForAccount:[[self accountManager] selectedAccount]]]; 
-		[[self smAccess] login]; // gets asyncronous callback
+		
+		[[self session] loginWithTarget:self 
+							   callback:@selector(autoLoginComplete:)
+							   username:[[self accountManager] selectedAccount] 
+							   password:[[self accountManager] passwordForAccount:[[self accountManager] selectedAccount]] 
+								 apiKey:[self apiKey]];
 	}
 	
 	// if user has seen the update policy this upload session, don't show it again
@@ -565,18 +588,21 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	
 	[self setLoginSheetStatusMessage:NSLocalizedString(@"Logging In...", @"log in status string")];
 	[self setLoginSheetIsBusy:YES];
-	[[self smAccess] setUsername:[self username]];
-	[[self smAccess] setPassword:[self password]];
-	[[self smAccess] login]; // gets asyncronous callback
+
+	[[self session] loginWithTarget:self 
+						   callback:@selector(loginComplete:) 
+						   username:[self username] 
+						   password:[self password]
+							 apiKey:[self apiKey]];
 }
 
--(void)loginDidComplete:(NSNumber *)wasSuccessful {
+-(BOOL)commonPostLoginTasks:(SMResponse *)response {
 	[self setIsBusy:NO];
 	[self setStatusText:@""];
 	[self setLoginSheetIsBusy:NO];
 	[self setLoginSheetStatusMessage:@""];
 	
-	if(![wasSuccessful boolValue]) {
+	if(! [response wasSuccessful]) {
 		NSString *err = NSLocalizedString(@"Login Failed", @"Status text for failed login");
 		// login request spawned from login sheet
 		if([[self loginPanel] isVisible]) {
@@ -588,18 +614,32 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 			[self showLoginSheet:self];
 		}
 		
-		return;
+		[self setSessionInfo:nil];
+		return NO;
 	}
 	
-	// attempt to login, if successful add to keychain
-	[[self accountManager] addAccount:[[self smAccess] username] withPassword:[[self smAccess] password]];
+	[self setSessionInfo:(SMSessionInfo *)[response smData]];
+	[self setCategories:nil];
+	[self setSubcategories:nil];
+	[[self session] fetchAlbumsWithTarget:self callback:@selector(albumFetchComplete:)];
+	[[self session] fetchCategoriesWithTarget:self callback:@selector(categoryFetchComplete:)];
+	[[self session] fetchSubCategoriesWithTarget:self callback:@selector(subcategoryFetchDidComplete:)];
+	return YES;
+}
+
+-(void)autoLoginComplete:(SMResponse *)response {
+	[self commonPostLoginTasks:response];
+}
+
+-(void)loginComplete:(SMResponse *)response {
 	
-	[self setSelectedAccount:[[self smAccess] username]];
+	if(![self commonPostLoginTasks:response])
+		return;
+
+	[[self accountManager] addAccount:[self username] withPassword:[self password]];
+	[self setSelectedAccount:[self username]];
 	[NSApp endSheet:loginPanel];
-	
 	[self notifyLogin:[self selectedAccount]];
-	[[self smAccess] buildCategoryList];
-	[[self smAccess] buildSubCategoryList];
 }
 
 
@@ -607,9 +647,20 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
     [sheet orderOut:self];
 }
 
+#pragma mark ALbum Fetch Callback
+
+-(void)albumFetchComplete:(SMResponse *)resp {
+	if(![resp wasSuccessful]) {
+		// TODO report error
+		return;
+	}
+	
+	[self setAlbums:[resp smData]];
+}
+
 #pragma mark Logout 
--(void)logoutDidComplete:(NSNumber *)wasSuccessful {
-	if(![wasSuccessful boolValue])
+-(void)logoutDidComplete:(SMResponse *)resp {
+	if(![resp wasSuccessful])
 		[self presentError:NSLocalizedString(@"Logout failed.", @"Error message to display when logout fails.")];
 	else if([self postLogoutInvocation] != nil) {
 		[self notifyLougout:[self selectedAccount]];
@@ -645,42 +696,43 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	
 	if(![[[self exportManager] window] isVisible])
 		return;
-
+	
 	if([self sheetIsDisplayed])
 		return;
-
-	if(![[self smAccess] isLoggedIn] || [[self smAccess] isLoggingIn]) {
+	
+	if(![self isLoggedIn] || [self isLoggingIn]) {
 		NSBeep();
 		return;
 	}
 	
-	[albumEditController showAlbumCreateSheet:self forWindow:[[self exportManager] window]];
+	[albumEditController showAlbumCreateSheet:[SMAlbum album] delegate:self forWindow:[[self exportManager] window]];
 }
 
--(void)createNewAlbumDidComplete:(NSNumber *)wasSuccessful {
+-(void)createAlbum:(SMAlbum *)album {
+	if(IsEmpty([album title])) {
+		NSBeep();
+		return;
+	}
+	
+	[[self albumEditController] setIsBusy:YES];
+	[[self session] createNewAlbum:album withTarget:self callback:@selector(createNewAlbumDidComplete:)];	
+}
 
+-(void)createNewAlbumDidComplete:(SMResponse *)resp {
+	
 	[[self albumEditController] setIsBusy:NO];
-	if([wasSuccessful boolValue]) {
+	if([resp wasSuccessful]) {
 		[albumEditController closeSheet];
 		[albumsArrayController setSelectionIndex:0]; // default to selecting the new album which should be album 0
+
+		// refresh list of albums
+		[[self session] fetchAlbumsWithTarget:self callback:@selector(albumFetchComplete:)];
 	} else {
 		// album creation occurs in a sheet, don't try to show an error dialog in another sheet...
 		NSBeep();
 		
 		//[self presentError:NSLocalizedString(@"Album creation failed.", @"Error message to display when album creation fails.")];
 	}
-}
-
--(void)createAlbum:(SMAlbumInfo *)albumInfo {
-	if(IsEmpty([albumInfo title])) {
-		NSBeep();
-		return;
-	}
-	
-	[[self albumEditController] setIsBusy:YES];
-	[[self smAccess] createNewAlbum:albumInfo];
-	
-	return;
 }
 
 #pragma mark Delete Album
@@ -692,7 +744,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	}
 	
 	// not properly logged in, can't remove an album
-	if(![[self smAccess] isLoggedIn] || [[self smAccess] isLoggingIn]) {
+	if(![self isLoggedIn] || [self isLoggingIn]) {
 		NSBeep();
 		return;
 	}
@@ -717,7 +769,8 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[self setIsBusy:YES];
 	[self setIsDeletingAlbum:YES];
 	[self setStatusText:NSLocalizedString(@"Deleting Album...", @"Delete album status")];
-	[[self smAccess] deleteAlbum:[[self selectedAlbum] ref]];
+	
+	[[self session] deleteAlbum:[[self selectedAlbum] ref] withTarget:self callback:@selector(deleteAlbumDidComplete:)];
 }	
 
 -(void)sheetDidDismiss:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo {
@@ -725,20 +778,20 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)deleteAlbumSheetDidEnd:(NSWindow *)sheet returnCode:(int)returnCode contextInfo:(void  *)contextInfo {
-
-	if(returnCode == NSAlertDefaultReturn) {
+	if(returnCode == NSAlertDefaultReturn)
 		[self beginAlbumDelete];
-	}
+	
 }
 
--(void)deleteAlbumDidComplete:(NSNumber *)wasSuccessful {
-	if(![wasSuccessful boolValue])
+-(void)deleteAlbumDidComplete:(SMResponse *)resp {
+	if(![resp wasSuccessful])
 		[self presentError:NSLocalizedString(@"Album deletion failed.", 
 											 @"Error message to display when album delete fails.")];
 	
 	[self setIsBusy:NO];
 	[self setIsDeletingAlbum:NO];
 	[self setStatusText:@""];	
+	[[self session] fetchAlbumsWithTarget:self callback:@selector(albumFetchComplete:)];
 }
 
 #pragma mark Album Edit
@@ -749,39 +802,67 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	}
 	
 	[self setIsBusy:YES];
-	[[self smAccess] fetchAlbumInfo:[[self selectedAlbum] ref]];		
+	[[self session] fetchExtendedAlbumInfo:[[self selectedAlbum] ref]
+								withTarget:self 
+								  callback:@selector(albumInfoFetchDidComplete:)];
 }
 
--(void)albumInfoFetchDidComplete:(NSNumber *)wasSuccessful forAlbum:(SMAlbumRef *)ref info:(SMAlbumInfo *)info {
-	[self setIsBusy:NO];
-	if([wasSuccessful boolValue])
-		[albumEditController showAlbumEditSheet:self 
-									  forWindow:[[self exportManager] window] 
-									   forAlbum:ref
-								  withAlbumInfo:info];
-	else {
-		NSBeep();
+-(SMCategory *)categoryWithId:(unsigned int)categoryId {
+	SMCategory *aCategory;
+	NSEnumerator *enumerator = [[self categories] objectEnumerator];
+	while(aCategory = [enumerator nextObject]) {
+		if([aCategory identifier] == categoryId)
+			return aCategory;
 	}
+	return nil;
 }
 
--(void)albumsFetchDidComplete:(NSNumber *)wasSuccessful {
+-(void)albumInfoFetchDidComplete:(SMResponse *)resp {
 	[[self albumEditController] setIsBusy:NO];
 	[[self albumEditController] closeSheet];
+	[self setIsBusy:NO];
+
+	SMAlbum *theAlbum = [resp smData];
+	SMSubCategory *subCategory = [theAlbum subCategory];
+	// FIXME setting a category wipes out a subcategory; this is weird but re
+	[theAlbum setCategory:[self categoryWithId:[[theAlbum category] identifier]]];
+	[theAlbum setSubCategory:subCategory];
+	
+	if(![resp wasSuccessful]) {
+		[self presentRemoteError:resp];
+		return;
+	}
+	
+	[albumEditController showAlbumEditSheet:self 
+								  forWindow:[[self exportManager] window]
+								   forAlbum:[resp smData]];
 }
 
 -(void)albumEditDidComplete:(NSNumber *)wasSuccessful forAlbum:(SMAlbumRef *)ref {	
 	// update fields for albums here...
 	if([wasSuccessful boolValue]) {
-		[[self smAccess] fetchAlbums];
+//		[[self session] fetchAlbums:NULL];
 	} else {
 		[[self albumEditController] setIsBusy:NO];
 		[[self albumEditController] closeSheet];
 	}
 }
 
--(void)editAlbum:(SMAlbumInfo *)albumInfo {
+-(void)editAlbum:(SMAlbum *)album {
 	[[self albumEditController] setIsBusy:YES];
-	[[self smAccess] editAlbum:albumInfo];
+	[[self session] editAlbum:album withTarget:self callback:@selector(albumEditDidEnd:)];
+}
+
+-(void)albumEditDidEnd:(SMResponse *)resp {
+	if(![resp wasSuccessful]) {
+		[self presentRemoteError:resp];
+	} else {
+		// a visible title of an album may have changed..
+		[[self session] fetchAlbumsWithTarget:self callback:@selector(albumFetchComplete:)];
+	}
+	
+	[[self albumEditController] setIsBusy:NO];
+	[[self albumEditController] closeSheet];
 }
 
 #pragma mark Image Url Fetching
@@ -792,10 +873,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[self incrementAlbumUrlFetchAttemptCount];
 	
 		// try again
-		[[self smAccess] performSelector:@selector(fetchImageUrls:) 
-							  withObject:ref
-							  afterDelay:2.0
-								 inModes:[NSArray arrayWithObjects: NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];		
+//		[[self session] performSelector:@selector(fetchImageUrls:) 
+//							  withObject:ref
+//							  afterDelay:2.0
+//								 inModes:[NSArray arrayWithObjects: NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];		
 		return;
 	}
 	
@@ -827,9 +908,57 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 #pragma mark Category Get
 
--(void)categoryGetDidComplete:(NSNumber *)wasSuccessful {
-	if(![wasSuccessful boolValue])
-		[self presentError:NSLocalizedString(@"Could not fetch categories.", @"Error message to display when category get fails.")];
+-(NSArray *)subcategoriesForCategory:(SMCategory *)cat {
+	SMSubCategory *aSubCategory;
+	NSEnumerator *subCategoryEnumerator = [[self subcategories] objectEnumerator];
+	NSMutableArray *subcategoriesForCategory = [NSMutableArray array];
+	while(aSubCategory = [subCategoryEnumerator nextObject]) {
+		if([aSubCategory parentCategoryIdentifier] == [cat identifier])
+			[subcategoriesForCategory addObject:aSubCategory];			
+	}
+	return [NSArray arrayWithArray:subcategoriesForCategory];
+}
+
+-(void)populateCategorySubCategories {
+	NSAssert([self categories] != nil && [self subcategories] != nil, 
+			 @"Inconsistent state: attempting to fill subcategories for categories but one of the two is nil");
+	
+	NSEnumerator *categoryEnumerator = [[self categories] objectEnumerator];
+	SMCategory *aCategory;
+	while(aCategory = [categoryEnumerator nextObject])
+		[aCategory setChildSubCategories:[self subcategoriesForCategory:aCategory]];
+}
+
+-(void)categoryFetchComplete:(SMResponse *)resp {
+	if(! [resp wasSuccessful]) {
+		[self presentRemoteError:resp];
+		return;
+	}
+	[self setCategories:[resp smData]];
+	@synchronized(self) {
+		if([self subcategories] != nil)
+			[self populateCategorySubCategories];
+	}
+}
+
+-(void)presentRemoteError:(SMResponse *)resp {
+	[self setIsBusy:NO];
+	[self presentError:[NSString stringWithFormat:
+						NSLocalizedString(@"Error from Smugmug: %@", @"Error string for remote errors"), 
+						[resp errorMessage]]];
+}
+
+-(void)subcategoryFetchDidComplete:(SMResponse *)resp {
+	if(! [resp wasSuccessful]) {
+		[self presentRemoteError:resp];
+		return;
+	}
+	
+	[self setSubcategories:[resp smData]];	
+	@synchronized(self) {
+		if([self categories] != nil)
+			[self populateCategorySubCategories];
+	}	
 }
 
 #pragma mark Upload Methods
@@ -838,7 +967,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	if([self sheetIsDisplayed]) // this should be impossible
 		return;
 
-	if(![[self smAccess] isLoggedIn]) {
+	if(![self isLoggedIn]) {
 		NSBeep();
 		return;
 	}
@@ -866,14 +995,13 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	
 	[img setScalesWhenResized:YES];
 	[self setCurrentThumbnail:img];
-	[self resetUploadRetryCount];
 	[self setUploadSiteUrl:nil];
 	[self setSiteUrlHasBeenFetched:NO];
 	
 	[self uploadCurrentImage];
 }
 
--(NSData *)imageDataForPath:(NSString *)pathToImage errorString:(NSString **)err {
+-(NSData *)sourceDataAtPath:(NSString *)pathToImage isImage:(BOOL)isImage errorString:(NSString **)err {
 	
 	NSString *application = nil;
 	NSString *filetype = nil;
@@ -897,7 +1025,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		return nil;
 	}
 	
-	if(isJpeg && ShouldScaleImages()) {
+	if(isJpeg && ShouldScaleImages() && isImage) {
 		int maxWidth = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleWidth] intValue];
 		int maxHeight = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleHeight] intValue];
 		
@@ -906,7 +1034,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 			maxWidth = INT_MAX;
 		if(maxHeight == 0)
 			maxHeight = INT_MAX;
-		
 		
 		NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc] initWithData:imgData] autorelease];
 		
@@ -924,10 +1051,22 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)uploadCurrentImage {
 	
-	NSString *nextFile = [[self exportManager] imagePathAtIndex:[self imagesUploaded]];
+	NSString *nextFile = nil;
+	
+	// if it's a movie, get the movie source
+	if([[self exportManager] originalIsMovieAtIndex:[self imagesUploaded]]) {
+		// get the movie:
+		nextFile = [[self exportManager] sourcePathAtIndex:[self imagesUploaded]];
+	} else {
+		// or a jpeg
+		nextFile = [[self exportManager] imagePathAtIndex:[self imagesUploaded]];
+	}
+	
 	NSString *error = nil;
-	NSData *imageData = [self imageDataForPath:nextFile errorString:&error];
-	if(imageData == nil) {
+	NSData *srcData = [self sourceDataAtPath:nextFile 
+									   isImage:![[self exportManager] originalIsMovieAtIndex:[self imagesUploaded]]
+								   errorString:&error];	
+	if(srcData == nil) {
 		if([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMContinueUploadOnFileIOError] boolValue]) {
 			NSLog(@"Error reading image data for image: %@. The image will be skipped.", nextFile);
 			[self uploadNextImage];
@@ -947,11 +1086,12 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	
 	NSString *filename = [self chooseUploadFilename:[[nextFile pathComponents] lastObject] 
 											  title:title];
-	[[self smAccess] uploadImageData:imageData
+	[[self session] uploadImageData:srcData
 							filename:filename
 							   album:[[self selectedAlbum] ref]
 							 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
-							keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]];		
+							keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]
+						   observer:self];		
 	
 }
 
@@ -979,24 +1119,11 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[self notifyUploadCompleted];
 }
 
--(void)uploadDidFail:(NSData *)imageData reason:(NSString *)errorText {
-
-	[self notifyUploadError:errorText];
-	
-	if([self uploadRetryCount] < UploadFailureRetryCount) {
-		// if an error occurred, retry up to UploadFailureRetryCount times
-		
-		[self incrementUploadRetryCount];
-		[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Retrying upload of image %d of %d\nReason: %@", @"Retry upload progress"), [self imagesUploaded] + 1, [[self exportManager] imageCount], errorText]];
-		[self uploadCurrentImage];
-		return;
-	} else {
-		// our max retries have been hit, stop uploading
-		[self performUploadCompletionTasks:NO];
-		NSString *errorString = NSLocalizedString(@"Image upload failed (%@).", @"Error message to display when upload fails.");
-		[self presentError:[NSString stringWithFormat:errorString, errorText]];
-		return;
-	}
+-(void)uploadDidFail:(SMResponse *)resp {
+	[self notifyUploadError:[resp errorMessage]];
+	[self performUploadCompletionTasks:NO];
+	NSString *errorString = NSLocalizedString(@"Image upload failed (%@).", @"Error message to display when upload fails.");
+	[self presentError:[NSString stringWithFormat:errorString, [resp errorMessage]]];
 }
 
 -(void)uploadMadeProgress:(NSData *)imageData bytesWritten:(long)bytesWritten ofTotalBytes:(long)totalBytes {	
@@ -1016,7 +1143,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)uploadNextImage {
 	// onto the next image
- 	[self resetUploadRetryCount];
 	[self setImagesUploaded:[self imagesUploaded] + 1];
 	[self setSessionUploadProgress:[NSNumber numberWithFloat:100.0*((float)[self imagesUploaded])/((float)[[self exportManager] imageCount])]];
 	
@@ -1033,15 +1159,15 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	}	
 }
 
--(void)uploadDidSucceeed:(NSData *)imageData imageRef:(SMImageRef *)ref requestDict:(NSDictionary *)requestDict {	
+-(void)uploadDidSucceed:(SMResponse *)resp {
 	if(![self siteUrlHasBeenFetched]) {
 		[self resetAlbumUrlFetchAttemptCount];
 		[self setSiteUrlHasBeenFetched:NO];
-		[[self smAccess] fetchImageUrls:ref];
+//		[[self session] fetchImageUrls:ref];
 	}
 	
-	[self notifyImageUploaded:[requestDict objectForKey:@"filename"]
-						image:[requestDict objectForKey:SMUploadKeyImageData]];
+//	[self notifyImageUploaded:[requestDict objectForKey:@"filename"]
+//						image:[requestDict objectForKey:SMUploadKeyImageData]];
 	[self uploadNextImage];
 }
 
@@ -1054,14 +1180,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 #pragma mark Get and Set properties
-
--(NSArray *)categories {
-	return [[self smAccess] categories];
-}
-
--(NSArray *)subcategories {
-	return [[self smAccess] subcategories];
-}
 
 -(NSString *)imageUploadProgressText {
 	return imageUploadProgressText;
@@ -1096,7 +1214,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	}
 	
 	// if we're already loggin in to another account, logout
-	if([[self smAccess] isLoggedIn]) {
+	if([self isLoggedIn]) {
 		// handle the rest of the account changed tasks after we logout
 		NSInvocation *inv = [NSInvocation invocationWithMethodSignature:
 			[self methodSignatureForSelector:@selector(accountChangedTasks:)]];
@@ -1105,7 +1223,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[[self postLogoutInvocation] setArgument:&account atIndex:2];
 		[inv retainArguments];
 		
-		[[self smAccess] logout]; // aynchronous callback
+//		[[self session] logout]; // aynchronous callback
 	} else {
 		[self accountChangedTasks:account];
 	}
@@ -1134,22 +1252,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)setLoginSheetIsBusy:(BOOL)v {
 	loginSheetIsBusy = v;
-}
-
--(void)setUploadRetryCount:(int)v {
-	uploadRetryCount = v;
-}
-
--(int)uploadRetryCount {
-	return uploadRetryCount;
-}
-
--(void)incrementUploadRetryCount {
-	[self setUploadRetryCount:[self uploadRetryCount]+1];
-}
-
--(void)resetUploadRetryCount {
-	[self setUploadRetryCount:0];
 }
 
 -(NSImage *)currentThumbnail {
@@ -1291,16 +1393,27 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	postLogoutInvocation = [inv retain];
 }
 
-
--(SMAccess *)smAccess {
-	return smAccess;
+-(SMESession *)session {
+	return session;
 }
 
--(void)setSMAccess:(SMAccess *)m {
-	if([self smAccess] != nil)
-		[[self smAccess] release];
+-(void)setSession:(SMESession *)m {
+	if(m != session) {
+		[session release];
+		session = [m retain];
+	}
+}
+
+
+-(SMSessionInfo *)sessionInfo {
+	return sessionInfo;
+}
+
+-(void)setSessionInfo:(SMSessionInfo *)m {
+	if([self sessionInfo] != nil)
+		[[self sessionInfo] release];
 	
-	smAccess = [m retain];
+	sessionInfo = [m retain];
 }
 
 -(SMAlbumEditController *)albumEditController {
@@ -1366,6 +1479,39 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	sessionUploadStatusText = [t retain];
 }
 
+-(NSArray *)albums {
+	return albums;
+}
+
+-(void)setAlbums:(NSArray *)a {
+	if(albums != a) {
+		[albums release];
+		albums = [a retain];
+	}
+}
+
+-(NSArray *)categories {
+	return categories;
+}
+
+-(void)setCategories:(NSArray *)v {
+	if(v != categories) {
+		[categories release];
+		categories = [v retain];
+	}
+}
+
+-(NSArray *)subcategories {
+	return subcategories;
+}
+
+-(void)setSubcategories:(NSArray *)v {
+	if(v != subcategories) {
+		[subcategories release];
+		subcategories = [v retain];
+	}
+}
+
 -(NSNumber *)fileUploadProgress {
 	return fileUploadProgress;
 }
@@ -1406,7 +1552,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 #pragma mark iPhoto Export Manager Delegate methods
 
 -(void)cancelExport {
-	[[self smAccess] stopUpload];
+	[[self session] stopUpload];
 }
 
 -(void)unlockProgress {
@@ -1456,7 +1602,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)viewWillBeDeactivated {
 	loginAttempted = NO;
-//	[[self smAccess] logout];
+//	[[self SMESession] logout];
 }
 
 -(void)viewWillBeActivated {
@@ -1485,7 +1631,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 - (BOOL)handlesMovieFiles {
-	return NO;
+	return YES;
 }
 
 #pragma mark Growl Delegate Methods

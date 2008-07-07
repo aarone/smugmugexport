@@ -1,0 +1,76 @@
+
+{
+    "stat":"ok",
+    "method":"smugmug.albums.getInfo",
+    "Album":
+    {
+        "id":5229420,
+        "Key":"kBj5G",
+        "Highlight":
+        {
+            "id":0
+        },
+        "Position":27,
+        "ImageCount":20,
+        "Title":"Afternoon in Town",
+        "Description":"Aaron & Season go to town",
+        "Keywords":"Philadelphia",
+        "Public":true,
+        "Password":"",
+        "PasswordHint":"",
+        "Printable":true,
+        "Filenames":true,
+        "Comments":true,
+        "External":true,
+        "Originals":true,
+        "EXIF":true,
+        "Share":true,
+        "SortMethod":"Position",
+        "SortDirection":false,
+        "LastUpdated":"2008-06-22 10:30:12",
+        "FamilyEdit":true,
+        "FriendEdit":true,
+        "HideOwner":false,
+        "CanRank":true,
+        "Clean":false,
+        "Geography":true,
+        "SmugSearchable":true,
+        "WorldSearchable":true,
+        "SquareThumbs":true,
+        "Larges":true,
+        "Watermarking":false,
+        "DefaultColor":false,
+        "ProofDays":0,
+        "Backprinting":"",
+        "XLarges":true,
+        "X2Larges":true,
+        "X3Larges":true,
+        "Header":false,
+        "Protected":false,
+        "UnsharpRadius":1,
+        "UnsharpSigma":1,
+        "UnsharpAmount":0.2,
+        "UnsharpThreshold":0.05,
+        "Category":
+        {
+            "id":50
+        },
+        "SubCategory":
+        {
+            "id":0
+        },
+        "Community":
+        {
+            "id":0
+        },
+        "Template":
+        {
+            "id":0
+        },
+        "Watermark":
+        {
+            "id":0
+        }
+    }
+}
+

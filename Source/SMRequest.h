@@ -11,21 +11,21 @@
 #import "SMUploadObserver.h"
 #import "SMAlbumRef.h"
 
-/*
- NSData *theImageData = [args objectForKey:@"imageData"];
- NSString *filename = [args objectForKey:@"filename"];
- NSString *sessionId = [args objectForKey:@"sessionId"];
- NSString *albumId = [args objectForKey: @"albumId"];
- NSString *caption = [args objectForKey:@"caption"];
- NSArray *keywords = [args objectForKey:@"keywords"];
-*/ 
+// protocol for monitoring an upload
+@protocol SMUploadRequestObserver
+-(void)uploadMadeProgress:(SMRequest *)request bytesWritten:(long)numberOfBytes ofTotalBytes:(long)totalBytes;
+-(void)uploadFailed:(SMRequest *)request withError:(NSString *)reason;
+-(void)uploadCanceled:(SMRequest *)request;
+-(void)uploadSucceeded:(SMRequest *)request;
+@end
+
 
 extern NSString *SMUploadKeyImageData;
-extern NSString *SMUploadKeyFilename;
-extern NSString *SMUploadKeySessionId;
-extern NSString *SMUploadKeyCaption;
-extern NSString *SMUploadKeyAlbumId;
-extern NSString *SMUploadKeyKeywords;
+//extern NSString *SMUploadKeyFilename;
+//extern NSString *SMUploadKeySessionId;
+//extern NSString *SMUploadKeyCaption;
+//extern NSString *SMUploadKeyAlbumId;
+//extern NSString *SMUploadKeyKeywords;
 
 @interface SMRequest : NSObject {
 	NSURLConnection *connection;
@@ -34,21 +34,20 @@ extern NSString *SMUploadKeyKeywords;
 	CFRunLoopRef uploadRunLoop;
 	SEL callback;
 	id target;
-	void *context;
 	BOOL wasSuccessful;
 	BOOL connectionIsOpen;
 	NSError *error;
-	NSObject<SMDecoder> *decoder;
-	NSDictionary *requestDict;	
+	
+	NSDictionary *requestDict;
 	NSURL *requestUrl;
 	
 	// upload stuff
-	NSObject<SMUploadObserver> *observer;
+	NSObject<SMUploadRequestObserver> *observer;
 	BOOL isUploading;
-	NSData *imageData;	
+	NSData *imageData;
 }
 
-+(SMRequest *)SMRequest:(NSObject<SMDecoder> *)decoder;
++(SMRequest *)request;
 
 #pragma mark REST method invocation API
 
@@ -79,22 +78,15 @@ extern NSString *SMUploadKeyKeywords;
  @abstract   performs a GET for the given url and append a sequence of key=val parameters to the URL
  @discussion The keys and values will be escaped and the callback semantics are the same as invokeMethod:responseCallback:responseTarget
  */
--(void)invokeMethodWithURL:(NSURL *)baseUrl keys:(NSArray *)keys values:(NSArray *)values responseCallback:(SEL)callback responseTarget:(id)target;
+-(void)invokeMethodWithURL:(NSURL *)baseUrl requestDict:(NSDictionary *)dict responseCallback:(SEL)callback responseTarget:(id)target;
 
-/*!
-  @method     invokeMethodWithURL:keys:valueDict:responseCallback:responseTarget:
-  @abstract   Invokes invokeMethodWithURL:keys:values:responseCallback:responseTarget: with the keys and values given by the given dictionary.
- */
--(void)invokeMethodWithURL:(NSURL *)baseURL keys:(NSArray *)keys valueDict:(NSDictionary *)keyValDict responseCallback:(SEL)callback responseTarget:(id)target;
-
-
--(void)uploadImageData:(NSData *)imageData
+-(void)uploadImageData:(NSData *)theImageData
 			  filename:(NSString *)filename
 			 sessionId:(NSString *)sessionId
-				 album:(SMAlbumRef *)albumRef 
+				 album:(SMAlbumRef *)albumRef
 			   caption:(NSString *)caption
 			  keywords:(NSArray *)keywords
-			  observer:(NSObject<SMUploadObserver> *)observer;
+			  observer:(NSObject<SMUploadRequestObserver> *)anObserver;
 
 -(void)cancelUpload;
 
@@ -113,9 +105,6 @@ extern NSString *SMUploadKeyKeywords;
 
 -(NSData *)imageData; // the last set image data for an upload
 
--(NSDictionary *)decodedResponse;
-
--(void *)context;
--(void)setContext:(void *)context;
+-(NSData *)data;
 
 @end

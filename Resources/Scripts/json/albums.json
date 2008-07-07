@@ -1,0 +1,286 @@
+
+
+
+{
+    "stat":"ok",
+    "method":"smugmug.albums.get",
+    "Albums":
+    [
+        {
+            "id":5246332,
+            "Key":"Sw76m",
+            "Title":"foo",
+            "Category":
+            {
+                "id":1,
+                "Name":"Animals"
+            },
+            "SubCategory":
+            {
+                "id":265861,
+                "Name":"cats"
+            }
+        },
+        {
+            "id":5229420,
+            "Key":"kBj5G",
+            "Title":"Afternoon in Town",
+            "Category":
+            {
+                "id":50,
+                "Name":"Street Scenes"
+            }
+        },
+        {
+            "id":4972563,
+            "Key":"B9jXA",
+            "Title":"Aaron & Oskar play GTA",
+            "Category":
+            {
+                "id":37,
+                "Name":"Pets"
+            }
+        },
+        {
+            "id":4972392,
+            "Key":"pr6u7",
+            "Title":"Italian Market Festival",
+            "Category":
+            {
+                "id":8,
+                "Name":"Events"
+            }
+        },
+        {
+            "id":4442134,
+            "Key":"QgBPf",
+            "Title":"Oskar & Mavis Lounge",
+            "Category":
+            {
+                "id":37,
+                "Name":"Pets"
+            }
+        },
+        {
+            "id":4714673,
+            "Key":"z3Yak",
+            "Title":"Em's Birthday",
+            "Category":
+            {
+                "id":41,
+                "Name":"Airplanes"
+            }
+        },
+        {
+            "id":4178095,
+            "Key":"Mrva8",
+            "Title":"iBook Disassembly",
+            "Category":
+            {
+                "id":40,
+                "Name":"Electronics"
+            }
+        },
+        {
+            "id":4277390,
+            "Key":"AGPdw",
+            "Title":"Obama in Wilmington",
+            "Category":
+            {
+                "id":55,
+                "Name":"Politics"
+            }
+        },
+        {
+            "id":4162380,
+            "Key":"d8Kra",
+            "Title":"Oskar & Mavis Snuggle",
+            "Category":
+            {
+                "id":37,
+                "Name":"Pets"
+            }
+        },
+        {
+            "id":3919844,
+            "Key":"wXCBf",
+            "Title":"Thanksgiving",
+            "Category":
+            {
+                "id":31,
+                "Name":"Holidays"
+            }
+        },
+        {
+            "id":3774514,
+            "Key":"GzNKe",
+            "Title":"Punkin Chunkin",
+            "Category":
+            {
+                "id":8,
+                "Name":"Events"
+            }
+        },
+        {
+            "id":3580564,
+            "Key":"e96Qv",
+            "Title":"Our First Jack Visit",
+            "Category":
+            {
+                "id":9,
+                "Name":"Family"
+            }
+        },
+        {
+            "id":3343444,
+            "Key":"q7XBN",
+            "Title":"Oskar & Mavis",
+            "Category":
+            {
+                "id":37,
+                "Name":"Pets"
+            }
+        },
+        {
+            "id":3256438,
+            "Key":"2YVd7",
+            "Title":"Food (8.4.07)",
+            "Category":
+            {
+                "id":57,
+                "Name":"Food"
+            }
+        },
+        {
+            "id":3227319,
+            "Key":"Yqh2z",
+            "Title":"New York Visit",
+            "Category":
+            {
+                "id":0,
+                "Name":"Other"
+            }
+        },
+        {
+            "id":3186999,
+            "Key":"8mFL3",
+            "Title":"Food (07.21.07)",
+            "Category":
+            {
+                "id":57,
+                "Name":"Food"
+            }
+        },
+        {
+            "id":3015210,
+            "Key":"dfmxp",
+            "Title":"Bloomsday at the Rosenbach",
+            "Category":
+            {
+                "id":8,
+                "Name":"Events"
+            }
+        },
+        {
+            "id":2982654,
+            "Key":"nMoYF",
+            "Title":"Philly Bike Race",
+            "Category":
+            {
+                "id":18,
+                "Name":"Sports"
+            }
+        },
+        {
+            "id":2914569,
+            "Key":"gQKRn",
+            "Title":"Mushrooms",
+            "Category":
+            {
+                "id":57,
+                "Name":"Food"
+            }
+        },
+        {
+            "id":2876503,
+            "Key":"QocrM",
+            "Title":"Italian Market Festival",
+            "Category":
+            {
+                "id":8,
+                "Name":"Events"
+            }
+        },
+        {
+            "id":2816766,
+            "Key":"nqzgj",
+            "Title":"for sale",
+            "Category":
+            {
+                "id":40,
+                "Name":"Electronics"
+            }
+        },
+        {
+            "id":2777171,
+            "Key":"78ypu",
+            "Title":"ninja book",
+            "Category":
+            {
+                "id":30,
+                "Name":"Humor"
+            }
+        },
+        {
+            "id":2677519,
+            "Key":"d7y3o",
+            "Title":"scotch collection",
+            "Category":
+            {
+                "id":12,
+                "Name":"Hobbies"
+            }
+        },
+        {
+            "id":2301756,
+            "Key":"N35Ti",
+            "Title":"Ella's 2nd birthday",
+            "Category":
+            {
+                "id":9,
+                "Name":"Family"
+            }
+        },
+        {
+            "id":1973549,
+            "Key":"TsfLF",
+            "Title":"Our Wedding",
+            "Category":
+            {
+                "id":23,
+                "Name":"Weddings"
+            }
+        },
+        {
+            "id":1884785,
+            "Key":"Wmqnc",
+            "Title":"honeymoon",
+            "Category":
+            {
+                "id":33,
+                "Name":"Vacation"
+            }
+        },
+        {
+            "id":1986684,
+            "Key":"qkVGH",
+            "Title":"Molly & Tom's Wedding",
+            "Category":
+            {
+                "id":23,
+                "Name":"Weddings"
+            }
+        }
+    ]
+}
+

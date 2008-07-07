@@ -1,0 +1,23 @@
+
+{
+    "stat":"ok",
+    "method":"smugmug.login.withPassword",
+    "Login":
+    {
+        "User":
+        {
+            "id":89699,
+            "NickName":"aarone",
+            "DisplayName":"aarone"
+        },
+        "PasswordHash":"$1$InBhMP3A$dYNK7poyM0hnqtLvMdeye1",
+        "AccountType":"Pro",
+        "FileSizeLimit":25165824,
+        "SmugVault":false,
+        "Session":
+        {
+            "id":"d719a7a4507f27af933a210a11585fea"
+        }
+    }
+}
+

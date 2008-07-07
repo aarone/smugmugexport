@@ -7,14 +7,15 @@
 //
 
 #import <Cocoa/Cocoa.h>
-@class SMRequest;
+@class SMRequest, SMImageRef, SMResponse;
 
 // protocol for monitoring an upload
 @protocol SMUploadObserver
 
--(void)uploadMadeProgress:(SMRequest *)request bytesWritten:(long)numberOfBytes ofTotalBytes:(long)totalBytes;
--(void)uploadFailed:(SMRequest *)request withError:(NSString *)reason;
--(void)uploadCanceled:(SMRequest *)request;
--(void)uploadSucceeded:(SMRequest *)request;
+-(void)uploadDidFail:(SMResponse *)resp;
+
+-(void)uploadMadeProgress:(NSData *)imageData bytesWritten:(long)bytesWritten ofTotalBytes:(long)totalBytes;
+
+-(void)uploadDidSucceed:(SMResponse *)resp;
 
 @end

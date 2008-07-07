@@ -6,17 +6,14 @@
 //  Copyright 2008 Aaron Evans. All rights reserved.
 //
 
-#import "SMAlbumInfo.h"
 #import "SMAlbum.h"
 #import "SMGlobals.h"
 #import "SMAlbumRef.h"
+#import "SMCategory.h"
+#import "SMSubCategory.h"
 
 @interface SMAlbumInfo (Private)
 -(void)setDefaults;
--(NSPredicate *)predicateForId:(NSString *)anId;
--(NSDictionary *)itemForId:(NSString *)anId categories:(NSArray *)categories;
--(NSDictionary *)categoryForId:(NSString *)categoryId categories:(NSArray *)categories;
--(NSDictionary *)subcategoryForId:(NSString *)subcategory subcategories:(NSArray *)subcategories;
 @end
 
 @implementation SMAlbumInfo
@@ -49,9 +46,7 @@
 	return [[[[self class] alloc] initWithAlbum:album] autorelease];
 }
 
-+(SMAlbumInfo *)albumInfoWithSMResponse:(NSDictionary *)response 
-							 categories:(NSArray *)categories 
-						  subcategories:(NSArray *)subcatgegories {
++(SMAlbumInfo *)albumInfoWithSMResponse:(NSDictionary *)response {
 	SMAlbumInfo *info = [SMAlbumInfo albumInfo];
 	[info setIsPublic:[[response objectForKey:@"Public"] boolValue]];
 	[info setAlbumKey:[response objectForKey:@"Key"]];
@@ -68,8 +63,11 @@
 	[info setTitle:[response objectForKey:@"Title"]];
 	[info setDescription:[response objectForKey:@"Description"]];
 	[info setKeywords:[response objectForKey:@"Keywords"]];
-	[info setCategory:[info categoryForId:[[response objectForKey:@"Category"] objectForKey:@"id"] categories:categories]];
-	[info setSubCategory:[info subcategoryForId:[[response objectForKey:@"SubCategory"] objectForKey:@"id"] subcategories:subcatgegories]];
+	[info setSubCategoryId:[[response objectForKey:@"SubCategory"] objectForKey:@"id"]];
+	[info setCategoryId:[[response objectForKey:@"Category"] objectForKey:@"id"]];
+	 
+	//	[info setCategory:[info categoryForId:[[response objectForKey:@"Category"] objectForKey:@"id"] categories:categories]];
+//	[info setSubCategory:[info subcategoryForId:[[response objectForKey:@"SubCategory"] objectForKey:@"id"] subcategories:subcatgegories]];
 		
 	return info;
 }
@@ -81,6 +79,8 @@
 	[subCategory release];
 	[title release];
 	[description release];
+	[subCategoryId release];
+	[categoryId release];
 	[keywords release];
 	
 	[super dealloc];
@@ -102,29 +102,10 @@
 	return [SMAlbumRef refWithId:[self albumId] key:[self albumKey]];
 }
 
--(NSDictionary *)categoryForId:(NSString *)categoryId categories:(NSArray *)categories {
-	return [self itemForId:categoryId categories:categories];
-}
-
--(NSDictionary *)subcategoryForId:(NSString *)subcategory subcategories:(NSArray *)subcategories {
-	return [self itemForId:subcategory categories:subcategories];
-}
-
--(NSDictionary *)itemForId:(NSString *)anId categories:(NSArray *)categories {
-	NSArray *result = [categories filteredArrayUsingPredicate:[self predicateForId: anId]];
-	if(IsEmpty(result))
-		return nil;
-	return [result objectAtIndex:0];	
-}
-
--(NSPredicate *)predicateForId:(NSString *)anId {
-	return [NSPredicate predicateWithFormat:@"id = %@", anId];
-}
-
 -(void)setDefaults {
 	[self setTitle:@""];
-	[self setSubCategory:nil];
-	[self setCategory:nil];
+	[self setSubCategoryId:nil];
+	[self setCategoryId:nil];
 	[self setKeywords:@""];
 	[self setDescription:@""];
 	[self setIsPublic:YES];
@@ -161,22 +142,45 @@
 	}
 }
 
--(NSDictionary *)category {
+-(NSString *)categoryId {
+	return categoryId;
+}
+
+-(void)setCategoryId:(NSString*)anId {
+	if(anId != categoryId) {
+		[categoryId release];
+		categoryId = [anId retain];
+	}
+}
+
+-(NSString *)subCategoryId {
+	return subCategoryId;
+}
+
+-(void)setSubCategoryId:(NSString *)anId {
+	if(anId != subCategoryId) {
+		[subCategoryId release];
+		subCategory = [anId retain];
+	}
+}
+
+
+-(SMCategory *)category {
 	return category;
 }
 
--(void)setCategory:(NSDictionary *)anId {
+-(void)setCategory:(SMCategory *)anId {
 	if(category != anId) {
 		[category release];
 		category = [anId retain];
 	}
 }
 
--(NSDictionary *)subCategory {
+-(SMSubCategory *)subCategory {
 	return subCategory;
 }
 
--(void)setSubCategory:(NSDictionary *)anId {
+-(void)setSubCategory:(SMSubCategory *)anId {
 	if(subCategory != anId) {
 		[subCategory release];
 		subCategory = [anId retain];
@@ -319,8 +323,8 @@
 	if([self albumKey] != nil)
 		[result setObject:[self albumKey] forKey:@"AlbumKey"];
 	
-	[result setObject:[[self category] objectForKey:@"id"] forKey:@"CategoryID"];	
-	[result setObject:[[self subCategory] objectForKey:@"id"] forKey:@"SubCategoryID"];
+	[result setObject:[self categoryId] forKey:@"CategoryID"];	
+	[result setObject:[self subCategoryId] forKey:@"SubCategoryID"];
 	
 	return result;
 }

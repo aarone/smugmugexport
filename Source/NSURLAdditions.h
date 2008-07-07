@@ -11,5 +11,5 @@
 
 @interface NSURL (NSURLAdditions)
 
--(NSURL *)URLByAppendingParameterListWithNames:(NSArray *)names values:(NSArray *)values;
+-(NSURL *)URLByAppendingParameterList:(NSDictionary *)params;
 @end

@@ -29,9 +29,9 @@
 	return [NSData dataWithBytes:&digest length:16];
 }
 
-// stolen from http://www.cocoadev.com/index.pl?NsUrlNotLoadingPages
-+(NSData *)dataFromModGzUrl:(NSURL *)url
-{
+// from http://www.cocoadev.com/index.pl?NsUrlNotLoadingPages
++(NSData *)dataFromModGzUrl:(NSURL *)url {
+	
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
 	NSTask  *gunzip;

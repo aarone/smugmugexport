@@ -7,13 +7,8 @@
 //
 
 #import "SMAlbumEditController.h"
-#import "SMAlbumInfo.h"
 #import "SMGlobals.h"
-
-NSString *SMAlbumID = @"id";
-NSString *SMAlbumKey = @"Key";
-NSString *SMCategoryID = @"id";
-NSString *SMSubCategoryID = @"id";
+#import "SMExportPlugin.h"
 
 @interface SMAlbumEditController (Private) 
 -(NSArray *)subCategoriesForCategory:(NSDictionary *)aCategory;
@@ -21,12 +16,11 @@ NSString *SMSubCategoryID = @"id";
 -(NSArray *)categories;
 -(NSArray *)subcategories;
 -(NSPredicate *)createRelevantSubCategoryFilterForCategory:(NSDictionary *)aCategory;
--(SMAlbumInfo *)albumInfo;
 -(void)refreshCategorySelections:(BOOL)clearsSubcategory;
--(SMAlbumInfo *)albumInfo;
--(void)setAlbumInfo:(SMAlbumInfo *)info;	
 -(BOOL)isEditing;
 -(void)setIsEditing:(BOOL)v;
+-(SMAlbum *)album;
+-(void)setAlbum:(SMAlbum *)anAlbum;
 @end
 
 @implementation SMAlbumEditController
@@ -37,12 +31,10 @@ NSString *SMSubCategoryID = @"id";
 
 	nibLoaded = NO;
 	isBusy = NO;
-	albumInfo = [[SMAlbumInfo alloc] init];
 	return self;
 }
 
 -(void)dealloc {
-	[albumInfo release];	
 	[super dealloc];
 }
 
@@ -54,48 +46,7 @@ NSString *SMSubCategoryID = @"id";
 	delegate = aDelegate;
 }
 
--(void)awakeFromNib {
-	[albumInfoController addObserver:self forKeyPath:@"selection.category" options:NSKeyValueObservingOptionNew context:NULL];
-	[[self albumInfo] setCategory:[[self categories] objectAtIndex:0]];
-	[self refreshCategorySelections:YES];
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath
-					  ofObject:(id)object
-                        change:(NSDictionary *)change
-                       context:(void *)context {
-	[self refreshCategorySelections:YES];
-}
-
--(void)refreshCategorySelections:(BOOL)clearsSubcategory {
-	NSDictionary *selectedCategory = [[self albumInfo] category];
-	NSMutableArray *relevantSubCategories = [NSMutableArray arrayWithArray:[self subCategoriesForCategory:selectedCategory]];
-	
-	NSDictionary *nullSubCategory = [self createNullSubcategory];
-	[relevantSubCategories insertObject:nullSubCategory	atIndex:0];
-	[subCategoriesArrayController setContent:nil];
-	[subCategoriesArrayController setContent:[NSArray arrayWithArray:relevantSubCategories]];
-	
-	if(clearsSubcategory || [[self albumInfo] subCategory] == nil)
-		[[self albumInfo] setSubCategory:nullSubCategory];
-}
-
--(NSDictionary *)createNullSubcategory {
-	return [NSDictionary dictionaryWithObjectsAndKeys:@"None", @"Title",
-			@"0", @"id", nil];
-}
-
--(NSArray *)subCategoriesForCategory:(NSDictionary *)aCategory {
-	NSArray *relevantSubCategories = [[self subcategories] filteredArrayUsingPredicate:[self createRelevantSubCategoryFilterForCategory:aCategory]];
-	return (relevantSubCategories == nil) ? [NSArray array] : relevantSubCategories;
-}
-
--(NSPredicate *)createRelevantSubCategoryFilterForCategory:(NSDictionary *)aCategory {
-	if(IsEmpty([self categories]) || IsEmpty([self subcategories]) || aCategory == nil)
-		return [NSPredicate predicateWithValue:YES];
-	
-	return [NSPredicate predicateWithFormat:@"Category.id = %@", [aCategory objectForKey:@"id"]];
-}
+-(void)awakeFromNib {}
 
 +(SMAlbumEditController *)controller {
 	return [[[[self class] alloc] init] autorelease];
@@ -119,13 +70,13 @@ NSString *SMSubCategoryID = @"id";
 	}
 }
 
--(void)showAlbumCreateSheet:(id)delegate forWindow:(NSWindow *)aWindow {
+-(void)showAlbumCreateSheet:(SMAlbum *)anAlbum
+				   delegate:(id)delegate 
+				  forWindow:(NSWindow *)aWindow {
 	[self loadNibIfNecessary];
-	
+
 	[self setIsEditing:NO];
-	[self setAlbumInfo:[SMAlbumInfo albumInfo]];
-	[[self albumInfo] setCategory:[[self categories] objectAtIndex:0]];
-	[[self albumInfo] setSubCategory:[self createNullSubcategory]];
+	[self setAlbum:anAlbum];
 	
 	[NSApp beginSheet:[self newAlbumSheet]
 	   modalForWindow:aWindow
@@ -140,9 +91,9 @@ NSString *SMSubCategoryID = @"id";
 -(IBAction)createOrEditAlbum:(id)sender {
 	
 	if(![self isEditing] && [delegate respondsToSelector:@selector(createAlbum:)]) {
-		[delegate createAlbum:[self albumInfo]];
+		[delegate createAlbum:[self album]];
 	} else if( [delegate respondsToSelector:@selector(editAlbum:)]) {
-		[delegate editAlbum:[self albumInfo]];
+		[delegate editAlbum:[self album]];
 	}
 }
 
@@ -157,52 +108,58 @@ NSString *SMSubCategoryID = @"id";
 	isSheetOpen = NO;	
 }
 
--(SMAlbumInfo *)albumInfo {
-	return albumInfo;
-}
-
--(void)setAlbumInfo:(SMAlbumInfo *)info {
-	if(albumInfo != info) {
-		[albumInfo release];
-		albumInfo = [info retain];
-	}
-}
-
 -(void)showAlbumEditSheet:(id)delegate
 				forWindow:(NSWindow *)aWindow
-				 forAlbum:(SMAlbumRef *)ref
-			withAlbumInfo:(SMAlbumInfo *)info {
+				 forAlbum:(SMAlbum *)anAlbum {
 	[self loadNibIfNecessary];
-	
-	// temporarily stop observing category changes: the observation is supposed to 
-	// only be effective when the user changes the selected category in the UI
-	[albumInfoController removeObserver:self 
-							 forKeyPath:@"selection.category"];
-	[self setAlbumInfo:info];
-	[self refreshCategorySelections:NO];
-	[albumInfoController addObserver:self 
-						  forKeyPath:@"selection.category" 
-							 options:NSKeyValueObservingOptionNew 
-							 context:NULL];
-	
-	
+	[self setAlbum:anAlbum];
 	[self setIsEditing:YES];
-	
 	isSheetOpen = YES;
 	[NSApp beginSheet:[self newAlbumSheet]
 	   modalForWindow:aWindow
 		modalDelegate:self
 	   didEndSelector:@selector(editAlbumDidEndSheet:returnCode:contextInfo:)
-		  contextInfo:ref];
-	[[self newAlbumSheet] makeKeyAndOrderFront:self];
+		  contextInfo:NULL];
+	[[self newAlbumSheet] makeKeyAndOrderFront:self];	
 }
 
 -(void)editAlbumDidEndSheet:(NSWindow *)sheet
-				returnCode:(int)returnCode
-			   contextInfo:(void *)contextInfo {
+				 returnCode:(int)returnCode
+				contextInfo:(void *)contextInfo {
 	[sheet orderOut:self];
 	isSheetOpen = NO;
 }
+
+//-(void)showAlbumEditSheet:(id)delegate
+//				forWindow:(NSWindow *)aWindow
+//				 forAlbum:(SMAlbumRef *)ref
+//			withAlbumInfo:(SMAlbumInfo *)info {
+//	[self loadNibIfNecessary];
+//	
+//	// temporarily stop observing category changes: the observation is supposed to 
+//	// only be effective when the user changes the selected category in the UI
+//	[albumInfoController removeObserver:self 
+//							 forKeyPath:@"selection.category"];
+//	[self setAlbumInfo:info];
+//	[self refreshCategorySelections:NO];
+//	[albumInfoController addObserver:self 
+//						  forKeyPath:@"selection.category" 
+//							 options:NSKeyValueObservingOptionNew 
+//							 context:NULL];
+//	
+//	
+//	[self setIsEditing:YES];
+//	
+//	isSheetOpen = YES;
+//	[NSApp beginSheet:[self newAlbumSheet]
+//	   modalForWindow:aWindow
+//		modalDelegate:self
+//	   didEndSelector:@selector(editAlbumDidEndSheet:returnCode:contextInfo:)
+//		  contextInfo:ref];
+//	[[self newAlbumSheet] makeKeyAndOrderFront:self];
+//}
+//
+
 
 -(NSString *)editAlbumButtonText {
 	return NSLocalizedString(@"Edit", @"Button text when editing a new album");
@@ -254,6 +211,17 @@ NSString *SMSubCategoryID = @"id";
 
 -(NSArray *)subcategories {
 	return [delegate subcategories];
+}
+
+-(SMAlbum *)album {
+	return album;
+}
+
+-(void)setAlbum:(SMAlbum *)anAlbum {
+	if(anAlbum != album) {
+		[album release];
+		album = [anAlbum retain];
+	}
 }
 
 

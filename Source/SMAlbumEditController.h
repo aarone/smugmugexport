@@ -7,15 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-@class SMAlbumInfo, SMAlbumRef;
-
-// informal protocol
-@protocol SMAlbumEditControllerDelegate
--(void)createAlbum:(SMAlbumInfo *)albumInfo;
--(void)editAlbum:(SMAlbumInfo *)albumInfo;
--(NSArray *)categories;
--(NSArray *)subcategories;
-@end
+@class SMAlbum, SMAlbumRef;
 
 @interface SMAlbumEditController : NSObject {
 	id delegate;
@@ -24,7 +16,7 @@
 	IBOutlet NSArrayController *subCategoriesArrayController;
 	IBOutlet NSObjectController *albumInfoController;
 	
-	SMAlbumInfo *albumInfo;
+	SMAlbum *album;
 	NSArray *categories;
 	NSArray *subcategories;
 	NSString *albumActionButtonText;
@@ -41,11 +33,14 @@
 +(SMAlbumEditController *)controller;
 -(void)setDelegate:(id)aDelegate;
 
--(void)showAlbumCreateSheet:(id)delegate forWindow:(NSWindow *)aWindow;
+-(void)showAlbumCreateSheet:(SMAlbum *)anAlbum
+				   delegate:(id)delegate 
+				  forWindow:(NSWindow *)aWindow;
+
 -(void)showAlbumEditSheet:(id)delegate
 				forWindow:(NSWindow *)aWindow
-				 forAlbum:(SMAlbumRef *)ref
-			withAlbumInfo:(SMAlbumInfo *)albumInfo;
+				 forAlbum:(SMAlbum *)album;
+
 -(id)delegate;
 -(void)closeSheet;
 -(BOOL)isSheetOpen;

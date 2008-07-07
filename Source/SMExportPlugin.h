@@ -9,12 +9,12 @@
 #import <Cocoa/Cocoa.h>
 #import <Growl/Growl.h>
 #import "ExportPluginProtocol.h"
-#import "SMAccess.h"
+#import "SMESession.h"
 
-@class SMAccess, ExportMgr, SMAccountManager, SMAlbumEditController;
-@protocol ExportPluginProtocol, SMAccessDelegate;
+@class SMESession, ExportMgr, SMAccountManager, SMAlbumEditController, SMSessionInfo;
+@protocol ExportPluginProtocol, SMESessionDelegate;
 
-@interface SMExportPlugin : NSObject <ExportPluginProtocol, SMAccessDelegate, GrowlApplicationBridgeDelegate> {
+@interface SMExportPlugin : NSObject <ExportPluginProtocol, GrowlApplicationBridgeDelegate, SMUploadObserver> {
 
 	IBOutlet id firstView;
 	IBOutlet id lastView;
@@ -39,6 +39,15 @@
 	NSURL *uploadSiteUrl;
 	NSMutableDictionary *newAlbumPreferences;
 	
+	SMESession *session;
+	
+	// smugmug state
+	NSArray *albums;
+	NSArray *categories;
+	NSArray *subcategories;
+	SMSessionInfo *sessionInfo;
+	BOOL isLoggingIn;
+	
 	NSInvocation *postLogoutInvocation; // do this after a logout is complete
 	
 	BOOL isUploading;
@@ -51,12 +60,10 @@
 	BOOL browserOpenedInGallery;
 	BOOL isDeletingAlbum;
 	BOOL isUpdateInProgress;
-	int uploadRetryCount;
 	int imagesUploaded;
 	int albumUrlFetchAttemptCount;
 	
 	ExportMgr *exportManager;
-	SMAccess *smAccess;
 	SMAccountManager *accountManager;
 	SMAlbumEditController *albumEditController;
 }
@@ -84,4 +91,6 @@
 #pragma mark Update
 -(IBAction)checkForUpdates:(id)sender;
 
+-(void)editAlbum:(SMAlbum *)album;
+-(void)createAlbum:(SMAlbum *)album;
 @end

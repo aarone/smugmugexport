@@ -11,13 +11,14 @@
 
 @implementation NSURL (NSURLAdditions)
 
--(NSURL *)URLByAppendingParameterListWithNames:(NSArray *)names values:(NSArray *)values {
+-(NSURL *)URLByAppendingParameterList:(NSDictionary *)params {
 	NSMutableString *parameterList = [NSMutableString stringWithString:@"?"];
 	
 	int i;
+	NSArray *names = [params allKeys];
 	for(i=0;i<[names count];i++) {
 		NSString *aKey = [names objectAtIndex:i];
-		id aVal = [values objectAtIndex:i];
+		id aVal = [params objectForKey:aKey];
 		if([aVal isKindOfClass:[NSString class]])
 			[parameterList appendFormat:@"%@=%@", aKey, [(NSString *)aVal urlEscapedString]];
 		else if([aVal respondsToSelector:@selector(stringValue)])

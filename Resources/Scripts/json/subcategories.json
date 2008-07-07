@@ -1,0 +1,49 @@
+
+{
+    "stat":"ok",
+    "method":"smugmug.subcategories.getAll",
+    "SubCategories":
+    [
+        {
+            "id":265859,
+            "Title":"Dogs",
+            "Category":
+            {
+                "id":1
+            }
+        },
+        {
+            "id":265861,
+            "Title":"cats",
+            "Category":
+            {
+                "id":1
+            }
+        },
+        {
+            "id":368290,
+            "Title":"Modern",
+            "Category":
+            {
+                "id":3
+            }
+        },
+        {
+            "id":368291,
+            "Title":"pop",
+            "Category":
+            {
+                "id":3
+            }
+        },
+        {
+            "id":371305,
+            "Title":"meow",
+            "Category":
+            {
+                "id":37
+            }
+        }
+    ]
+}
+

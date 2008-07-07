@@ -11,7 +11,6 @@
 #import "NSURLAdditions.h"
 #import "SMGlobals.h"
 #import "NSUserDefaultsAdditions.h"
-#import "SMDecoder.h"
 #import "NSDataAdditions.h"
 #import "SMUploadObserver.h"
 
@@ -27,8 +26,6 @@
 -(id)target;
 -(void)setTarget:(id)t;
 -(void)setErrror:(NSError *)err;
--(NSObject<SMDecoder> *)decoder;
--(void)setDecoder:(NSObject<SMDecoder> *)aDecoder;
 +(NSString *)UserAgent;
 -(void)appendToResponse;
 -(void)transferComplete;
@@ -62,18 +59,19 @@
 
 NSString *SMUploadKeyImageData = @"SMImageData";
 NSString *SMUploadKeyFilename = @"SMFilename";
-NSString *SMUploadKeySessionId = @"SMSessionId";
+NSString *SMUploadKeySessionId = @"SMESessionId";
 NSString *SMUploadKeyCaption = @"SMCaption";
 NSString *SMUploadKeyKeywords = @"SMKeywords";
 NSString *SMUploadKeyAlbumRef = @"SMAlbumRef";
+NSString *SMUploadKeyObserver = @"SMUploadKeyObserver";
 
 double UploadProgressTimerInterval = 0.125/2.0;
 
 static const CFOptionFlags DAClientNetworkEvents = 
-kCFStreamEventOpenCompleted     |
-kCFStreamEventHasBytesAvailable |
-kCFStreamEventEndEncountered    |
-kCFStreamEventErrorOccurred;
+										kCFStreamEventOpenCompleted     |
+										kCFStreamEventHasBytesAvailable |
+										kCFStreamEventEndEncountered    |
+										kCFStreamEventErrorOccurred;
 
 static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType type, void *clientCallBackInfo) {
 	switch (type) {
@@ -94,19 +92,18 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 
 @implementation SMRequest
 
--(id)initWithDecoder:(NSObject<SMDecoder> *)aDecoder {
+-(id)init {
 	if((self = [super init]) == nil)
 		return nil;
 	
-	[self setDecoder:aDecoder];
 	[self setWasSuccessful:NO];
 	[self setConnectionIsOpen:NO];
 	
 	return self;
 }
 
-+(SMRequest *)SMRequest:(NSObject<SMDecoder> *)aDecoder {
-	return [[[[self class] alloc] initWithDecoder:aDecoder] autorelease];
++(SMRequest *)request {
+	return [[[[self class] alloc] init] autorelease];
 }
 
 +(NSString *)UserAgent {
@@ -116,22 +113,15 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 -(void)dealloc {
 	[[self connection] release];
 	[[self error] release];
-	[[self decoder] release];
 	[[self imageData] release];
 	[[self response] release];
 	[[self requestUrl] release];
 	[[self requestDict] release];
+	[[self target] release];
 	
 	[super dealloc];
 }
 
--(void *)context {
-	return context;
-}
-
--(void)setContext:(void *)_context {
-	context = _context;
-}
 
 -(NSString *)appName {
 	return @"SMExportPlugin";
@@ -145,27 +135,16 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	return @"JSON";
 }
 
--(NSString *)postUploadURL:(NSString *)filename  {
+-(NSString *)postUploadURL:(NSString *)filename {
 	return @"http://upload.smugmug.com/photos/xmlrawadd.mg";
 }
 
--(NSObject<SMDecoder> *)decoder {
-	return decoder;
-}
-
--(NSObject<SMUploadObserver> *)observer {
+-(NSObject<SMUploadRequestObserver> *)observer {
 	return observer;
 }
 
--(void)setObserver:(NSObject<SMUploadObserver> *)anObserver {
+-(void)setObserver:(NSObject<SMUploadRequestObserver> *)anObserver {
 	observer = anObserver;
-}
-
--(void)setDecoder:(NSObject<SMDecoder> *)aDecoder {
-	if([self decoder] != nil)
-		[[self decoder] release];
-	
-	decoder = [aDecoder retain];
 }
 
 -(NSDictionary *)requestDict {
@@ -256,7 +235,11 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(void)setTarget:(id)t {
-	target = t; // no retain, just like a delegate
+	if(t != target) {
+		[target release];
+		target = [t retain];
+	}
+	
 }
 
 -(BOOL)connectionIsOpen {
@@ -295,33 +278,24 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	while ( [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
 									 beforeDate:[NSDate distantFuture]] 
 			&& [self connectionIsOpen]);
-
+	
 	[pool release];
 }
 
 -(void)invokeMethod:(NSURL *)url responseCallback:(SEL)c responseTarget:(id)t {
 	[self setCallback:c];
 	[self setTarget:t];
-	
 	[NSThread detachNewThreadSelector:@selector(invokeMethodWithUrl:) toTarget:self withObject:url];
 }
 
--(void)invokeMethodWithURL:(NSURL *)baseUrl keys:(NSArray *)keys values:(NSArray *)values responseCallback:(SEL)callbackSel responseTarget:(id)responseTarget {
+-(void)invokeMethodWithURL:(NSURL *)baseUrl 
+			   requestDict:(NSDictionary *)dict 
+		  responseCallback:(SEL)callbackSel 
+			responseTarget:(id)responseTarget {
 	
-	[self setRequestDict:[NSDictionary dictionaryWithObjects:values	forKeys:keys]];
-	NSURL *uploadUrl = [baseUrl URLByAppendingParameterListWithNames:keys values:values];
+	[self setRequestDict:dict];
+	NSURL *uploadUrl = [baseUrl URLByAppendingParameterList:dict];
 	[self invokeMethod:uploadUrl responseCallback:callbackSel responseTarget:responseTarget];
-}
-
--(void)invokeMethodWithURL:(NSURL *)baseURL keys:(NSArray *)keys valueDict:(NSDictionary *)keyValDict responseCallback:(SEL)callbackSel responseTarget:(id)responseTarget {
-	
-	NSMutableArray *values = [NSMutableArray array];
-	NSEnumerator *keyEnumerator = [keys objectEnumerator];
-	NSString *aKey;
-	while(aKey = [keyEnumerator nextObject])
-		[values addObject:[keyValDict objectForKey:aKey]];
-	
-   	[self invokeMethodWithURL:baseURL keys:keys values:values responseCallback:callbackSel responseTarget:responseTarget];
 }
 
 #pragma mark NSURLConnection Delegate Methods
@@ -352,6 +326,12 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	[self setError:nil];
 	[[self target] performSelector:callback withObject:self];
 	[self setConnectionIsOpen:NO];
+	
+	if(IsNetworkTracingEnabled()) {
+		NSString *responseAsString = [[[NSString alloc] initWithData:[self response]
+															encoding:NSUTF8StringEncoding] autorelease];
+		NSLog(@"response: %@", responseAsString);
+	}	
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)e {
@@ -361,20 +341,11 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	[self setConnectionIsOpen:NO];
 }
 
--(NSDictionary *)decodedResponse {	
-	if(IsNetworkTracingEnabled()) {
-		NSString *responseAsString = [[[NSString alloc] initWithData:[self response] 
-															encoding:NSUTF8StringEncoding] autorelease];
-		NSLog(@"response: %@", responseAsString);
-	}
-	
-	return [[self decoder] decodedResponse:[self response]];
-}
-
 #pragma mark Upload Methods
 -(void)cancelUpload {
 	[self setIsUploading:NO];
-	[[self observer] uploadCanceled:self];
+	
+	[[self observer] uploadCanceled:self];	
 	[self destroyUploadResources];
 }
 
@@ -423,6 +394,11 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	[pool release];
 }
 
+-(void)updateProgress:(NSArray *)args {
+	[[self observer] uploadMadeProgress:self bytesWritten:[[args objectAtIndex:0] intValue]
+						   ofTotalBytes:[[args objectAtIndex: 1] intValue]];										 
+}
+
 -(void)trackUploadProgress:(NSTimer *)timer {
 	
 	if(![self isUploading] || readStream == NULL) {
@@ -444,6 +420,8 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 
 -(void)transferComplete {
 	[[self observer] uploadSucceeded:self];
+	
+	
 	[self destroyUploadResources];
 }
 
@@ -471,9 +449,16 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 		
 }
 
+-(void)reportError:(NSString *)err {
+	[[self observer] uploadFailed:self withError:err];
+}
+
 -(void)errorOccurred: (CFStreamError *)err {
 	NSString *errorText = [self errorDescriptionForError:err];
+	
 	[[self observer] uploadFailed:self withError:errorText];
+	
+	
 	[self destroyUploadResources];
 }
 
@@ -510,7 +495,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 				 album:(SMAlbumRef *)albumRef
 			   caption:(NSString *)caption
 			  keywords:(NSArray *)keywords
-			  observer:(NSObject<SMUploadObserver> *)anObserver {
+			  observer:(NSObject<SMUploadRequestObserver> *)anObserver {
 	NSDictionary *args = [NSDictionary dictionaryWithObjectsAndKeys:
 								 theImageData, SMUploadKeyImageData,
 								 filename, SMUploadKeyFilename,
@@ -518,13 +503,12 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 								 albumRef, SMUploadKeyAlbumRef,
 								 caption, SMUploadKeyCaption,
 								 keywords, SMUploadKeyKeywords,
-								 anObserver, @"observer", 
+								 anObserver, SMUploadKeyObserver, 
 						  nil];
 	[self setRequestDict:args];
 	[NSThread detachNewThreadSelector:@selector(startImageUpload:) 
 							 toTarget:self 
 						   withObject:args];
-													
 }
 
 -(void)startImageUpload:(NSDictionary *)args {
@@ -535,7 +519,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	SMAlbumRef *albumRef = [args objectForKey: SMUploadKeyAlbumRef];
 	NSString *caption = [args objectForKey:SMUploadKeyCaption];
 	NSArray *keywords = [args objectForKey:SMUploadKeyKeywords];
-	NSObject<SMUploadObserver> *anObserver = [args objectForKey:@"observer"];
+	NSObject<SMUploadRequestObserver> *anObserver = [args objectForKey:SMUploadKeyObserver];
 
 	[self setObserver:anObserver];
 	[self setImageData:theImageData];
@@ -593,6 +577,10 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 		CFRunLoopRun();
 	
 	[pool release];
+}
+
+-(NSData *)data {
+	return [NSData dataWithData:response];
 }
 
 @end

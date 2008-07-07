@@ -15,8 +15,7 @@
 		93188E1F0DE9D67B00DBC3FC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
 		93188E200DE9D67B00DBC3FC /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 930DE5BE0B4831D2008120ED /* Security.framework */; };
 		93188E210DE9D67B00DBC3FC /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 930961BA0C66A164002B8DAA /* libcrypto.dylib */; };
-		93188E300DE9D77C00DBC3FC /* TestVersionComparison.m in Sources */ = {isa = PBXBuildFile; fileRef = 93188D920DE9D51A00DBC3FC /* TestVersionComparison.m */; };
-		9319DE360CB91B560037023F /* SMAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = 9319DE330CB91B560037023F /* SMAccess.m */; };
+		93188E300DE9D77C00DBC3FC /* TestCategories.m in Sources */ = {isa = PBXBuildFile; fileRef = 93188D920DE9D51A00DBC3FC /* TestCategories.m */; };
 		9319DE3B0CB91B5D0037023F /* SMAccountManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9319DE390CB91B5D0037023F /* SMAccountManager.m */; };
 		9319DE3F0CB91B690037023F /* SMJSONDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 9319DE3D0CB91B690037023F /* SMJSONDecoder.m */; };
 		932164520B2F78B000624A8D /* NSDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 9321644E0B2F78B000624A8D /* NSDataAdditions.m */; };
@@ -27,14 +26,21 @@
 		933AA0B30CB8273000B7B2A5 /* SMUserDefaults.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0B10CB8273000B7B2A5 /* SMUserDefaults.m */; };
 		933AA0CC0CB827CF00B7B2A5 /* SMExportPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 933AA0CA0CB827CF00B7B2A5 /* SMExportPlugin.m */; };
 		935A1A870C1CC2CC00043E12 /* NSUserDefaultsAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 935A1A850C1CC2CC00043E12 /* NSUserDefaultsAdditions.m */; };
+		9382617F0E1E7F6700A29C9F /* SMData.m in Sources */ = {isa = PBXBuildFile; fileRef = 9382617E0E1E7F6700A29C9F /* SMData.m */; };
+		938261820E1E7F7000A29C9F /* SMSessionInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 938261810E1E7F7000A29C9F /* SMSessionInfo.m */; };
+		938261870E1E7F8100A29C9F /* SMSubCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 938261840E1E7F8100A29C9F /* SMSubCategory.m */; };
+		938261880E1E7F8100A29C9F /* SMCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 938261850E1E7F8100A29C9F /* SMCategory.m */; };
 		938E26AB0C0F47EA0059F26B /* NSURLAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26A90C0F47EA0059F26B /* NSURLAdditions.m */; };
 		938E27490C0F4DE10059F26B /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E27470C0F4DE10059F26B /* NSStringAdditions.m */; };
 		93BD6F2F0AD84AAC007CE525 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
 		93C23E0C0D968FE60022EEE1 /* SMAlbum.m in Sources */ = {isa = PBXBuildFile; fileRef = 93C23E0B0D968FE60022EEE1 /* SMAlbum.m */; };
-		93C23E310D9699E90022EEE1 /* SMAlbumInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 93C23E2F0D9699E90022EEE1 /* SMAlbumInfo.m */; };
 		93C23E820D96B4290022EEE1 /* SMAlbumEditController.m in Sources */ = {isa = PBXBuildFile; fileRef = 93C23E800D96B4290022EEE1 /* SMAlbumEditController.m */; };
 		93C23EA70D96B8DF0022EEE1 /* AlbumEdit.nib in Resources */ = {isa = PBXBuildFile; fileRef = 93C23EA60D96B8DF0022EEE1 /* AlbumEdit.nib */; };
 		93CE12270D5504B200C96591 /* Growl.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 93CE121E0D5504A800C96591 /* Growl.framework */; };
+		93DD11EB0E17EC8C00275408 /* SMResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD11EA0E17EC8C00275408 /* SMResponse.m */; };
+		93DD11EC0E17EC8C00275408 /* SMResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD11EA0E17EC8C00275408 /* SMResponse.m */; };
+		93DD12D70E182D5100275408 /* SMESession.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD12D60E182D5100275408 /* SMESession.m */; };
+		93DD12D80E182D5100275408 /* SMESession.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD12D60E182D5100275408 /* SMESession.m */; };
 		93DD89D80C8C526100A6131B /* SMRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD89D60C8C526100A6131B /* SMRequest.m */; };
 		93DE06B00DE990ED0029F0FA /* JSON.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 93DE06380DE98DD60029F0FA /* JSON.framework */; };
 		93E58BE10D84690C00DA6105 /* SMImageRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 93E58BE00D84690C00DA6105 /* SMImageRef.m */; };
@@ -73,13 +79,11 @@
 		1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		930961BA0C66A164002B8DAA /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
 		930DE5BE0B4831D2008120ED /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
-		93188D910DE9D51A00DBC3FC /* TestVersionComparison.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestVersionComparison.h; path = Source/TestVersionComparison.h; sourceTree = "<group>"; };
-		93188D920DE9D51A00DBC3FC /* TestVersionComparison.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestVersionComparison.m; path = Source/TestVersionComparison.m; sourceTree = "<group>"; };
+		93188D910DE9D51A00DBC3FC /* TestCategories.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestCategories.h; path = Source/TestCategories.h; sourceTree = "<group>"; };
+		93188D920DE9D51A00DBC3FC /* TestCategories.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestCategories.m; path = Source/TestCategories.m; sourceTree = "<group>"; };
 		93188D970DE9D5C600DBC3FC /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = /System/Library/Frameworks/SenTestingKit.framework; sourceTree = "<absolute>"; };
 		93188DB20DE9D5D900DBC3FC /* Tests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		93188E3D0DE9D83700DBC3FC /* Tests-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "Tests-Info.plist"; path = "Resources/Tests-Info.plist"; sourceTree = "<group>"; };
-		9319DE320CB91B560037023F /* SMAccess.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMAccess.h; path = Source/SMAccess.h; sourceTree = "<group>"; };
-		9319DE330CB91B560037023F /* SMAccess.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMAccess.m; path = Source/SMAccess.m; sourceTree = "<group>"; };
 		9319DE340CB91B560037023F /* SMGlobals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMGlobals.h; path = Source/SMGlobals.h; sourceTree = "<group>"; };
 		9319DE380CB91B5D0037023F /* SMAccountManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMAccountManager.h; path = Source/SMAccountManager.h; sourceTree = "<group>"; };
 		9319DE390CB91B5D0037023F /* SMAccountManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMAccountManager.m; path = Source/SMAccountManager.m; sourceTree = "<group>"; };
@@ -105,20 +109,30 @@
 		933AA0CA0CB827CF00B7B2A5 /* SMExportPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMExportPlugin.m; path = Source/SMExportPlugin.m; sourceTree = "<group>"; };
 		935A1A840C1CC2CC00043E12 /* NSUserDefaultsAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSUserDefaultsAdditions.h; path = Source/NSUserDefaultsAdditions.h; sourceTree = "<group>"; };
 		935A1A850C1CC2CC00043E12 /* NSUserDefaultsAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSUserDefaultsAdditions.m; path = Source/NSUserDefaultsAdditions.m; sourceTree = "<group>"; };
+		9382617D0E1E7F6700A29C9F /* SMData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMData.h; path = Source/SMData.h; sourceTree = "<group>"; };
+		9382617E0E1E7F6700A29C9F /* SMData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMData.m; path = Source/SMData.m; sourceTree = "<group>"; };
+		938261800E1E7F7000A29C9F /* SMSessionInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMSessionInfo.h; path = Source/SMSessionInfo.h; sourceTree = "<group>"; };
+		938261810E1E7F7000A29C9F /* SMSessionInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMSessionInfo.m; path = Source/SMSessionInfo.m; sourceTree = "<group>"; };
+		938261830E1E7F8100A29C9F /* SMSubCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMSubCategory.h; path = Source/SMSubCategory.h; sourceTree = "<group>"; };
+		938261840E1E7F8100A29C9F /* SMSubCategory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMSubCategory.m; path = Source/SMSubCategory.m; sourceTree = "<group>"; };
+		938261850E1E7F8100A29C9F /* SMCategory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMCategory.m; path = Source/SMCategory.m; sourceTree = "<group>"; };
+		938261860E1E7F8100A29C9F /* SMCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMCategory.h; path = Source/SMCategory.h; sourceTree = "<group>"; };
 		938E26A80C0F47EA0059F26B /* NSURLAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSURLAdditions.h; path = Source/NSURLAdditions.h; sourceTree = "<group>"; };
 		938E26A90C0F47EA0059F26B /* NSURLAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSURLAdditions.m; path = Source/NSURLAdditions.m; sourceTree = "<group>"; };
 		938E27460C0F4DE10059F26B /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSStringAdditions.h; path = Source/NSStringAdditions.h; sourceTree = "<group>"; };
 		938E27470C0F4DE10059F26B /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSStringAdditions.m; path = Source/NSStringAdditions.m; sourceTree = "<group>"; };
 		93BD6F170AD84A49007CE525 /* SmugMugExport.iPhotoExporter */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SmugMugExport.iPhotoExporter; sourceTree = BUILT_PRODUCTS_DIR; };
-		93BD6F180AD84A49007CE525 /* SmugMugExport-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = "SmugMugExport-Info.plist"; path = "Resources/SmugMugExport-Info.plist"; sourceTree = "<group>"; };
+		93BD6F180AD84A49007CE525 /* SmugMugExport-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "SmugMugExport-Info.plist"; path = "Resources/SmugMugExport-Info.plist"; sourceTree = "<group>"; };
 		93C23E0A0D968FE60022EEE1 /* SMAlbum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMAlbum.h; path = Source/SMAlbum.h; sourceTree = "<group>"; };
 		93C23E0B0D968FE60022EEE1 /* SMAlbum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMAlbum.m; path = Source/SMAlbum.m; sourceTree = "<group>"; };
-		93C23E2F0D9699E90022EEE1 /* SMAlbumInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMAlbumInfo.m; path = Source/SMAlbumInfo.m; sourceTree = "<group>"; };
-		93C23E300D9699E90022EEE1 /* SMAlbumInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMAlbumInfo.h; path = Source/SMAlbumInfo.h; sourceTree = "<group>"; };
 		93C23E800D96B4290022EEE1 /* SMAlbumEditController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMAlbumEditController.m; path = Source/SMAlbumEditController.m; sourceTree = "<group>"; };
 		93C23E810D96B4290022EEE1 /* SMAlbumEditController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMAlbumEditController.h; path = Source/SMAlbumEditController.h; sourceTree = "<group>"; };
 		93C23EA60D96B8DF0022EEE1 /* AlbumEdit.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = AlbumEdit.nib; path = Resources/AlbumEdit.nib; sourceTree = "<group>"; };
 		93CE121E0D5504A800C96591 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Growl.framework; path = Resources/Frameworks/Growl.framework; sourceTree = "<group>"; };
+		93DD11E90E17EC8C00275408 /* SMResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMResponse.h; path = Source/SMResponse.h; sourceTree = "<group>"; };
+		93DD11EA0E17EC8C00275408 /* SMResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMResponse.m; path = Source/SMResponse.m; sourceTree = "<group>"; };
+		93DD12D50E182D5100275408 /* SMESession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMESession.h; path = Source/SMESession.h; sourceTree = "<group>"; };
+		93DD12D60E182D5100275408 /* SMESession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMESession.m; path = Source/SMESession.m; sourceTree = "<group>"; };
 		93DD88F60C8C4AE000A6131B /* SMDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMDecoder.h; path = Source/SMDecoder.h; sourceTree = "<group>"; };
 		93DD89D50C8C526100A6131B /* SMRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMRequest.h; path = Source/SMRequest.h; sourceTree = "<group>"; };
 		93DD89D60C8C526100A6131B /* SMRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMRequest.m; path = Source/SMRequest.m; sourceTree = "<group>"; };
@@ -264,8 +278,8 @@
 		93188D8E0DE9D4ED00DBC3FC /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				93188D910DE9D51A00DBC3FC /* TestVersionComparison.h */,
-				93188D920DE9D51A00DBC3FC /* TestVersionComparison.m */,
+				93188D910DE9D51A00DBC3FC /* TestCategories.h */,
+				93188D920DE9D51A00DBC3FC /* TestCategories.m */,
 			);
 			name = Tests;
 			sourceTree = "<group>";
@@ -284,19 +298,14 @@
 		938E26DE0C0F49180059F26B /* SmugMug Access */ = {
 			isa = PBXGroup;
 			children = (
+				93DD12D50E182D5100275408 /* SMESession.h */,
+				93DD12D60E182D5100275408 /* SMESession.m */,
+				93DD12080E17F04E00275408 /* Types */,
 				93EBDDE30C8CF5EA00905273 /* SMUploadObserver.h */,
 				93DD89D50C8C526100A6131B /* SMRequest.h */,
 				93DD89D60C8C526100A6131B /* SMRequest.m */,
-				9319DE320CB91B560037023F /* SMAccess.h */,
-				9319DE330CB91B560037023F /* SMAccess.m */,
-				93C23E0A0D968FE60022EEE1 /* SMAlbum.h */,
-				93C23E0B0D968FE60022EEE1 /* SMAlbum.m */,
-				93C23E300D9699E90022EEE1 /* SMAlbumInfo.h */,
-				93C23E2F0D9699E90022EEE1 /* SMAlbumInfo.m */,
-				93E58C810D84732E00DA6105 /* SMAlbumRef.h */,
-				93E58C800D84732E00DA6105 /* SMAlbumRef.m */,
-				93E58BDF0D84690C00DA6105 /* SMImageRef.h */,
-				93E58BE00D84690C00DA6105 /* SMImageRef.m */,
+				93DD11E90E17EC8C00275408 /* SMResponse.h */,
+				93DD11EA0E17EC8C00275408 /* SMResponse.m */,
 				93DD88F60C8C4AE000A6131B /* SMDecoder.h */,
 				9319DE3C0CB91B690037023F /* SMJSONDecoder.h */,
 				9319DE3D0CB91B690037023F /* SMJSONDecoder.m */,
@@ -319,6 +328,27 @@
 				935A1A850C1CC2CC00043E12 /* NSUserDefaultsAdditions.m */,
 			);
 			name = Categories;
+			sourceTree = "<group>";
+		};
+		93DD12080E17F04E00275408 /* Types */ = {
+			isa = PBXGroup;
+			children = (
+				9382617D0E1E7F6700A29C9F /* SMData.h */,
+				9382617E0E1E7F6700A29C9F /* SMData.m */,
+				938261800E1E7F7000A29C9F /* SMSessionInfo.h */,
+				938261810E1E7F7000A29C9F /* SMSessionInfo.m */,
+				93C23E0A0D968FE60022EEE1 /* SMAlbum.h */,
+				93C23E0B0D968FE60022EEE1 /* SMAlbum.m */,
+				93E58C810D84732E00DA6105 /* SMAlbumRef.h */,
+				93E58C800D84732E00DA6105 /* SMAlbumRef.m */,
+				93E58BDF0D84690C00DA6105 /* SMImageRef.h */,
+				93E58BE00D84690C00DA6105 /* SMImageRef.m */,
+				938261830E1E7F8100A29C9F /* SMSubCategory.h */,
+				938261840E1E7F8100A29C9F /* SMSubCategory.m */,
+				938261860E1E7F8100A29C9F /* SMCategory.h */,
+				938261850E1E7F8100A29C9F /* SMCategory.m */,
+			);
+			name = Types;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -436,8 +466,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				93188E300DE9D77C00DBC3FC /* TestVersionComparison.m in Sources */,
+				93188E300DE9D77C00DBC3FC /* TestCategories.m in Sources */,
 				93188E1E0DE9D67400DBC3FC /* NSStringAdditions.m in Sources */,
+				93DD11EB0E17EC8C00275408 /* SMResponse.m in Sources */,
+				93DD12D70E182D5100275408 /* SMESession.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -456,14 +488,18 @@
 				933AA0920CB825CA00B7B2A5 /* SMExportBox.m in Sources */,
 				933AA0B30CB8273000B7B2A5 /* SMUserDefaults.m in Sources */,
 				933AA0CC0CB827CF00B7B2A5 /* SMExportPlugin.m in Sources */,
-				9319DE360CB91B560037023F /* SMAccess.m in Sources */,
 				9319DE3B0CB91B5D0037023F /* SMAccountManager.m in Sources */,
 				9319DE3F0CB91B690037023F /* SMJSONDecoder.m in Sources */,
 				93E58BE10D84690C00DA6105 /* SMImageRef.m in Sources */,
 				93E58C820D84732E00DA6105 /* SMAlbumRef.m in Sources */,
 				93C23E0C0D968FE60022EEE1 /* SMAlbum.m in Sources */,
-				93C23E310D9699E90022EEE1 /* SMAlbumInfo.m in Sources */,
 				93C23E820D96B4290022EEE1 /* SMAlbumEditController.m in Sources */,
+				93DD11EC0E17EC8C00275408 /* SMResponse.m in Sources */,
+				93DD12D80E182D5100275408 /* SMESession.m in Sources */,
+				9382617F0E1E7F6700A29C9F /* SMData.m in Sources */,
+				938261820E1E7F7000A29C9F /* SMSessionInfo.m in Sources */,
+				938261870E1E7F8100A29C9F /* SMSubCategory.m in Sources */,
+				938261880E1E7F8100A29C9F /* SMCategory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
