@@ -430,7 +430,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	
 	NSString *remoteVersion = [remoteInfo objectForKey:@"remoteVersion"];
 	if(remoteVersion == nil) {
-		[args release];
 		return;
 	}
 	
@@ -438,7 +437,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	if(localVersion == nil) {
 		NSLog(@"undefined bundle version found during update.");
 		NSBeep();
-		[args release];
 		return;
 	}
 
@@ -446,8 +444,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[self displayUpdateAvailable:remoteInfo];
 	else if([displayAlertIfNoUpdateAvailable boolValue])
 		[self displayNoUpdateAvailable];
-
-	[args release];
 }
 
 -(void)displayNoUpdateAvailable {
