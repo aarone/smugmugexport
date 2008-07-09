@@ -40,9 +40,11 @@
 	NSData *compressedData = [NSData dataWithContentsOfURL:url];
 	unsigned char firstByte = 0;
 	[compressedData getBytes:&firstByte length:1];
-	if(firstByte != 0x1F) // not gzipped data
+	if(firstByte != 0x1F) {// not gzipped data
+		[compressedData retain];
+		[pool release];
 		return [NSData dataWithData:compressedData];
-	
+	}
     gunzip = [[NSTask alloc] init];
     
     compressedDataPipe = [NSPipe pipe];

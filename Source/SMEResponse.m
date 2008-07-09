@@ -24,7 +24,7 @@
 	@try {		
 		response = IsEmpty(data) ? nil : [[self decodedResponse:data decoder:aDecoder] retain];
 	} @catch (NSException *ex) {
-		NSLog(@"Error decoding response: @", ex);
+		NSLog(@"Error decoding response: %@", ex);
 		response = nil;
 	}
 	

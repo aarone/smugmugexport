@@ -68,6 +68,8 @@
 		return NSOrderedAscending;
 	else if(thisQualifier != nil && thatQualifier == nil)
 		return NSOrderedDescending;
+	else if(thisQualifier == nil && thatQualifier == nil)
+		return NSOrderedSame;
 	
 	return [thisQualifier compare:thatQualifier];
 }

@@ -74,6 +74,8 @@ static SMEKeychainManager *sharedKeychainManager = nil;
 	
 	// create our search for this keychain item kind
 	result = SecKeychainSearchCreateFromAttributes(NULL, kSecGenericPasswordItemClass, &list, &search);
+	if(result != noErr)
+		return nil;
 
 #define HACK_FOR_LABEL (7)
 	SecItemAttr itemAttributes[] = {HACK_FOR_LABEL};
@@ -88,7 +90,9 @@ static SMEKeychainManager *sharedKeychainManager = nil;
 	NSMutableArray *foundItems = [NSMutableArray array];
 	while (SecKeychainSearchCopyNext (search, &item) == noErr) {
 		SecKeychainItemCopyAttributesAndData(item, &info, NULL, &attributeList, NULL, NULL);
-		NSString *label = [[NSString alloc] initWithBytes:(void *)attributeList->attr->data length:(unsigned)attributeList->attr->length encoding:NSUTF8StringEncoding];
+		NSString *label = [[[NSString alloc] initWithBytes:(void *)attributeList->attr->data 
+												   length:(unsigned)attributeList->attr->length 
+												 encoding:NSUTF8StringEncoding] autorelease];
 		
 		[foundItems addObject:label];
 		CFRelease (item);
@@ -159,6 +163,10 @@ static SMEKeychainManager *sharedKeychainManager = nil;
     list.attr = attributes;
 	
 	result = SecKeychainSearchCreateFromAttributes(NULL, kSecGenericPasswordItemClass, &list, &search);
+	
+	if(result != noErr)
+		return NO;
+	
 	while (SecKeychainSearchCopyNext (search, &item) == noErr)
         numberOfItemsFound++;
 
@@ -195,11 +203,20 @@ static SMEKeychainManager *sharedKeychainManager = nil;
     list.attr = attributes;
 	
 	result = SecKeychainSearchCreateFromAttributes(NULL, kSecGenericPasswordItemClass, &list, &search);
+	if(result != noErr) {
+		CFRelease(search);
+		return NO;
+	}
+	
 	SecKeychainSearchCopyNext (search, &item);
     status = SecKeychainItemModifyContent(item, &list, [newPassword length], [newPassword UTF8String]);
 	
-    if (status != 0)
+    if (status != noErr) {
+		CFRelease (item);
+		CFRelease(search);
         NSLog(@"Error modifying item: %d", (int)status);
+		return NO;
+	}
 	
 	CFRelease (item);
 	CFRelease(search);

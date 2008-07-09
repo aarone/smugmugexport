@@ -561,6 +561,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 		CFRelease(readStream);
 		readStream = NULL;
 		NSLog(@"CFReadStreamSetClient returned null on start of upload");
+		[pool release];
 		return;
 	}
 	

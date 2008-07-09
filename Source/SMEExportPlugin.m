@@ -324,7 +324,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 #pragma mark Error Handling
 -(void)presentError:(NSString *)errorText {
 	if([self sheetIsDisplayed]) {
-		NSLog(errorText);
+		NSLog(@"%@", errorText);
 		return; // TODO display somewhere else
 	}
 	
@@ -372,7 +372,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	int selectedButton = [alert runModal];
 	
 	[[self defaults] setObject:[NSNumber numberWithBool:YES] forKey:SMUserHasSeenUpdatePolicy];
-	[[self defaults] setObject:[NSNumber numberWithBool:selectedButton = NSAlertFirstButtonReturn] forKey:SMAutomaticallyCheckForUpdates];
+	[[self defaults] setObject:[NSNumber numberWithBool:selectedButton == NSAlertFirstButtonReturn] forKey:SMAutomaticallyCheckForUpdates];
 	[alert release];
 }
 
@@ -409,7 +409,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[[self defaults] setObject:[NSDate date] forKey:SMLastUpdateCheck];
 	
 	[self performSelectorOnMainThread:@selector(remoteVersionInfoWasFetch:)
-						   withObject:[[NSDictionary alloc] initWithObjectsAndKeys: 
+						   withObject:[NSDictionary dictionaryWithObjectsAndKeys: 
 									   remoteInfo , @"remoteInfo",
 									   displayAlertIfNoUpdateAvailable, @"displayAlertIfNoUpdateAvailable", nil]
 						waitUntilDone:NO];
