@@ -9,6 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "SMERequest.h"
 
+#define NO_CATEGORIES_FOUND_CODE 15
 
 @class SMEAlbumRef, SMEImageRef, SMEAlbum;
 
@@ -27,6 +28,9 @@
 			  username:(NSString *)username 
 			  password:(NSString *)password 
 				apiKey:(NSString *)apiKey;
+
+-(void)logoutWithTarget:(id)target
+			   callback:(SEL)callback;
 
 -(void)fetchAlbumsWithTarget:(id)target
 					callback:(SEL)callback;

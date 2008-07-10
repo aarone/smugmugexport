@@ -46,12 +46,11 @@
 	NSArray *categories;
 	NSArray *subcategories;
 	SMESessionInfo *sessionInfo;
-	BOOL isLoggingIn;
 	
 	NSInvocation *postLogoutInvocation; // do this after a logout is complete
-	
+
+	BOOL isLoggingIn;
 	BOOL isUploading;
-	BOOL loginSheetIsBusy;
 	BOOL isBusy;
 	BOOL loginAttempted;
 	BOOL uploadCancelled;

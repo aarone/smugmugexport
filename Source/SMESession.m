@@ -146,7 +146,6 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 @end
 
-#define NO_CATEGORIES_FOUND_CODE 15
 
 @implementation SMESession
 
@@ -221,6 +220,25 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	
 	// the only state of a session
 	[self setSessionID:[info sessionId]];	
+	return resp;
+}
+
+-(void)logoutWithTarget:(id)target
+			   callback:(SEL)callback {
+
+	[self invokeMethodAndTransform:[self baseRequestUrl]
+					   requestDict:[NSDictionary dictionaryWithObjectsAndKeys:
+									@"smugmug.logout", @"method",
+									[self sessionID], @"SessionID", nil]
+						  callback:callback
+							target:target
+					   transformer:self
+					  transformSel:@selector(transformLogoutRequest:)];	
+	
+}
+
+-(SMEResponse *)transformLogoutRequest:(SMERequest *)req {
+	SMEResponse *resp = [SMEResponse responseWithData:[req data] decoder:[self decoder]];
 	return resp;
 }
 

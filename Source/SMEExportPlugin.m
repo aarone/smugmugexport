@@ -59,13 +59,14 @@
 -(void)setStatusText:(NSString *)t;
 -(BOOL)isBusy;
 -(void)setIsBusy:(BOOL)v;
+-(BOOL)isLoggedIn;
+-(BOOL)isLoggingIn;
+-(void)setIsLoggingIn:(BOOL)v;
 -(BOOL)isDeletingAlbum;
 -(void)setIsDeletingAlbum:(BOOL)v;	
 -(void)login;
 -(NSImage *)currentThumbnail;
 -(void)setCurrentThumbnail:(NSImage *)d;
--(BOOL)loginSheetIsBusy;
--(void)setLoginSheetIsBusy:(BOOL)v;
 -(void)setInsertionPoint:(NSWindow *)aWindow;
 -(void)presentError:(NSString *)errorText;
 -(BOOL)isUploading;
@@ -263,28 +264,31 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 +(void)initialize {
 	[self initializeLocalizableStrings];
 	
+	NSNumber *no = [NSNumber numberWithBool:NO];
+	NSNumber *yes = [NSNumber numberWithBool:YES];
+	
 	NSMutableDictionary *defaultsDict = [NSMutableDictionary dictionary];
 	[defaultsDict setObject:ExistingAlbumTabIdentifier forKey:SMESelectedTabIdDefaultsKey];
 	[defaultsDict setObject:[NSArray array] forKey:SMEAccountsDefaultsKey];
-	[defaultsDict setObject:@"yes" forKey:SMOpenInBrowserAfterUploadCompletion];
-	[defaultsDict setObject:@"yes" forKey:SMCloseExportWindowAfterUploadCompletion];
-	[defaultsDict setObject:@"yes" forKey:SMStorePasswordInKeychain];
-	[defaultsDict setObject:@"no" forKey:SMUseKeywordsAsTags];
-	[defaultsDict setObject:@"yes" forKey:SMShowAlbumDeleteAlert];
-	[defaultsDict setObject:@"no" forKey:SMEnableNetworkTracing];
-	[defaultsDict setObject:@"yes" forKey:SMEnableAlbumFetchDelay];
+	[defaultsDict setObject:yes forKey:SMOpenInBrowserAfterUploadCompletion];
+	[defaultsDict setObject:yes forKey:SMCloseExportWindowAfterUploadCompletion];
+	[defaultsDict setObject:yes forKey:SMStorePasswordInKeychain];
+	[defaultsDict setObject:no forKey:SMUseKeywordsAsTags];
+	[defaultsDict setObject:yes forKey:SMShowAlbumDeleteAlert];
+	[defaultsDict setObject:no forKey:SMEnableNetworkTracing];
+	[defaultsDict setObject:yes forKey:SMEnableAlbumFetchDelay];
 	[defaultsDict setObject:[NSNumber numberWithFloat:[NSBitmapImageRep defaultJpegScalingFactor]] forKey:SMJpegQualityFactor];
 	[defaultsDict setObject:[NSNumber numberWithInt:0] forKey:SMSelectedScalingTag];
 	[defaultsDict setObject:[NSNumber numberWithInt: SMDefaultScaledWidth] forKey:SMImageScaleWidth];
 	[defaultsDict setObject:[NSNumber numberWithInt: SMDefaultScaledHeight] forKey:SMImageScaleHeight];
 	[defaultsDict setObject:defaultRemoteVersionInfo forKey:SMRemoteInfoURL];
-	[defaultsDict setObject:@"yes" forKey:SMCheckForUpdates];
+	[defaultsDict setObject:yes forKey:SMCheckForUpdates];
 	[defaultsDict setObject:SMUploadedFilenameOptionFilename forKey:SMUploadedFilename];
-	[defaultsDict setObject:[NSNumber numberWithBool:NO] forKey:SMUserHasSeenUpdatePolicy];
-	[defaultsDict setObject:[NSNumber numberWithBool:NO] forKey:SMAutomaticallyCheckForUpdates];
+	[defaultsDict setObject:no forKey:SMUserHasSeenUpdatePolicy];
+	[defaultsDict setObject:no forKey:SMAutomaticallyCheckForUpdates];
 	[defaultsDict setObject:[NSDate distantPast] forKey:SMLastUpdateCheck];
 	[defaultsDict setObject:[NSNumber numberWithInt:SMDefaultUpdateCheckInterval] forKey:SMUpdateCheckInterval];
-	[defaultsDict setObject:[NSNumber numberWithBool:NO] forKey:SMContinueUploadOnFileIOError];
+	[defaultsDict setObject:no forKey:SMContinueUploadOnFileIOError];
 	
 	[[NSUserDefaults smugMugUserDefaults] registerDefaults:defaultsDict];
 	
@@ -391,7 +395,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(IBAction)checkForUpdates:(id)sender {
 	if([self isUpdateInProgress]) {
-		NSLog(@"Cannot check for updates because a check is already in progress.");
 		NSBeep();
 		return;
 	}
@@ -478,14 +481,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 #pragma mark Login Methods
 
--(BOOL)isLoggedIn {
-	return sessionInfo != nil; 
-}
-
--(BOOL)isLoggingIn {
-	return NO;
-}
-
 -(void)attemptLoginIfNecessary {
 	// try to automatically show the login sheet 
 	
@@ -524,6 +519,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[self setLoginAttempted:YES];
 		[self performSelectorOnMainThread:@selector(setIsBusyWithNumber:) withObject:[NSNumber numberWithBool:YES] waitUntilDone:NO];	
 		[self performSelectorOnMainThread:@selector(setStatusText:) withObject:NSLocalizedString(@"Logging in...", @"Status text for logginng in") waitUntilDone:NO];
+		[self setIsLoggingIn:YES];
 		
 		[[self session] loginWithTarget:self 
 							   callback:@selector(autoLoginComplete:)
@@ -572,7 +568,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[self setSelectedAccount:[[[self accountManager] accounts] objectAtIndex:0]];
 	
 	[self setLoginSheetStatusMessage:@""];
-	[self setLoginSheetIsBusy:NO];
+	[self setIsLoggingIn:NO];
 	[NSApp endSheet:loginPanel];
 }
 
@@ -584,7 +580,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	}
 	
 	[self setLoginSheetStatusMessage:NSLocalizedString(@"Logging In...", @"log in status string")];
-	[self setLoginSheetIsBusy:YES];
+	[self setIsLoggingIn:YES];
 
 	[[self session] loginWithTarget:self 
 						   callback:@selector(loginComplete:) 
@@ -596,7 +592,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 -(BOOL)commonPostLoginTasks:(SMEResponse *)response {
 	[self setIsBusy:NO];
 	[self setStatusText:@""];
-	[self setLoginSheetIsBusy:NO];
+	[self setIsLoggingIn:NO];
 	[self setLoginSheetStatusMessage:@""];
 	
 	if(! [response wasSuccessful]) {
@@ -653,16 +649,14 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	}
 	
 	[self setAlbums:[resp smData]];
+	[albumsArrayController setSelectionIndex:0]; 
 }
 
 #pragma mark Logout 
 -(void)logoutDidComplete:(SMEResponse *)resp {
-	if(![resp wasSuccessful])
-		[self presentError:NSLocalizedString(@"Logout failed.", @"Error message to display when logout fails.")];
-	else if([self postLogoutInvocation] != nil) {
-		[self notifyLougout:[self selectedAccount]];
-		[[self postLogoutInvocation] invokeWithTarget:self];
-	}
+	[self notifyLougout:[self selectedAccount]];
+	[self setSessionInfo:nil];
+	[[self postLogoutInvocation] invokeWithTarget:self];
 }
 
 #pragma mark Preferences
@@ -938,7 +932,8 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)subcategoryFetchDidComplete:(SMEResponse *)resp {
-	if(! [resp wasSuccessful]) {
+	// smugmug considers zero categories to be an error. weird!
+	if(! [resp wasSuccessful] && [resp code] != NO_CATEGORIES_FOUND_CODE) {
 		[self presentRemoteError:resp];
 		return;
 	}
@@ -1175,6 +1170,18 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 #pragma mark Get and Set properties
 
+-(BOOL)isLoggedIn {
+	return sessionInfo != nil; 
+}
+
+-(BOOL)isLoggingIn {
+	return isLoggingIn;
+}
+
+-(void)setIsLoggingIn:(BOOL)v {
+	isLoggingIn = v;
+}
+
 -(NSString *)imageUploadProgressText {
 	return imageUploadProgressText;
 }
@@ -1217,7 +1224,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[[self postLogoutInvocation] setArgument:&account atIndex:2];
 		[inv retainArguments];
 		
-//		[[self session] logout]; // aynchronous callback
+		[[self session] logoutWithTarget:self callback:@selector(logoutDidComplete:)]; // aynchronous callback
 	} else {
 		[self accountChangedTasks:account];
 	}
@@ -1228,24 +1235,13 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[[self accountManager] setSelectedAccount:account];
 	
 	[self setLoginAttempted:NO];
+	
 	// login to the newly selected account
 	[self attemptLoginIfNecessary];	
 }
 
 -(NSString *)selectedAccount {
 	return [[self accountManager] selectedAccount];
-}
-
--(BOOL)loginSheetIsBusy {
-	return loginSheetIsBusy;
-}
-
--(void)setLoginSheetIsBusyWithNumber:(NSNumber *)v {
-	[self setLoginSheetIsBusy:[v boolValue]];
-}
-
--(void)setLoginSheetIsBusy:(BOOL)v {
-	loginSheetIsBusy = v;
 }
 
 -(NSImage *)currentThumbnail {
@@ -1596,7 +1592,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)viewWillBeDeactivated {
 	loginAttempted = NO;
-//	[[self SMESession] logout];
+	[[self session] logoutWithTarget:self callback:@selector(logoutDidComplete:)];
 }
 
 -(void)viewWillBeActivated {
