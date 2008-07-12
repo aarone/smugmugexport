@@ -25,6 +25,8 @@
 	BOOL nibLoaded;
 	BOOL isSheetOpen;
 	BOOL isEditing; // ie not creating a new album
+	
+	NSString *statusText;
 }
 
 -(IBAction)cancelAlbumSheet:(id)sender;
@@ -41,10 +43,11 @@
 				forWindow:(NSWindow *)aWindow
 				 forAlbum:(SMEAlbum *)album;
 
+-(void)showError:(NSString *)err;
+
 -(id)delegate;
 -(void)closeSheet;
 -(BOOL)isSheetOpen;
-
 -(BOOL)isBusy;
 -(void)setIsBusy:(BOOL)v;
 

@@ -59,10 +59,10 @@
 }
 
 -(void)setImageId:(NSString *)anId {
-	if([self imageId] != nil)
-		[[self imageId] release];
-	
-	imageId = [anId retain];
+	if(imageId != anId) {
+		[imageId release];
+		imageId = [anId retain];
+	}
 }
 			
 -(NSString *)imageId {
@@ -71,10 +71,10 @@
 
 
 -(void)setImageKey:(NSString *)aKey {
-	if([self imageKey] != nil)
-		[[self imageKey] release];
-	
-	imageKey = [aKey retain];
+	if(imageKey != aKey) {
+		[imageKey release];	
+		imageKey = [aKey retain];
+	}
 }
 
 

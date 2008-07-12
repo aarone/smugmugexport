@@ -153,10 +153,10 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(void)setRequestDict:(NSDictionary *)dict {
-	if([self requestDict] != nil)
-		[[self requestDict] release];
-	
-	requestDict = [dict retain];
+	if(requestDict != dict) {
+		[requestDict release];	
+		requestDict = [dict retain];
+	}
 }
 
 -(NSURL *)requestUrl {
@@ -164,10 +164,10 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(void)setRequestUrl:(NSURL *)url {
-	if([self requestUrl] != nil) 
-		[[self requestUrl] release];
-	
-	requestUrl = [url retain];
+	if(requestUrl != url) {
+		[requestUrl release];	
+		requestUrl = [url retain];
+	}
 }
 
 -(BOOL)isUploading {
@@ -183,10 +183,10 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(void)setImageData:(NSData *)data {
-	if([self imageData] != nil)
-		[[self imageData] release];
-	
-	imageData = [data retain];
+	if(imageData != data) {
+		[imageData release];
+		imageData = [data retain];
+	}
 }
 
 -(NSData *)imageData {
@@ -194,10 +194,10 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(void)setResponse:(NSMutableData *)data {
-	if([self response] != nil)
-		[[self response] release];
-	
-	response = [data retain];
+	if(response != data) {
+		[response release];
+		response = [data retain];	
+	}
 }
 
 -(void)appendToResponse:(NSData *)data {
@@ -209,10 +209,10 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(void)setConnection:(NSURLConnection *)c {
-	if([self connection] != nil)
-		[[self connection] release];
-	
-	connection = [c retain];
+	if(connection != c) {
+		[connection release];
+		connection = [c retain];	
+	}
 }
 
 -(BOOL)wasSuccessful {
@@ -256,10 +256,10 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(void)setError:(NSError *)e {
-	if([self error] != nil)
-		[[self error] release];
-	
-	error = [e retain];
+	if(error != e) {
+		[error release];
+		error = [e retain];
+	}
 }
 
 -(void)invokeMethodWithUrl:(NSURL *)url {

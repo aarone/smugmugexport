@@ -328,8 +328,8 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 #pragma mark Error Handling
 -(void)presentError:(NSString *)errorText {
 	if([self sheetIsDisplayed]) {
-		NSLog(@"%@", errorText);
-		return; // TODO display somewhere else
+		[[self albumEditController] showError:errorText];
+		return;
 	}
 	
 	NSAlert *alert = [[NSAlert alloc] init];
@@ -342,6 +342,13 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 					  modalDelegate:self
 					 didEndSelector:@selector(errorAlertDidEnd:returnCode:contextInfo:)
 						contextInfo:NULL];
+}
+
+-(void)presentRemoteError:(SMEResponse *)resp {
+	[self setIsBusy:NO];
+	[self presentError:[NSString stringWithFormat:
+						NSLocalizedString(@"Error from Smugmug: %@", @"Error string for remote errors"), 
+						[resp errorMessage]]];
 }
 
 -(void)errorAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
@@ -924,13 +931,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	}
 }
 
--(void)presentRemoteError:(SMEResponse *)resp {
-	[self setIsBusy:NO];
-	[self presentError:[NSString stringWithFormat:
-						NSLocalizedString(@"Error from Smugmug: %@", @"Error string for remote errors"), 
-						[resp errorMessage]]];
-}
-
 -(void)subcategoryFetchDidComplete:(SMEResponse *)resp {
 	// smugmug considers zero categories to be an error. weird!
 	if(! [resp wasSuccessful] && [resp code] != NO_CATEGORIES_FOUND_CODE) {
@@ -1187,10 +1187,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)setImageUploadProgressText:(NSString *)text {
-	if([self imageUploadProgressText] != nil)
-		[[self imageUploadProgressText] release];
-	
-	imageUploadProgressText = [text retain];
+	if(imageUploadProgressText != text) {
+		[imageUploadProgressText release];	
+		imageUploadProgressText = [text retain];
+	}
 }
 
 -(NSArray *)accounts {
@@ -1249,10 +1249,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)setCurrentThumbnail:(NSImage *)d {
-	if([self currentThumbnail] != nil)
-		[[self currentThumbnail] release];
-	
-	currentThumbnail = [d retain];
+	if(currentThumbnail != d) {
+		[currentThumbnail release];
+		currentThumbnail = [d retain];
+	}
 }
 
 -(BOOL)siteUrlHasBeenFetched {
@@ -1268,10 +1268,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)setUploadSiteUrl:(NSURL *)url {
-	if(uploadSiteUrl != nil)
-		[[self uploadSiteUrl] release];
-	
-	uploadSiteUrl = [url retain];
+	if(uploadSiteUrl != url) {
+		[uploadSiteUrl release];	
+		uploadSiteUrl = [url retain];
+	}
 }
 
 -(void)setIsBusyWithNumber:(NSNumber *)val {
@@ -1335,10 +1335,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)setAccountManager:(SMEAccountManager *)mgr {
-	if([self accountManager] != nil)
-		[[self accountManager] release];
-	
-	accountManager = [mgr retain];
+	if(accountManager != mgr) {
+		[accountManager release];
+		accountManager = [mgr retain];
+	}
 }
 
 -(ExportMgr *)exportManager {
@@ -1366,10 +1366,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)setLoginSheetStatusMessage:(NSString *)m {
-	if([self loginSheetStatusMessage] != nil)
-		[[self loginSheetStatusMessage] release];
-	
-	loginSheetStatusMessage = [m retain];
+	if(loginSheetStatusMessage != m) {
+		[loginSheetStatusMessage release];
+		loginSheetStatusMessage = [m retain];
+	}
 }
 
 -(NSInvocation *)postLogoutInvocation {
@@ -1377,10 +1377,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)setPostLogoutInvocation:(NSInvocation *)inv {
-	if([self postLogoutInvocation] != nil)
-		[[self postLogoutInvocation] release];
-		
-	postLogoutInvocation = [inv retain];
+	if(inv != postLogoutInvocation) {
+		[postLogoutInvocation release];		
+		postLogoutInvocation = [inv retain];	
+	}
 }
 
 -(SMESession *)session {
@@ -1400,10 +1400,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)setSessionInfo:(SMESessionInfo *)m {
-	if([self sessionInfo] != nil)
-		[[self sessionInfo] release];
-	
-	sessionInfo = [m retain];
+	if(sessionInfo != m) {
+		[sessionInfo release];	
+		sessionInfo = [m retain];		
+	}
 }
 
 -(SMEAlbumEditController *)albumEditController {
@@ -1430,10 +1430,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)setUsername:(NSString *)n {
-	if([self username] != nil)
-		[[self username] release];
-	
-	username = [n retain];
+	if(n != username) {
+		[username release];	
+		username = [n retain];	
+	}
 }
 
 -(NSString *)statusText {
@@ -1441,10 +1441,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)setStatusText:(NSString *)t {
-	if([self statusText] != nil)
-		[[self statusText] release];
-	
-	statusText = [t retain];
+	if(statusText != t) {
+		[statusText release];	
+		statusText = [t retain];
+	}
 }
 
 -(NSString *)password {
@@ -1452,10 +1452,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)setPassword:(NSString *)p {
-	if([self password] != nil)
-		[[self password] release];
-	
-	password = [p retain];
+	if(password != p) {
+		[password release];
+		password = [p retain];
+	}
 }
 
 -(NSString *)sessionUploadStatusText {
@@ -1463,10 +1463,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)setSessionUploadStatusText:(NSString *)t {
-	if([self sessionUploadStatusText] != nil)
-		[[self sessionUploadStatusText] release];
-	
-	sessionUploadStatusText = [t retain];
+	if(sessionUploadStatusText != t) {
+		[sessionUploadStatusText release];
+		sessionUploadStatusText = [t retain];
+	}
 }
 
 -(NSArray *)albums {
@@ -1507,10 +1507,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)setFileUploadProgress:(NSNumber *)v {
-	if([self fileUploadProgress] != nil)
-		[[self fileUploadProgress] release];
-	
-	fileUploadProgress = [v retain];
+	if(fileUploadProgress != v) {
+		[fileUploadProgress release];	
+		fileUploadProgress = [v retain];	
+	}
 }
 
 -(NSNumber *)sessionUploadProgress {
@@ -1518,10 +1518,11 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)setSessionUploadProgress:(NSNumber *)v {
-	if([self sessionUploadProgress] != nil)
-		[[self sessionUploadProgress] release];
+	if(sessionUploadProgress != v) {
+		[sessionUploadProgress release];
+		sessionUploadProgress = [v retain];	
+	}
 
-	sessionUploadProgress = [v retain];
 }
 
 -(SMEAlbum *)selectedAlbum {

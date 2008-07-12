@@ -21,6 +21,8 @@
 -(void)setIsEditing:(BOOL)v;
 -(SMEAlbum *)album;
 -(void)setAlbum:(SMEAlbum *)anAlbum;
+-(NSString *)statusText;
+-(void)setStatusText:(NSString *)aString;
 @end
 
 @implementation SMEAlbumEditController
@@ -57,6 +59,10 @@
 		[NSBundle loadNibNamed: @"AlbumEdit" owner: self];
 	
 	nibLoaded = YES;
+}
+
+-(void)showError:(NSString *)err {
+	[self setStatusText:err];
 }
 
 -(NSWindow *)newAlbumSheet {
@@ -130,37 +136,6 @@
 	isSheetOpen = NO;
 }
 
-//-(void)showAlbumEditSheet:(id)delegate
-//				forWindow:(NSWindow *)aWindow
-//				 forAlbum:(SMAlbumRef *)ref
-//			withAlbumInfo:(SMAlbumInfo *)info {
-//	[self loadNibIfNecessary];
-//	
-//	// temporarily stop observing category changes: the observation is supposed to 
-//	// only be effective when the user changes the selected category in the UI
-//	[albumInfoController removeObserver:self 
-//							 forKeyPath:@"selection.category"];
-//	[self setAlbumInfo:info];
-//	[self refreshCategorySelections:NO];
-//	[albumInfoController addObserver:self 
-//						  forKeyPath:@"selection.category" 
-//							 options:NSKeyValueObservingOptionNew 
-//							 context:NULL];
-//	
-//	
-//	[self setIsEditing:YES];
-//	
-//	isSheetOpen = YES;
-//	[NSApp beginSheet:[self newAlbumSheet]
-//	   modalForWindow:aWindow
-//		modalDelegate:self
-//	   didEndSelector:@selector(editAlbumDidEndSheet:returnCode:contextInfo:)
-//		  contextInfo:ref];
-//	[[self newAlbumSheet] makeKeyAndOrderFront:self];
-//}
-//
-
-
 -(NSString *)editAlbumButtonText {
 	return NSLocalizedString(@"Edit", @"Button text when editing a new album");
 }
@@ -224,5 +199,14 @@
 	}
 }
 
+-(NSString *)statusText {
+	return statusText;
+}
 
+-(void)setStatusText:(NSString *)aString {
+	if(aString != statusText) {
+		[statusText release];
+		statusText = [aString retain];
+	}
+}
 @end

@@ -8,6 +8,7 @@
 		<string key="IBDocument.HIToolboxVersion">352.00</string>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
+			<integer value="4"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -37,7 +38,7 @@
 				<string key="NSWindowContentMaxSize">{3.40282e+38, 3.40282e+38}</string>
 				<string key="NSWindowContentMinSize">{213, 107}</string>
 				<object class="NSView" key="NSWindowView" id="1015393335">
-					<nil key="NSNextResponder"/>
+					<reference key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -666,8 +667,25 @@
 								<int key="NSArrowPosition">1</int>
 							</object>
 						</object>
+						<object class="NSTextField" id="271764007">
+							<reference key="NSNextResponder" ref="1015393335"/>
+							<int key="NSvFlags">268</int>
+							<string key="NSFrame">{{44, 22}, {228, 17}}</string>
+							<reference key="NSSuperview" ref="1015393335"/>
+							<bool key="NSEnabled">YES</bool>
+							<object class="NSTextFieldCell" key="NSCell" id="504145203">
+								<int key="NSCellFlags">68288064</int>
+								<int key="NSCellFlags2">272630784</int>
+								<string key="NSContents">Label</string>
+								<reference key="NSSupport" ref="542151538"/>
+								<reference key="NSControlView" ref="271764007"/>
+								<reference key="NSBackgroundColor" ref="794237512"/>
+								<reference key="NSTextColor" ref="315780253"/>
+							</object>
+						</object>
 					</object>
 					<string key="NSFrameSize">{466, 363}</string>
+					<reference key="NSSuperview"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1680, 1028}}</string>
 				<string key="NSMinSize">{213, 129}</string>
@@ -739,6 +757,7 @@
 					<string>albumInfo</string>
 					<string>albumActionButtonText</string>
 					<string>album</string>
+					<string>statusText</string>
 				</object>
 				<string key="NSObjectClassName">SMEAlbumEditController</string>
 				<bool key="NSEditable">YES</bool>
@@ -1363,6 +1382,22 @@
 					</object>
 					<int key="connectionID">353</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">value: selection.statusText</string>
+						<reference key="source" ref="271764007"/>
+						<reference key="destination" ref="350046097"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="271764007"/>
+							<reference key="NSDestination" ref="350046097"/>
+							<string key="NSLabel">value: selection.statusText</string>
+							<string key="NSBinding">value</string>
+							<string key="NSKeyPath">selection.statusText</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">358</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -1422,6 +1457,7 @@
 							<reference ref="1058459662"/>
 							<reference ref="562715374"/>
 							<reference ref="146330009"/>
+							<reference ref="271764007"/>
 						</object>
 						<reference key="parent" ref="324277855"/>
 					</object>
@@ -1840,6 +1876,20 @@
 						<reference key="object" ref="155717356"/>
 						<reference key="parent" ref="5307730"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">354</int>
+						<reference key="object" ref="271764007"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="504145203"/>
+						</object>
+						<reference key="parent" ref="1015393335"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">355</int>
+						<reference key="object" ref="504145203"/>
+						<reference key="parent" ref="271764007"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -1903,6 +1953,8 @@
 					<string>34.ImportedFromIB2</string>
 					<string>35.IBPluginDependency</string>
 					<string>35.ImportedFromIB2</string>
+					<string>354.IBPluginDependency</string>
+					<string>355.IBPluginDependency</string>
 					<string>36.IBPluginDependency</string>
 					<string>36.ImportedFromIB2</string>
 					<string>4.IBPluginDependency</string>
@@ -1989,6 +2041,8 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<reference ref="9"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<reference ref="9"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<reference ref="9"/>
@@ -2035,7 +2089,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">353</int>
+			<int key="maxID">358</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -2075,6 +2129,14 @@
 							<string>NSArrayController</string>
 						</object>
 					</object>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">Source/SMEAlbumEditController.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
+					<string key="className">SMEAlbumEditController</string>
+					<string key="superclassName">NSObject</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBUserSource</string>
 						<string key="minorKey"/>
