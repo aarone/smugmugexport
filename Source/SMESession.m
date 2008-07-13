@@ -20,6 +20,7 @@
 #import "SMECategory.h"
 #import "SMESubCategory.h"
 #import "SMEImageURLs.h"
+#import "SMEUploadRequest.h"
 
 /*
  * Class wraps the repetitive process of invoking remote smugmgu methods, asynchronously getting a callback
@@ -103,7 +104,7 @@
 		[inv setArgument:&arg atIndex:2];
 		[arg retain]; // not retained by retainArguments above
 	}
-//	[inv invoke];
+
 	[inv performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
 }
 
@@ -119,8 +120,8 @@
 -(void)newAlbumCreationDidComplete:(SMERequest *)req;
 -(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey;
 -(SMERequest *)createRequest;
--(SMERequest *)lastUploadRequest;
--(void)setLastUploadRequest:(SMERequest *)request;	
+-(SMEUploadRequest *)lastUploadRequest;
+-(void)setLastUploadRequest:(SMEUploadRequest *)request;	
 @end
 
 static const NSTimeInterval AlbumRefreshDelay = 1.0;
@@ -184,6 +185,10 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 		[sessionID release];
 		sessionID = [anID retain];
 	}
+}
+
++(NSString *)UserAgent {
+	return [[[NSString alloc] initWithFormat:@"iPhoto SMExportPlugin/%@", [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:(NSString *)kCFBundleShortVersionStringKey]] autorelease];
 }
 
 #pragma mark Login/Logout Methods
@@ -444,7 +449,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 			  keywords:(NSArray *)keywords
 			  observer:(NSObject<SMEUploadObserver>*)anObserver {
 	
-	SMERequest *uploadRequest = [self createRequest];
+	SMEUploadRequest *uploadRequest = [SMEUploadRequest uploadRequest];
 	[self setLastUploadRequest:uploadRequest];
 	observer = anObserver; // delegate non-retaining semantics to avoid retain cycles
 	[uploadRequest uploadImageData:imageData
@@ -466,33 +471,33 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 						   ofTotalBytes:[[args objectAtIndex:2] longValue]];
 }
 
--(void)uploadMadeProgress:(SMERequest *)request bytesWritten:(long)numberOfBytes ofTotalBytes:(long)totalBytes {
+-(void)uploadMadeProgress:(SMEUploadRequest *)request bytesWritten:(long)numberOfBytes ofTotalBytes:(long)totalBytes {
 	[self performSelectorOnMainThread:@selector(notifyDelegateOfProgress:) 
 						   withObject:[NSArray arrayWithObjects:[request imageData], [NSNumber numberWithLong:numberOfBytes], [NSNumber numberWithLong:totalBytes], nil]
 						waitUntilDone:NO];
 }
 
--(void)uploadCanceled:(SMERequest *)request {
+-(void)uploadCanceled:(SMEUploadRequest *)request {
 	[[self observer] performSelectorOnMainThread:@selector(uploadWasCanceled)
 									  withObject:nil
 								   waitUntilDone:NO];	
 }
 
--(void)uploadFailed:(SMERequest *)request withError:(NSString *)reason {
-	SMEResponse *resp = [SMEResponse responseWithData:[request data] decoder:[self decoder]];
+-(void)uploadFailed:(SMEUploadRequest *)request withError:(NSString *)reason {
+	SMEResponse *resp = [SMEResponse responseWithData:[request responseData] decoder:[self decoder]];
 	[[self observer] performSelectorOnMainThread:@selector(uploadDidFail:)
 									  withObject:resp
 								   waitUntilDone:NO];
 }
 
 -(void)notifyDelegateOfUploadSuccess:(SMEResponse *)resp {
-	NSString *filename = [[[self lastUploadRequest] requestDict] objectForKey:SMUploadKeyFilename];
-	NSData *data = [[self lastUploadRequest] imageData];
-	[[self observer] uploadDidSucceed:resp filename:filename data:data];
+	[[self observer] uploadDidSucceed:resp 
+							 filename:[[self lastUploadRequest] filename] 
+								 data:[[self lastUploadRequest] imageData]];
 }
 
--(void)uploadSucceeded:(SMERequest *)request {
-	SMEResponse *resp = [SMEResponse responseWithData:[request data] decoder:[self decoder]];
+-(void)uploadSucceeded:(SMEUploadRequest *)request {
+	SMEResponse *resp = [SMEResponse responseWithData:[request responseData] decoder:[self decoder]];
 	SMEImageRef *ref = [SMEImageRef refWithDictionary:[[resp response] objectForKey:@"Image"]];
 	[resp setSMData:ref];
 	[self performSelectorOnMainThread:@selector(notifyDelegateOfUploadSuccess:)
@@ -504,11 +509,11 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	[[self lastUploadRequest] cancelUpload];
 }
 
--(SMERequest *)lastUploadRequest {
+-(SMEUploadRequest *)lastUploadRequest {
 	return lastUploadRequest;
 }
 
--(void)setLastUploadRequest:(SMERequest *)request {
+-(void)setLastUploadRequest:(SMEUploadRequest *)request {
 	if(lastUploadRequest != request) {
 		[lastUploadRequest release];
 		lastUploadRequest = [request retain];

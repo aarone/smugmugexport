@@ -8,6 +8,8 @@
 
 #import <Cocoa/Cocoa.h>
 #import "SMERequest.h"
+#import "SMEUploadRequest.h"
+#import "SMEUploadObserver.h"
 
 #define NO_CATEGORIES_FOUND_CODE 15
 
@@ -17,7 +19,7 @@
  */
 @interface SMESession : NSObject<SMEUploadRequestObserver> {
 	NSString *sessionID;
-	SMERequest *lastUploadRequest;
+	SMEUploadRequest *lastUploadRequest;
 	NSObject<SMEUploadObserver>* observer;
 }
 
@@ -35,6 +37,7 @@
 -(void)fetchAlbumsWithTarget:(id)target
 					callback:(SEL)callback;
 
++(NSString *)UserAgent;
 
 -(void)fetchCategoriesWithTarget:(id)target callback:(SEL)callback;
 

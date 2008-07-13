@@ -32,6 +32,8 @@
 		938261880E1E7F8100A29C9F /* SMECategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 938261850E1E7F8100A29C9F /* SMECategory.m */; };
 		938E26AB0C0F47EA0059F26B /* SMEURLAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26A90C0F47EA0059F26B /* SMEURLAdditions.m */; };
 		938E27490C0F4DE10059F26B /* SMEStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E27470C0F4DE10059F26B /* SMEStringAdditions.m */; };
+		939FDC8A0E2A5FA8001D6B9B /* SMEUploadRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 939FDC880E2A5FA8001D6B9B /* SMEUploadRequest.m */; };
+		939FDC8D0E2A5FB6001D6B9B /* SMEGrowlDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 939FDC8B0E2A5FB6001D6B9B /* SMEGrowlDelegate.m */; };
 		93BD6F2F0AD84AAC007CE525 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
 		93C23E0C0D968FE60022EEE1 /* SMEAlbum.m in Sources */ = {isa = PBXBuildFile; fileRef = 93C23E0B0D968FE60022EEE1 /* SMEAlbum.m */; };
 		93C23E820D96B4290022EEE1 /* SMEAlbumEditController.m in Sources */ = {isa = PBXBuildFile; fileRef = 93C23E800D96B4290022EEE1 /* SMEAlbumEditController.m */; };
@@ -122,6 +124,10 @@
 		938E26A90C0F47EA0059F26B /* SMEURLAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEURLAdditions.m; path = Source/SMEURLAdditions.m; sourceTree = "<group>"; };
 		938E27460C0F4DE10059F26B /* SMEStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEStringAdditions.h; path = Source/SMEStringAdditions.h; sourceTree = "<group>"; };
 		938E27470C0F4DE10059F26B /* SMEStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEStringAdditions.m; path = Source/SMEStringAdditions.m; sourceTree = "<group>"; };
+		939FDC880E2A5FA8001D6B9B /* SMEUploadRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEUploadRequest.m; path = Source/SMEUploadRequest.m; sourceTree = "<group>"; };
+		939FDC890E2A5FA8001D6B9B /* SMEUploadRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEUploadRequest.h; path = Source/SMEUploadRequest.h; sourceTree = "<group>"; };
+		939FDC8B0E2A5FB6001D6B9B /* SMEGrowlDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEGrowlDelegate.m; path = Source/SMEGrowlDelegate.m; sourceTree = "<group>"; };
+		939FDC8C0E2A5FB6001D6B9B /* SMEGrowlDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEGrowlDelegate.h; path = Source/SMEGrowlDelegate.h; sourceTree = "<group>"; };
 		93BD6F170AD84A49007CE525 /* SmugMugExport.iPhotoExporter */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SmugMugExport.iPhotoExporter; sourceTree = BUILT_PRODUCTS_DIR; };
 		93BD6F180AD84A49007CE525 /* SmugMugExport-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "SmugMugExport-Info.plist"; path = "Resources/SmugMugExport-Info.plist"; sourceTree = "<group>"; };
 		93C23E0A0D968FE60022EEE1 /* SMEAlbum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEAlbum.h; path = Source/SMEAlbum.h; sourceTree = "<group>"; };
@@ -211,6 +217,8 @@
 			children = (
 				933AA0C90CB827CF00B7B2A5 /* SMEExportPlugin.h */,
 				933AA0CA0CB827CF00B7B2A5 /* SMEExportPlugin.m */,
+				939FDC8B0E2A5FB6001D6B9B /* SMEGrowlDelegate.m */,
+				939FDC8C0E2A5FB6001D6B9B /* SMEGrowlDelegate.h */,
 				93C23E810D96B4290022EEE1 /* SMEAlbumEditController.h */,
 				93C23E800D96B4290022EEE1 /* SMEAlbumEditController.m */,
 				933AA08F0CB825C900B7B2A5 /* SMEExportBox.h */,
@@ -307,6 +315,8 @@
 				93EBDDE30C8CF5EA00905273 /* SMEUploadObserver.h */,
 				93DD89D50C8C526100A6131B /* SMERequest.h */,
 				93DD89D60C8C526100A6131B /* SMERequest.m */,
+				939FDC880E2A5FA8001D6B9B /* SMEUploadRequest.m */,
+				939FDC890E2A5FA8001D6B9B /* SMEUploadRequest.h */,
 				93DD11E90E17EC8C00275408 /* SMEResponse.h */,
 				93DD11EA0E17EC8C00275408 /* SMEResponse.m */,
 				93DD88F60C8C4AE000A6131B /* SMEDecoder.h */,
@@ -506,6 +516,8 @@
 				938261880E1E7F8100A29C9F /* SMECategory.m in Sources */,
 				93ED9DC20E22BEF800572F50 /* SMEImageURLs.m in Sources */,
 				93ED9E1B0E22C5A800572F50 /* SMEBitmapImageRepAdditions.m in Sources */,
+				939FDC8A0E2A5FA8001D6B9B /* SMEUploadRequest.m in Sources */,
+				939FDC8D0E2A5FB6001D6B9B /* SMEGrowlDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -618,6 +630,9 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_LABEL = YES;
+				GCC_WARN_UNUSED_VALUE = YES;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "Resources/SmugMugExport-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";

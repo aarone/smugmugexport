@@ -8,30 +8,11 @@
 
 #import <Cocoa/Cocoa.h>
 #import "SMEDecoder.h"
-#import "SMEUploadObserver.h"
 #import "SMEAlbumRef.h"
-
-// protocol for monitoring an upload
-@protocol SMEUploadRequestObserver
--(void)uploadMadeProgress:(SMERequest *)request bytesWritten:(long)numberOfBytes ofTotalBytes:(long)totalBytes;
--(void)uploadFailed:(SMERequest *)request withError:(NSString *)reason;
--(void)uploadCanceled:(SMERequest *)request;
--(void)uploadSucceeded:(SMERequest *)request;
-@end
-
-
-extern NSString *SMUploadKeyImageData;
-extern NSString *SMUploadKeyFilename;
-//extern NSString *SMUploadKeySessionId;
-//extern NSString *SMUploadKeyCaption;
-//extern NSString *SMUploadKeyAlbumId;
-//extern NSString *SMUploadKeyKeywords;
 
 @interface SMERequest : NSObject {
 	NSURLConnection *connection;
 	NSMutableData *response;
-	CFReadStreamRef readStream;
-	CFRunLoopRef uploadRunLoop;
 	SEL callback;
 	id target;
 	BOOL wasSuccessful;
@@ -40,11 +21,6 @@ extern NSString *SMUploadKeyFilename;
 	
 	NSDictionary *requestDict;
 	NSURL *requestUrl;
-	
-	// upload stuff
-	NSObject<SMEUploadRequestObserver> *observer;
-	BOOL isUploading;
-	NSData *imageData;
 }
 
 +(SMERequest *)request;
@@ -78,17 +54,10 @@ extern NSString *SMUploadKeyFilename;
  @abstract   performs a GET for the given url and append a sequence of key=val parameters to the URL
  @discussion The keys and values will be escaped and the callback semantics are the same as invokeMethod:responseCallback:responseTarget
  */
--(void)invokeMethodWithURL:(NSURL *)baseUrl requestDict:(NSDictionary *)dict responseCallback:(SEL)callback responseTarget:(id)target;
-
--(void)uploadImageData:(NSData *)theImageData
-			  filename:(NSString *)filename
-			 sessionId:(NSString *)sessionId
-				 album:(SMEAlbumRef *)albumRef
-			   caption:(NSString *)caption
-			  keywords:(NSArray *)keywords
-			  observer:(NSObject<SMEUploadRequestObserver> *)anObserver;
-
--(void)cancelUpload;
+-(void)invokeMethodWithURL:(NSURL *)baseUrl 
+			   requestDict:(NSDictionary *)dict 
+		  responseCallback:(SEL)callback 
+			responseTarget:(id)target;
 
 /*!
   @method     wasSuccessful
@@ -102,8 +71,6 @@ extern NSString *SMUploadKeyFilename;
   @discussion This is simply the error from the underlying NSURLConnection.
  */
 -(NSError *)error;
-
--(NSData *)imageData; // the last set image data for an upload
 
 -(NSData *)data;
 

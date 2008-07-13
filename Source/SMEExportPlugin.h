@@ -11,10 +11,10 @@
 #import "ExportPluginProtocol.h"
 #import "SMESession.h"
 
-@class SMESession, ExportMgr, SMEAccountManager, SMEAlbumEditController, SMESessionInfo;
+@class SMESession, ExportMgr, SMEAccountManager, SMEAlbumEditController, SMESessionInfo, SMEGrowlDelegate;
 @protocol ExportPluginProtocol, SMESessionDelegate;
 
-@interface SMEExportPlugin : NSObject <ExportPluginProtocol, GrowlApplicationBridgeDelegate, SMEUploadObserver> {
+@interface SMEExportPlugin : NSObject <ExportPluginProtocol, SMEUploadObserver> {
 
 	IBOutlet id firstView;
 	IBOutlet id lastView;
@@ -39,6 +39,7 @@
 	NSURL *uploadSiteUrl;
 	NSMutableDictionary *newAlbumPreferences;
 	
+	SMEGrowlDelegate *growlDelegate;
 	SMESession *session;
 	
 	// smugmug state

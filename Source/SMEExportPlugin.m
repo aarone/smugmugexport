@@ -23,96 +23,137 @@
 #import "SMESubCategory.h"
 #import "SMECategory.h"
 #import "SMEImageURLs.h"
+#import "SMEGrowlDelegate.h"
 
 @interface SMEExportPlugin (Private)
 -(ExportMgr *)exportManager;
--(void)setExportManager:(ExportMgr *)m;
+
+-(NSArray *)albums;
+-(void)setAlbums:(NSArray *)a;
+
+-(NSArray *)categories;
+-(void)setCategories:(NSArray *)v;
+
+-(NSArray *)subcategories;
+-(void)setSubcategories:(NSArray *)v;	
+
 -(SMESession *)session;
 -(void)setSession:(SMESession *)m;
+
 -(SMESessionInfo *)sessionInfo;
 -(void)setSessionInfo:(SMESessionInfo *)m;
+
 -(NSString *)username;
 -(void)setUsername:(NSString *)n;
+
 -(NSString *)password;
 -(void)setPassword:(NSString *)p;
--(NSString *)sessionUploadStatusText;
--(void)setSessionUploadStatusText:(NSString *)t;
--(NSNumber *)fileUploadProgress;
--(void)setFileUploadProgress:(NSNumber *)v;
--(NSNumber *)sessionUploadProgress;
--(void)setSessionUploadProgress:(NSNumber *)v;
--(int)imagesUploaded;
--(void)setImagesUploaded:(int)v;
--(void)resizeWindow;
--(SMEAccountManager *)accountManager;
--(void)setAccountManager:(SMEAccountManager *)mgr;
--(void)registerDefaults;
+
 -(BOOL)loginAttempted;
 -(void)setLoginAttempted:(BOOL)v;
--(void)performPostLoginTasks;
+
+-(NSString *)sessionUploadStatusText;
+-(void)setSessionUploadStatusText:(NSString *)t;
+
+-(NSNumber *)fileUploadProgress;
+-(void)setFileUploadProgress:(NSNumber *)v;
+
+-(NSString *)statusText;
+-(void)setStatusText:(NSString *)t;
+
+-(BOOL)isBusy;
+-(void)setIsBusy:(BOOL)v;
+
+-(BOOL)isLoggedIn;
+
+-(BOOL)isLoggingIn;
+-(void)setIsLoggingIn:(BOOL)v;
+
+-(BOOL)isDeletingAlbum;
+-(void)setIsDeletingAlbum:(BOOL)v;	
+
+-(NSImage *)currentThumbnail;
+-(void)setCurrentThumbnail:(NSImage *)d;
+
+-(NSNumber *)sessionUploadProgress;
+-(void)setSessionUploadProgress:(NSNumber *)v;
+
+-(int)imagesUploaded;
+-(void)setImagesUploaded:(int)v;
+
+-(BOOL)isUpdateInProgress;
+-(void)setIsUpdateInProgress:(BOOL)v;
+
+-(SMEAccountManager *)accountManager;
+-(void)setAccountManager:(SMEAccountManager *)mgr;
+
 -(NSString *)loginSheetStatusMessage;
 -(void)setLoginSheetStatusMessage:(NSString *)m;
+
+-(BOOL)siteUrlHasBeenFetched;
+-(void)setSiteUrlHasBeenFetched:(BOOL)v;
+
+-(NSURL *)uploadSiteUrl;
+-(void)setUploadSiteUrl:(NSURL *)url;
+
+-(SMEGrowlDelegate *)growlDelegate;
+-(void)setGrowlDelegate:(SMEGrowlDelegate *)aDelegate;
+
 -(void)setSelectedAccount:(NSString *)account;
 -(NSString *)selectedAccount;
 -(SMEAlbum *)selectedAlbum;
--(NSString *)statusText;
--(void)setStatusText:(NSString *)t;
--(BOOL)isBusy;
--(void)setIsBusy:(BOOL)v;
--(BOOL)isLoggedIn;
--(BOOL)isLoggingIn;
--(void)setIsLoggingIn:(BOOL)v;
--(BOOL)isDeletingAlbum;
--(void)setIsDeletingAlbum:(BOOL)v;	
--(void)login;
--(NSImage *)currentThumbnail;
--(void)setCurrentThumbnail:(NSImage *)d;
+
 -(void)setInsertionPoint:(NSWindow *)aWindow;
 -(void)presentError:(NSString *)errorText;
+
 -(BOOL)isUploading;
 -(void)setIsUploading:(BOOL)v;
+
 -(void)beginAlbumDelete;
+
 -(BOOL)browserOpenedInGallery;
 -(void)setBrowserOpenedInGallery:(BOOL)v;	
+
 -(NSString *)imageUploadProgressText;
 -(void)setImageUploadProgressText:(NSString *)text;
+
 -(NSPanel *)uploadPanel;
+
 -(NSPanel *)loginPanel;
+
 -(BOOL)sheetIsDisplayed;
 -(void)uploadCurrentImage;
+
 -(void)openLastGalleryInBrowser;
+
 -(NSInvocation *)postLogoutInvocation;
 -(void)setPostLogoutInvocation:(NSInvocation *)inv;
+
 -(void)accountChangedTasks:(NSString *)account;
--(NSPredicate *)createRelevantSubCategoryPredicate;
+
 +(void)initializeLocalizableStrings;
--(BOOL)siteUrlHasBeenFetched;
--(void)setSiteUrlHasBeenFetched:(BOOL)v;
--(NSURL *)uploadSiteUrl;
--(void)setUploadSiteUrl:(NSURL *)url;
--(void)selectFirstSubCategory;
+
 -(SMEAlbumEditController *)albumEditController;
--(void)setAlbumEditController:(SMEAlbumEditController *)aController;	
--(NSArray *)albums;
--(void)setAlbums:(NSArray *)a;
--(NSArray *)categories;
--(void)setCategories:(NSArray *)v;
--(NSArray *)subcategories;
--(void)setSubcategories:(NSArray *)v;	
+-(void)setAlbumEditController:(SMEAlbumEditController *)aController;
 
 -(NSArray *)filenameSelectionOptions;
 -(NSString *)chooseUploadFilename:(NSString *)filename title:(NSString *)imageTitle;
 -(void)displayUserUpdatePolicy;
--(BOOL)isUpdateInProgress;
--(void)setIsUpdateInProgress:(BOOL)v;
+
+
 -(void)remoteVersionInfoWasFetch:(NSDictionary *)remoteInfo;
+
 -(void)displayUpdateAvailable:(NSDictionary *)remoteInfo;
 -(void)displayNoUpdateAvailable;
+
 -(int)albumUrlFetchAttemptCount;
 -(void)incrementAlbumUrlFetchAttemptCount;
 -(void)resetAlbumUrlFetchAttemptCount;
+
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful;
 -(void)uploadNextImage;
+
+-(void)presentRemoteError:(SMEResponse *)resp;
 
 -(NSString *)GrowlFrameworkPath;
 -(BOOL)isGrowlLoaded;
@@ -124,25 +165,20 @@
 -(void)loadJSON;
 -(void)unloadJSON;
 -(void)unloadFramework:(NSString *)fwPath;
-
--(void)notifyImageUploaded:(NSString *)imageFilename image:(NSData *)image;
--(NSData *)notificationThumbnail:(NSData *)fullsizeImageData;
-
--(void)presentRemoteError:(SMEResponse *)resp;
 @end
 
-@interface SMEExportPlugin (GrowlDelegate)
--(NSDictionary *) registrationDictionaryForGrowl;
--(NSString *) applicationNameForGrowl;
--(NSData *) applicationIconDataForGrowl;
--(void) growlIsReady;
--(void) growlNotificationWasClicked:(id)clickContext;
--(void) growlNotificationTimedOut:(id)clickContext;
--(void)notifyLogin:(NSString *)account;
--(void)notifyLougout:(NSString *)account;
--(void)notifyUploadCompleted;
--(void)notifyUploadError:(NSString *)error;
-@end
+//@interface SMEExportPlugin (GrowlDelegate)
+//-(NSDictionary *) registrationDictionaryForGrowl;
+//-(NSString *) applicationNameForGrowl;
+//-(NSData *) applicationIconDataForGrowl;
+//-(void) growlIsReady;
+//-(void) growlNotificationWasClicked:(id)clickContext;
+//-(void) growlNotificationTimedOut:(id)clickContext;
+//-(void)notifyLogin:(NSString *)account;
+//-(void)notifyLougout:(NSString *)account;
+//-(void)notifyUploadCompleted;
+//-(void)notifyUploadError:(NSString *)error;
+//@end
 
 // UI keys
 NSString *ExistingAlbumTabIdentifier = @"existingAlbum";
@@ -150,7 +186,7 @@ NSString *NewAlbumTabIdentifier = @"newAlbum";
 
 // UI strings
 NSString *NewAccountLabel;
-NSString *NullSubcategoryLabel;
+//NSString *NullSubcategoryLabel;
 
 NSString *SMUploadedFilenameOptionFilename;
 NSString *SMUploadedFilenameOptionTitle;
@@ -179,13 +215,6 @@ NSString *SMLastUpdateCheck = @"SMLastUpdateCheck";
 NSString *SMUpdateCheckInterval = @"SMUpdateCheckInterval";
 NSString *SMContinueUploadOnFileIOError = @"SMContinueUploadOnFileIOError";
 
-// Growl Notification Keys
-NSString *SMGrowlUploadCompleted = nil;
-NSString *SMGrowlUploadError = nil;
-NSString *SMGrowlImageUploaded = nil;
-NSString *SMGrowlLogin = nil;
-NSString *SMGrowlLogout = nil;
-
 static const int AlbumUrlFetchRetryCount = 5;
 static const int SMDefaultScaledHeight = 2592;
 static const int SMDefaultScaledWidth = 2592;
@@ -199,13 +228,12 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	if((self = [super init]) == nil)
 		return nil; // fail!
 	
-	exportManager = exportMgr;	
-	[self loadGrowl];
+	exportManager = exportMgr;
 	[self loadJSON];
 	
+	[self loadGrowl];
+
 	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
-	
-	
 	[self setAccountManager:[SMEAccountManager accountManager]];
 	[self setSession:[SMESession session]];
 	[self setAlbumEditController:[SMEAlbumEditController controller]];
@@ -221,21 +249,15 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 +(void)initializeLocalizableStrings {
 	NewAccountLabel = NSLocalizedString(@"New Account...", @"Text for New Account entry in account popup");
-	NullSubcategoryLabel = NSLocalizedString(@"None", @"Text for Null SubCategory");
+//	NullSubcategoryLabel = NSLocalizedString(@"None", @"Text for Null SubCategory");
 	SMUploadedFilenameOptionFilename = NSLocalizedString(@"filename", @"filename option for upload filename preference");
 	SMUploadedFilenameOptionTitle = NSLocalizedString(@"title", @"title option for upload filename preference");
-	
-	// Growl stuff
-	SMGrowlUploadCompleted = NSLocalizedString(@"Upload Completed", @"Upload completed growl notification name");
-	SMGrowlUploadError = NSLocalizedString(@"Upload Error", @"Upload error growl notification name");
-	SMGrowlImageUploaded = NSLocalizedString(@"Image Uploaded", @"Image uploaded growl notification name");
-	SMGrowlLogin = NSLocalizedString(@"Logged In", @"Logged in growl notification name");
-	SMGrowlLogout = NSLocalizedString(@"Logged Out", @"Logged out growl notification name");
 }
 
 -(void)dealloc {
 	[self unloadGrowl];
 	[self unloadJSON];
+	[[self growlDelegate] release];
 	[[self subcategories] release];
 	[[self categories] release];
 	[[self albums] release];
@@ -488,6 +510,11 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 #pragma mark Login Methods
 
+-(void)setBusyWithStatus:(NSString *)theStatusText {
+	[self setIsBusy:YES];
+	[self setStatusText:theStatusText];
+}
+
 -(void)attemptLoginIfNecessary {
 	// try to automatically show the login sheet 
 	
@@ -524,8 +551,9 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	   [[self accountManager] passwordExistsInKeychainForAccount:[[self accountManager] selectedAccount]]) {
 
 		[self setLoginAttempted:YES];
-		[self performSelectorOnMainThread:@selector(setIsBusyWithNumber:) withObject:[NSNumber numberWithBool:YES] waitUntilDone:NO];	
-		[self performSelectorOnMainThread:@selector(setStatusText:) withObject:NSLocalizedString(@"Logging in...", @"Status text for logginng in") waitUntilDone:NO];
+		[self performSelectorOnMainThread:@selector(setBusyWithStatus:) 
+							   withObject:NSLocalizedString(@"Logging in...", @"Status text for logginng in") 
+							waitUntilDone:NO];
 		[self setIsLoggingIn:YES];
 		
 		[[self session] loginWithTarget:self 
@@ -639,7 +667,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[[self accountManager] addAccount:[self username] withPassword:[self password]];
 	[self setSelectedAccount:[self username]];
 	[NSApp endSheet:loginPanel];
-	[self notifyLogin:[self selectedAccount]];
+	[[self growlDelegate] notifyLogin:[self selectedAccount]];
 }
 
 
@@ -661,7 +689,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 #pragma mark Logout 
 -(void)logoutDidComplete:(SMEResponse *)resp {
-	[self notifyLougout:[self selectedAccount]];
+	[[self growlDelegate] notifyLougout:[self selectedAccount]];
 	[self setSessionInfo:nil];
 	[[self postLogoutInvocation] invokeWithTarget:self];
 }
@@ -1100,11 +1128,11 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[[self exportManager] cancelExportBeforeBeginning];
 	
 	if(wasSuccessful)
-		[self notifyUploadCompleted];
+		[[self growlDelegate] notifyUploadCompleted:[self imagesUploaded] uploadSiteUrl:[[self uploadSiteUrl] description]];
 }
 
 -(void)uploadDidFail:(SMEResponse *)resp {
-	[self notifyUploadError:[resp errorMessage]];
+	[[self growlDelegate] notifyUploadError:[resp errorMessage]];
 	[self performUploadCompletionTasks:NO];
 	NSString *errorString = NSLocalizedString(@"Image upload failed (%@).", @"Error message to display when upload fails.");
 	[self presentError:[NSString stringWithFormat:errorString, [resp errorMessage]]];
@@ -1156,7 +1184,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[[self session] fetchImageURLs:ref withTarget:self callback:@selector(imageUrlFetchDidCompleteForImageRef:)];
 	}
 
-	[self notifyImageUploaded:filename image:imageData];
+	[[self growlDelegate] notifyImageUploaded:filename image:imageData];
 	[self uploadNextImage];
 }
 
@@ -1274,8 +1302,15 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	}
 }
 
--(void)setIsBusyWithNumber:(NSNumber *)val {
-	[self setIsBusy:[val boolValue]];
+-(SMEGrowlDelegate *)growlDelegate {
+	return growlDelegate;
+}
+
+-(void)setGrowlDelegate:(SMEGrowlDelegate *)aDelegate {
+	if(aDelegate != growlDelegate) {
+		[growlDelegate release];
+		growlDelegate = [aDelegate retain];
+	}
 }
 
 -(BOOL)isBusy {
@@ -1625,58 +1660,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	return YES;
 }
 
-#pragma mark Growl Delegate Methods
-
--(NSDictionary *)registrationDictionaryForGrowl {
-	NSArray *allNotifications = [NSArray arrayWithObjects:
-								 SMGrowlLogin,
-								 SMGrowlLogout,
-								 SMGrowlUploadCompleted,
-								 SMGrowlUploadError,
-								 SMGrowlImageUploaded,
-								 nil];
-	NSArray *defaultNotifications = [NSArray arrayWithObjects:
-									 SMGrowlUploadCompleted,
-									 SMGrowlUploadError,
-									 nil];
-	return [NSDictionary dictionaryWithObjectsAndKeys:
-			allNotifications, GROWL_NOTIFICATIONS_ALL,
-			defaultNotifications, GROWL_NOTIFICATIONS_DEFAULT,
-			[NSNumber numberWithInt:1], GROWL_TICKET_VERSION,
-			nil];
-}
-
--(NSString *)applicationNameForGrowl {
-	NSString *appName = [[[NSBundle bundleForClass:[SMEExportPlugin class]] infoDictionary] objectForKey:@"CFBundleDisplayName"];
-	return appName;
-}
-
--(NSData *)applicationIconDataForGrowl {
-	return nil;
-}
-
--(void)growlIsReady {
-}
-
--(void)growlNotificationWasClicked:(id)clickContext {
-	if(clickContext != nil)
-		[[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:(NSString *)clickContext]];
-}
-
--(void)growlNotificationTimedOut:(id)clickContext {
-}
-
-#pragma mark Growl Notification
-
--(NSData *)notificationThumbnail:(NSData *)fullsizeImageData {
-	NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc] initWithData:fullsizeImageData] autorelease];
-	return [rep scaledRepToMaxWidth:120 maxHeight:120];	
-}
-
--(NSString *)GrowlFrameworkPath {
-	return [[[NSBundle bundleForClass:[self class]] privateFrameworksPath] stringByAppendingPathComponent:@"Growl.framework"];
-}
-
 -(NSString *)JSONFrameworkPath {
 	return [[[NSBundle bundleForClass:[self class]] privateFrameworksPath] stringByAppendingPathComponent:@"JSON.framework"];
 }
@@ -1704,14 +1687,20 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		[jsonBundle load];
 }
 
+-(NSString *)GrowlFrameworkPath {
+	return [[[NSBundle bundleForClass:[self class]] privateFrameworksPath] stringByAppendingPathComponent:@"Growl.framework"];
+}
+
 -(void)loadGrowl {
 	if([self isGrowlLoaded])
 		return;
 	
+	[self setGrowlDelegate:[SMEGrowlDelegate growlDelegate]];
+	
 	NSBundle *growlBundle = [NSBundle bundleWithPath:[self GrowlFrameworkPath]];
 	if (growlBundle && [growlBundle load]) {
 		// Register ourselves as a Growl delegate
-		[GrowlApplicationBridge setGrowlDelegate:self];
+		[GrowlApplicationBridge setGrowlDelegate:[self growlDelegate]];
 	} else {
 		NSLog(@"Could not load Growl.framework");
 	}
@@ -1730,60 +1719,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)unloadJSON {
 	[self unloadFramework:[self JSONFrameworkPath]];
-}
-
--(void)unloadGrowl {
-	[self unloadFramework:[self GrowlFrameworkPath]];
-}
-
--(void)notifyImageUploaded:(NSString *)imageFilename image:(NSData *)image{	
-	[GrowlApplicationBridge notifyWithTitle:NSLocalizedString(@"Image Uploaded", @"Growl notification title for image uploaded event")
-								description:imageFilename
-						   notificationName:SMGrowlImageUploaded
-								   iconData:[self notificationThumbnail:image]
-								   priority:0
-								   isSticky:NO
-							   clickContext:nil];
-}
-
--(void)notifyLogin:(NSString *)account {
-	[GrowlApplicationBridge notifyWithTitle:NSLocalizedString(@"Logged In", @"Growl Notification title for logged in event")
-								description:[NSString stringWithFormat:NSLocalizedString(@"User: %@", @"User logged in growl description"), account]
-						   notificationName:SMGrowlLogin
-								   iconData:nil
-								   priority:0
-								   isSticky:NO
-							   clickContext:nil];
-}
-
--(void)notifyLougout:(NSString *)account {
-	[GrowlApplicationBridge notifyWithTitle:NSLocalizedString(@"Logged Out", @"Growl Message Title: (Logged Out)")
-								description:[NSString stringWithFormat:NSLocalizedString(@"User: %@", @"User logged out growl description"), account]
-						   notificationName:SMGrowlLogout
-								   iconData:nil
-								   priority:0
-								   isSticky:NO
-							   clickContext:nil];
-}
-
--(void)notifyUploadCompleted {
-	[GrowlApplicationBridge notifyWithTitle:NSLocalizedString(@"Upload Complete", @"Growl title for upload completed notification")
-								description:[NSString stringWithFormat:NSLocalizedString(@"Uploaded %d images", @"Description for upload complete Growl message"), imagesUploaded]
-						   notificationName:SMGrowlUploadCompleted
-								   iconData:nil
-								   priority:0
-								   isSticky:NO
-							   clickContext:[[self uploadSiteUrl] description]];
-}
-
--(void)notifyUploadError:(NSString *)error {
-	[GrowlApplicationBridge notifyWithTitle:NSLocalizedString(@"Upload Error", @"Growl title for upload error notification")
-								description:error
-						   notificationName:SMGrowlUploadError
-								   iconData:nil
-								   priority:0
-								   isSticky:NO
-							   clickContext:nil];			
 }
 
 @end
