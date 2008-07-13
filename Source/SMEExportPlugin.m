@@ -167,26 +167,12 @@
 -(void)unloadFramework:(NSString *)fwPath;
 @end
 
-//@interface SMEExportPlugin (GrowlDelegate)
-//-(NSDictionary *) registrationDictionaryForGrowl;
-//-(NSString *) applicationNameForGrowl;
-//-(NSData *) applicationIconDataForGrowl;
-//-(void) growlIsReady;
-//-(void) growlNotificationWasClicked:(id)clickContext;
-//-(void) growlNotificationTimedOut:(id)clickContext;
-//-(void)notifyLogin:(NSString *)account;
-//-(void)notifyLougout:(NSString *)account;
-//-(void)notifyUploadCompleted;
-//-(void)notifyUploadError:(NSString *)error;
-//@end
-
 // UI keys
 NSString *ExistingAlbumTabIdentifier = @"existingAlbum";
 NSString *NewAlbumTabIdentifier = @"newAlbum";
 
 // UI strings
 NSString *NewAccountLabel;
-//NSString *NullSubcategoryLabel;
 
 NSString *SMUploadedFilenameOptionFilename;
 NSString *SMUploadedFilenameOptionTitle;
@@ -230,7 +216,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	
 	exportManager = exportMgr;
 	[self loadJSON];
-	
+	[self setGrowlDelegate:[SMEGrowlDelegate growlDelegate]];
 	[self loadGrowl];
 
 	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
@@ -506,7 +492,6 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 -(NSString *)apiKey {
 	return @"98LHI74dS6P0A8cQ1M6h0R1hXsbIPDXc";
 }
-
 
 #pragma mark Login Methods
 
@@ -850,7 +835,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 	SMEAlbum *theAlbum = [resp smData];
 	SMESubCategory *subCategory = [theAlbum subCategory];
-	// FIXME setting a category wipes out a subcategory; this is weird but re
+	// FIXME setting a category wipes out a subcategory; this is weird but required to make binding stuff work
 	[theAlbum setCategory:[self categoryWithId:[[theAlbum category] identifier]]];
 	[theAlbum setSubCategory:subCategory];
 	
@@ -1118,13 +1103,14 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[self setIsUploading:NO];
 	
 	// if this really bothers you you can set your preferences to not open the page in the browser
-	if([[[NSUserDefaults smugMugUserDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue] &&
-				[self uploadSiteUrl] != nil &&  ![self browserOpenedInGallery]) {
+	if(wasSuccessful &&
+		[[[NSUserDefaults smugMugUserDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue] &&
+			[self uploadSiteUrl] != nil &&  ![self browserOpenedInGallery]) {
 		[self setBrowserOpenedInGallery:YES];
 		[[NSWorkspace sharedWorkspace] openURL:uploadSiteUrl];
 	}
 	
-	if([[[NSUserDefaults smugMugUserDefaults] valueForKey:SMCloseExportWindowAfterUploadCompletion] boolValue])
+	if(wasSuccessful && [[[NSUserDefaults smugMugUserDefaults] valueForKey:SMCloseExportWindowAfterUploadCompletion] boolValue])
 		[[self exportManager] cancelExportBeforeBeginning];
 	
 	if(wasSuccessful)
@@ -1176,7 +1162,13 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	}	
 }
 
--(void)uploadDidSucceed:(SMEResponse *)resp filename:(NSString *)filename data:(NSData *)imageData {
+-(void)uploadDidComplete:(SMEResponse *)resp filename:(NSString *)filename data:(NSData *)imageData {
+	if(! [resp wasSuccessful]) {
+		[self performUploadCompletionTasks:NO];
+		[self presentRemoteError:resp];
+		return;
+	}
+	
 	SMEImageRef *ref = [resp smData];
 	if(![self siteUrlHasBeenFetched]) {
 		[self resetAlbumUrlFetchAttemptCount];
@@ -1628,7 +1620,8 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)viewWillBeDeactivated {
 	loginAttempted = NO;
-	[[self session] logoutWithTarget:self callback:@selector(logoutDidComplete:)];
+	if([self isLoggedIn])
+		[[self session] logoutWithTarget:self callback:@selector(logoutDidComplete:)];
 }
 
 -(void)viewWillBeActivated {
@@ -1694,9 +1687,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 -(void)loadGrowl {
 	if([self isGrowlLoaded])
 		return;
-	
-	[self setGrowlDelegate:[SMEGrowlDelegate growlDelegate]];
-	
+		
 	NSBundle *growlBundle = [NSBundle bundleWithPath:[self GrowlFrameworkPath]];
 	if (growlBundle && [growlBundle load]) {
 		// Register ourselves as a Growl delegate
@@ -1713,7 +1704,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 //	// NSBundle unload is strictly >= 10.5
 //	NSBundle *bundle = [NSBundle bundleWithPath:fwPath];
 //	if (bundle)
-//		[bundle unload];			
+//		[bundle unload];
 }
 
 

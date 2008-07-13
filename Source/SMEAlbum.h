@@ -7,30 +7,16 @@
 //
 
 #import <Cocoa/Cocoa.h>
-
-#import "SMEData.h"
+#import "SMEConciseAlbum.h"
 
 @class SMEAlbumRef, SMESubCategory, SMECategory;
 
-@interface SMEAlbum : NSObject {
-	NSMutableDictionary *albumData;
-	SMECategory *category;
-	SMESubCategory * subCategory;
+@interface SMEAlbum : SMEConciseAlbum {
 }
 
 -(id)initWithDictionary:(NSMutableDictionary *)dict;
 +(SMEAlbum *)album; //empty album
 +(SMEAlbum *)albumWithDictionary:(NSMutableDictionary *)dict; // from smugmug album dictionary
-
--(NSString *)albumKey;
--(NSString *)albumId;
--(NSString *)title;
--(void)setTitle:(NSString *)title;
--(SMEAlbumRef *)ref;
--(SMESubCategory *)subCategory;
--(void)setCategory:(SMECategory *)cat;
--(SMECategory *)category;
--(void)setSubCategory:(SMESubCategory *)cat;
 
 -(NSString *)description;
 -(void)setDescription:(NSString *)aDescription;
@@ -58,7 +44,6 @@
 -(BOOL)allowsFamilyToEdit;
 -(void)setAllowsFamilyToEdit:(BOOL)v;
 
--(NSDictionary *)toDictionary;
 // album representations are not equivalent for GET and PUTs
 -(NSDictionary *)toEditDictionary;
 @end

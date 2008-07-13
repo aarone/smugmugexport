@@ -16,6 +16,17 @@
 @class SMEAlbumRef, SMEImageRef, SMEAlbum;
 
 /*
+ * Interface to SmugMug interface.  Methods map to underlying SmugMug
+ * functions (see docs at link below). Upon login, the instance of the
+ * session keeps the underlying session id for future requests.  All 
+ * non-upload methods take a callback object and selector.  The selector 
+ * should take a single parameter, an SMResponse instance.  The response
+ * provides generic error handling and reporting and a potentially an
+ * domain-specific representation of the response (see /Types for existing
+ * domain-specific representations).  The docs below detail the 
+ * domain-specific responses for each method.
+ *
+ * SmugMug API: http://smugmug.jot.com/WikiHome/1.2.0
  */
 @interface SMESession : NSObject<SMEUploadRequestObserver> {
 	NSString *sessionID;
@@ -25,33 +36,44 @@
 
 +(SMESession *)session;
 
++(NSString *)UserAgent;
+
+/* response is an SMESessionInfo */
 -(void)loginWithTarget:(id)target 
 			  callback:(SEL)sel 
 			  username:(NSString *)username 
 			  password:(NSString *)password 
 				apiKey:(NSString *)apiKey;
 
+/* response has no domain specific representation */
 -(void)logoutWithTarget:(id)target
 			   callback:(SEL)callback;
 
+/* response is an array of SMEConciseAlbums */
 -(void)fetchAlbumsWithTarget:(id)target
 					callback:(SEL)callback;
 
-+(NSString *)UserAgent;
-
+/* response has an array of SMECategory */
 -(void)fetchCategoriesWithTarget:(id)target callback:(SEL)callback;
 
+/* response has an array of SMESubCategory */
 -(void)fetchSubCategoriesWithTarget:(id)target callback:(SEL)callback;
 
+/* response has no domain specific representation */
 -(void)deleteAlbum:(SMEAlbumRef *)ref withTarget:(id)target callback:(SEL)callback;
 
+/* response has no domain specific representation */
 -(void)createNewAlbum:(SMEAlbum *)album withTarget:(id)target callback:(SEL)callback;
 
+/* response has no domain specific representation */
 -(void)editAlbum:(SMEAlbum *)album withTarget:(id)target callback:(SEL)callback;
 
+/* response is an SMEAlbum */
 -(void)fetchExtendedAlbumInfo:(SMEAlbumRef *)ref withTarget:(id)target callback:(SEL)callback;
 
+/* response is an array of SMEImageURLs */
 -(void)fetchImageURLs:(SMEImageRef *)imageRef withTarget:(id)target callback:(SEL)callback;
+
 
 -(void)uploadImageData:(NSData *)imageData
 			  filename:(NSString *)filename
@@ -60,7 +82,5 @@
 			  keywords:(NSArray *)keywords
 			  observer:(NSObject<SMEUploadObserver>*)observer;
 -(void)stopUpload;
-
-
 
 @end

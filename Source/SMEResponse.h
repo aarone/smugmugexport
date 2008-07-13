@@ -18,11 +18,16 @@
 
 -(id)initWithData:(NSData *)data decoder:(NSObject<SMEDecoder> *)aDecoder;
 +(SMEResponse *)responseWithData:(NSData *)data decoder:(NSObject<SMEDecoder> *)aDecoder;
--(id)smData;
 -(unsigned int)code;
 -(NSString *)errorMessage;
+
+// underlying response data decoded as a NSDictionary
 -(NSDictionary *)response;
+
+// further decoded data using a domain-specific class (see /Types)
 -(void)setSMData:(id)data;
+-(id)smData;
+
 -(BOOL)wasSuccessful;
 
 @end

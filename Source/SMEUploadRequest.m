@@ -199,7 +199,10 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	
 	CFReadStreamScheduleWithRunLoop(readStream, CFRunLoopGetCurrent(), kCFRunLoopCommonModes);
 	uploadRunLoop = CFRunLoopGetCurrent();
-	[self setIsUploading:YES];
+
+	@synchronized(self) {
+		[self setIsUploading:YES];
+	}
 	[self setResponse:[NSMutableData data]];
 	
 	CFReadStreamOpen(readStream);
@@ -215,7 +218,9 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 
 
 -(void)destroyUploadResources {
-	[self setIsUploading:NO];
+	@synchronized(self) {
+		[self setIsUploading:NO];
+	}
 	
 	if(readStream != NULL) {
 		CFReadStreamUnscheduleFromRunLoop(readStream, uploadRunLoop, kCFRunLoopCommonModes);
@@ -270,9 +275,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(void)transferComplete {
-	[[self observer] uploadSucceeded:self];
-	
-	
+	[[self observer] uploadComplete:self];
 	[self destroyUploadResources];
 }
 
@@ -301,7 +304,12 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(void)cancelUpload {
-	[self setIsUploading:NO];
+	@synchronized(self) {
+		if(![self isUploading])
+			return;
+		
+		[self setIsUploading:NO];		
+	}
 	
 	[[self observer] uploadCanceled:self];	
 	[self destroyUploadResources];

@@ -15,7 +15,7 @@
 -(void)uploadMadeProgress:(SMEUploadRequest *)request bytesWritten:(long)numberOfBytes ofTotalBytes:(long)totalBytes;
 -(void)uploadFailed:(SMEUploadRequest *)request withError:(NSString *)reason;
 -(void)uploadCanceled:(SMEUploadRequest *)request;
--(void)uploadSucceeded:(SMEUploadRequest *)request;
+-(void)uploadComplete:(SMEUploadRequest *)request;
 @end
 
 @interface SMEUploadRequest : NSObject {

@@ -27,6 +27,10 @@ NSString *SMGrowlLogout = nil;
 	return [[[[self class] alloc] init] autorelease];
 }
 
+-(void)dealloc {
+	[super dealloc];
+}
+
 +(void)initialize {
 	[self initializeLocalizableStrings];
 }

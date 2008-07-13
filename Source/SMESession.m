@@ -191,7 +191,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	return [[[NSString alloc] initWithFormat:@"iPhoto SMExportPlugin/%@", [[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:(NSString *)kCFBundleShortVersionStringKey]] autorelease];
 }
 
-#pragma mark Login/Logout Methods
+#pragma mark Login
 
 -(void)invokeMethodAndTransform:(NSURL *)aUrl
 					requestDict:(NSDictionary *)dict
@@ -228,6 +228,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	return resp;
 }
 
+#pragma mark Logout
 -(void)logoutWithTarget:(id)target
 			   callback:(SEL)callback {
 
@@ -255,6 +256,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 
+#pragma mark Fetch Albums
 -(void)fetchAlbumsWithTarget:(id)target
 					callback:(SEL)callback {
 	[self validateSessionId];
@@ -279,12 +281,13 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	NSEnumerator *albumEnum = [[[resp response] objectForKey:@"Albums"] objectEnumerator];
 	NSDictionary *albumDict = nil;
 	while(albumDict = [albumEnum nextObject])
-		[result addObject:[SMEAlbum albumWithDictionary:[NSMutableDictionary dictionaryWithDictionary:albumDict]]];
+		[result addObject:[SMEConciseAlbum albumWithDictionary:[NSMutableDictionary dictionaryWithDictionary:albumDict]]];
 	
 	[resp setSMData:[NSArray arrayWithArray:result]];
 	return resp;
 }
 
+#pragma mark Fetch Categories
 -(void)fetchCategoriesWithTarget:(id)target callback:(SEL)callback {
 	[self validateSessionId];
 	[self invokeMethodAndTransform:[self baseRequestUrl]
@@ -325,6 +328,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	return [self transformCategoryForCategoryKey:@"Categories" categoryClass:[SMECategory class] request:req];
 }
 
+#pragma mark Fetch SubCategories
 -(void)fetchSubCategoriesWithTarget:(id)target callback:(SEL)callback {
 	[self validateSessionId];
 	[self invokeMethodAndTransform:[self baseRequestUrl]
@@ -337,6 +341,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 					  transformSel:@selector(transformSubCategoriesRequest:)];
 }
 
+#pragma mark Delete Album
 -(void)deleteAlbum:(SMEAlbumRef *)ref withTarget:(id)target callback:(SEL)callback {
 	[self validateSessionId];
 	[self invokeMethodAndTransform:[self baseRequestUrl]
@@ -355,7 +360,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	return resp;
 }
 
-
+#pragma mark Create Album
 -(void)createNewAlbum:(SMEAlbum *)album withTarget:(id)target callback:(SEL)callback {
 	[self validateSessionId];
 	
@@ -376,6 +381,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	return resp;
 }
 
+#pragma mark Edit Album
 -(void)editAlbum:(SMEAlbum *)album withTarget:(id)target callback:(SEL)callback {
 	[self validateSessionId];
 	
@@ -395,6 +401,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	return resp;
 }
 
+#pragma mark Full Album Fetch
 -(void)fetchExtendedAlbumInfo:(SMEAlbumRef *)ref withTarget:(id)target callback:(SEL)callback {
 	[self validateSessionId];
 	
@@ -433,6 +440,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 					  transformSel:@selector(imageFetchDidComplete:)];
 }
 
+#pragma mark Fetch Image
 -(SMEResponse *)imageFetchDidComplete:(SMERequest *)req {
 	SMEResponse *resp = [SMEResponse responseWithData:[req data] decoder:[self decoder]];
 	SMEImageURLs *urls = (SMEImageURLs *)[SMEImageURLs dataWithSourceData:[[resp response] objectForKey:@"Image"]];
@@ -440,8 +448,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	return resp;
 }
 
-#pragma mark Upload 
-
+#pragma mark Upload
 -(void)uploadImageData:(NSData *)imageData
 			  filename:(NSString *)filename
 				 album:(SMEAlbumRef *)albumRef
@@ -491,12 +498,12 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)notifyDelegateOfUploadSuccess:(SMEResponse *)resp {
-	[[self observer] uploadDidSucceed:resp 
-							 filename:[[self lastUploadRequest] filename] 
+	[[self observer] uploadDidComplete:resp 
+							  filename:[[self lastUploadRequest] filename] 
 								 data:[[self lastUploadRequest] imageData]];
 }
 
--(void)uploadSucceeded:(SMEUploadRequest *)request {
+-(void)uploadComplete:(SMEUploadRequest *)request {
 	SMEResponse *resp = [SMEResponse responseWithData:[request responseData] decoder:[self decoder]];
 	SMEImageRef *ref = [SMEImageRef refWithDictionary:[[resp response] objectForKey:@"Image"]];
 	[resp setSMData:ref];

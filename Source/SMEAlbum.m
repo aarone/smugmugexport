@@ -10,33 +10,7 @@
 #import "SMEAlbumRef.h"
 #import "SMESubCategory.h"
 #import "SMECategory.h"
-
-
-@interface NSMutableDictionary (SMDictionaryAdditions)
--(void)nilSafeSetObject:(id)obj forKey:(id)aKey;
--(void)setBool:(BOOL)v forKey:(id)key;
-@end
-
-@implementation NSMutableDictionary (SMDictionaryAdditions)
--(void)setBool:(BOOL)v forKey:(id)key {
-	[self setObject:[NSNumber numberWithBool:v] forKey:key];
-}
-
--(void)nilSafeSetObject:(id)obj forKey:(id)aKey {
-	if(obj == nil)
-		[self removeObjectForKey:aKey];
-	else
-		[self setObject:obj forKey:aKey];
-}
-
-@end
-
-@interface SMEAlbum (Private)
--(void)setAlbumData:(NSMutableDictionary *)d;
--(NSMutableDictionary *)albumData;
--(NSDictionary *)categoryDict;
--(NSDictionary *)subCategoryDict;
-@end
+#import "SMEDictionaryAdditions.h"
 
 @implementation SMEAlbum
 
@@ -45,7 +19,7 @@
 }
 
 -(id)initWithDictionary:(NSMutableDictionary *)dict {
-	if( ! (self = [super init]))
+	if( ! (self = [super initWithDictionary:dict]))
 		return nil;
 	
 	BOOL useDefaults = dict == nil;
@@ -93,80 +67,6 @@
 -(void)dealloc {
 	[self setAlbumData:nil];
 	[super dealloc];
-}
-
--(void)setAlbumData:(NSMutableDictionary *)d {
-	if(d != albumData) {
-		[albumData release];
-		albumData = [d retain];
-	}
-}
-
--(NSMutableDictionary *)albumData {
-	return albumData;
-}
-
--(unsigned int)hash {
-	return 31 * [[self albumId] hash] + [[self albumKey] hash];
-}
-
--(BOOL)isEqual:(id)anotherObject {
-	if(![anotherObject isKindOfClass:[self class]])
-		return NO;
-	
-	return [[self albumId] isEqual:[anotherObject albumId]] &&
-		[[self albumKey] isEqual:[anotherObject albumKey]];
-}
-
--(SMEAlbumRef *)ref {
-	return [SMEAlbumRef refWithId:[self albumId]	key:[self albumKey]];
-}
-
--(NSString *)albumKey {
-	return [[self albumData] objectForKey:@"Key"];
-}
-
--(NSString *)albumId {
-	return [[[self albumData] objectForKey:@"id"] stringValue];
-}
-
--(NSDictionary *)categoryDict {
-	return [[self albumData] objectForKey:@"Category"];
-}
-
--(NSDictionary *)subCategoryDict {
-	return [[self albumData] objectForKey:@"SubCategory"];
-}
-
--(NSString *)title {
-	return [[self albumData] objectForKey:@"Title"];
-}
-
--(void)setTitle:(NSString *)title {
-	[[self albumData] nilSafeSetObject:title forKey:@"Title"];
-}
-
--(SMESubCategory *)subCategory {
-	return subCategory;
-}
-
--(void)setSubCategory:(SMESubCategory *)cat {
-	if(cat != subCategory) {
-		[subCategory release];
-		subCategory = [cat retain];
-	}
-}
-
--(SMECategory *)category {
-	return category;
-}
-
--(void)setCategory:(SMECategory *)cat {
-	if(cat != category) {
-		[category release];
-		category = [cat retain];
-	}
-	[self setSubCategory:nil]; // subcategories are subordinates of categories
 }
 
 -(NSString *)description {
@@ -266,13 +166,6 @@
 	[[self albumData] setBool:v	forKey:@"FamilyEdit"];
 }
 
--(NSDictionary *)toDictionary {
-	NSMutableDictionary *result = [NSMutableDictionary dictionaryWithDictionary:[self albumData]];
-	[result nilSafeSetObject:[self categoryDict] forKey:@"Category"];
-	[result nilSafeSetObject:[self subCategoryDict] forKey:@"SubCategory"];
-	return [NSDictionary dictionaryWithDictionary:result];
-}
-
 -(NSDictionary *)toEditDictionary {
 	NSMutableDictionary *result = [NSMutableDictionary dictionary];
 	[result setObject:[self albumId] forKey:@"AlbumID"];
@@ -294,5 +187,3 @@
 }
 
 @end
-
-

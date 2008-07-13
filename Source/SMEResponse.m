@@ -19,8 +19,7 @@
 -(id)initWithData:(NSData *)data decoder:(NSObject<SMEDecoder> *)aDecoder {
 	if( ! (self = [super init]))
 		return nil;
-	
-	
+		
 	@try {		
 		response = IsEmpty(data) ? nil : [[self decodedResponse:data decoder:aDecoder] retain];
 	} @catch (NSException *ex) {

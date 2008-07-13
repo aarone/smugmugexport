@@ -32,6 +32,7 @@
 		938261880E1E7F8100A29C9F /* SMECategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 938261850E1E7F8100A29C9F /* SMECategory.m */; };
 		938E26AB0C0F47EA0059F26B /* SMEURLAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E26A90C0F47EA0059F26B /* SMEURLAdditions.m */; };
 		938E27490C0F4DE10059F26B /* SMEStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 938E27470C0F4DE10059F26B /* SMEStringAdditions.m */; };
+		939E379F0E2A8A050026DC3E /* SMEConciseAlbum.m in Sources */ = {isa = PBXBuildFile; fileRef = 939E379E0E2A8A050026DC3E /* SMEConciseAlbum.m */; };
 		939FDC8A0E2A5FA8001D6B9B /* SMEUploadRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 939FDC880E2A5FA8001D6B9B /* SMEUploadRequest.m */; };
 		939FDC8D0E2A5FB6001D6B9B /* SMEGrowlDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 939FDC8B0E2A5FB6001D6B9B /* SMEGrowlDelegate.m */; };
 		93BD6F2F0AD84AAC007CE525 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
@@ -47,6 +48,7 @@
 		93DE06B00DE990ED0029F0FA /* JSON.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 93DE06380DE98DD60029F0FA /* JSON.framework */; };
 		93E58BE10D84690C00DA6105 /* SMEImageRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 93E58BE00D84690C00DA6105 /* SMEImageRef.m */; };
 		93E58C820D84732E00DA6105 /* SMEAlbumRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 93E58C800D84732E00DA6105 /* SMEAlbumRef.m */; };
+		93E9B8D10E2A8A3800EE9AE9 /* SMEDictionaryAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 93E9B8CF0E2A8A3800EE9AE9 /* SMEDictionaryAdditions.m */; };
 		93ED9DC20E22BEF800572F50 /* SMEImageURLs.m in Sources */ = {isa = PBXBuildFile; fileRef = 93ED9DC10E22BEF800572F50 /* SMEImageURLs.m */; };
 		93ED9E1B0E22C5A800572F50 /* SMEBitmapImageRepAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 93ED9E1A0E22C5A800572F50 /* SMEBitmapImageRepAdditions.m */; };
 /* End PBXBuildFile section */
@@ -124,6 +126,8 @@
 		938E26A90C0F47EA0059F26B /* SMEURLAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEURLAdditions.m; path = Source/SMEURLAdditions.m; sourceTree = "<group>"; };
 		938E27460C0F4DE10059F26B /* SMEStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEStringAdditions.h; path = Source/SMEStringAdditions.h; sourceTree = "<group>"; };
 		938E27470C0F4DE10059F26B /* SMEStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEStringAdditions.m; path = Source/SMEStringAdditions.m; sourceTree = "<group>"; };
+		939E379D0E2A8A050026DC3E /* SMEConciseAlbum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEConciseAlbum.h; path = Source/SMEConciseAlbum.h; sourceTree = "<group>"; };
+		939E379E0E2A8A050026DC3E /* SMEConciseAlbum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEConciseAlbum.m; path = Source/SMEConciseAlbum.m; sourceTree = "<group>"; };
 		939FDC880E2A5FA8001D6B9B /* SMEUploadRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEUploadRequest.m; path = Source/SMEUploadRequest.m; sourceTree = "<group>"; };
 		939FDC890E2A5FA8001D6B9B /* SMEUploadRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEUploadRequest.h; path = Source/SMEUploadRequest.h; sourceTree = "<group>"; };
 		939FDC8B0E2A5FB6001D6B9B /* SMEGrowlDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEGrowlDelegate.m; path = Source/SMEGrowlDelegate.m; sourceTree = "<group>"; };
@@ -148,6 +152,8 @@
 		93E58BE00D84690C00DA6105 /* SMEImageRef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEImageRef.m; path = Source/SMEImageRef.m; sourceTree = "<group>"; };
 		93E58C800D84732E00DA6105 /* SMEAlbumRef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEAlbumRef.m; path = Source/SMEAlbumRef.m; sourceTree = "<group>"; };
 		93E58C810D84732E00DA6105 /* SMEAlbumRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEAlbumRef.h; path = Source/SMEAlbumRef.h; sourceTree = "<group>"; };
+		93E9B8CF0E2A8A3800EE9AE9 /* SMEDictionaryAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEDictionaryAdditions.m; path = Source/SMEDictionaryAdditions.m; sourceTree = "<group>"; };
+		93E9B8D00E2A8A3800EE9AE9 /* SMEDictionaryAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEDictionaryAdditions.h; path = Source/SMEDictionaryAdditions.h; sourceTree = "<group>"; };
 		93EBDDE30C8CF5EA00905273 /* SMEUploadObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEUploadObserver.h; path = Source/SMEUploadObserver.h; sourceTree = "<group>"; };
 		93ED9DC00E22BEF800572F50 /* SMEImageURLs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEImageURLs.h; path = Source/SMEImageURLs.h; sourceTree = "<group>"; };
 		93ED9DC10E22BEF800572F50 /* SMEImageURLs.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEImageURLs.m; path = Source/SMEImageURLs.m; sourceTree = "<group>"; };
@@ -217,8 +223,8 @@
 			children = (
 				933AA0C90CB827CF00B7B2A5 /* SMEExportPlugin.h */,
 				933AA0CA0CB827CF00B7B2A5 /* SMEExportPlugin.m */,
-				939FDC8B0E2A5FB6001D6B9B /* SMEGrowlDelegate.m */,
 				939FDC8C0E2A5FB6001D6B9B /* SMEGrowlDelegate.h */,
+				939FDC8B0E2A5FB6001D6B9B /* SMEGrowlDelegate.m */,
 				93C23E810D96B4290022EEE1 /* SMEAlbumEditController.h */,
 				93C23E800D96B4290022EEE1 /* SMEAlbumEditController.m */,
 				933AA08F0CB825C900B7B2A5 /* SMEExportBox.h */,
@@ -227,7 +233,7 @@
 				933AA0B10CB8273000B7B2A5 /* SMEUserDefaults.m */,
 				9319DE380CB91B5D0037023F /* SMEAccountManager.h */,
 				9319DE390CB91B5D0037023F /* SMEAccountManager.m */,
-				938E26DE0C0F49180059F26B /* SmugMug Access */,
+				938E26DE0C0F49180059F26B /* SmugMug */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -306,7 +312,7 @@
 			name = Misc;
 			sourceTree = "<group>";
 		};
-		938E26DE0C0F49180059F26B /* SmugMug Access */ = {
+		938E26DE0C0F49180059F26B /* SmugMug */ = {
 			isa = PBXGroup;
 			children = (
 				93DD12D50E182D5100275408 /* SMESession.h */,
@@ -315,15 +321,15 @@
 				93EBDDE30C8CF5EA00905273 /* SMEUploadObserver.h */,
 				93DD89D50C8C526100A6131B /* SMERequest.h */,
 				93DD89D60C8C526100A6131B /* SMERequest.m */,
-				939FDC880E2A5FA8001D6B9B /* SMEUploadRequest.m */,
 				939FDC890E2A5FA8001D6B9B /* SMEUploadRequest.h */,
+				939FDC880E2A5FA8001D6B9B /* SMEUploadRequest.m */,
 				93DD11E90E17EC8C00275408 /* SMEResponse.h */,
 				93DD11EA0E17EC8C00275408 /* SMEResponse.m */,
 				93DD88F60C8C4AE000A6131B /* SMEDecoder.h */,
 				9319DE3C0CB91B690037023F /* SMEJSONDecoder.h */,
 				9319DE3D0CB91B690037023F /* SMEJSONDecoder.m */,
 			);
-			name = "SmugMug Access";
+			name = SmugMug;
 			sourceTree = "<group>";
 		};
 		9394BC8D0ADDBF390066CD67 /* Categories */ = {
@@ -339,6 +345,8 @@
 				938E27470C0F4DE10059F26B /* SMEStringAdditions.m */,
 				935A1A840C1CC2CC00043E12 /* SMEUserDefaultsAdditions.h */,
 				935A1A850C1CC2CC00043E12 /* SMEUserDefaultsAdditions.m */,
+				93E9B8CF0E2A8A3800EE9AE9 /* SMEDictionaryAdditions.m */,
+				93E9B8D00E2A8A3800EE9AE9 /* SMEDictionaryAdditions.h */,
 			);
 			name = Categories;
 			sourceTree = "<group>";
@@ -352,6 +360,8 @@
 				938261810E1E7F7000A29C9F /* SMESessionInfo.m */,
 				93C23E0A0D968FE60022EEE1 /* SMEAlbum.h */,
 				93C23E0B0D968FE60022EEE1 /* SMEAlbum.m */,
+				939E379D0E2A8A050026DC3E /* SMEConciseAlbum.h */,
+				939E379E0E2A8A050026DC3E /* SMEConciseAlbum.m */,
 				93E58C810D84732E00DA6105 /* SMEAlbumRef.h */,
 				93E58C800D84732E00DA6105 /* SMEAlbumRef.m */,
 				93E58BDF0D84690C00DA6105 /* SMEImageRef.h */,
@@ -518,6 +528,8 @@
 				93ED9E1B0E22C5A800572F50 /* SMEBitmapImageRepAdditions.m in Sources */,
 				939FDC8A0E2A5FA8001D6B9B /* SMEUploadRequest.m in Sources */,
 				939FDC8D0E2A5FB6001D6B9B /* SMEGrowlDelegate.m in Sources */,
+				939E379F0E2A8A050026DC3E /* SMEConciseAlbum.m in Sources */,
+				93E9B8D10E2A8A3800EE9AE9 /* SMEDictionaryAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
