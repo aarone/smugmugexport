@@ -60,9 +60,7 @@
 	
 	inv = [[NSInvocation invocationWithMethodSignature:sig] retain];
 	[inv setSelector:callback];
-	[inv setTarget:target];
-	[inv retainArguments];
-	
+	[inv setTarget:target];	
 	
 	NSMethodSignature *transformSig = [[aTransformer class] instanceMethodSignatureForSelector:transformSel];
 	if(nil == transformSig && transformSel != nil) {
@@ -72,7 +70,6 @@
 		transformInv = [[NSInvocation invocationWithMethodSignature:transformSig] retain];
 		[transformInv setSelector:transformSel];
 		[transformInv setTarget:aTransformer];
-		[transformInv retainArguments];
 	}	
 	
 	return self;

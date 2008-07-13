@@ -65,7 +65,6 @@
 }
 
 -(void)dealloc {
-	[self setAlbumData:nil];
 	[super dealloc];
 }
 
