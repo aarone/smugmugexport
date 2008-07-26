@@ -6,7 +6,7 @@
 //  Copyright 2007 Aaron Evans. All rights reserved.
 //
 
-#import "SMERequest.h"
+#import "SMEMethodRequest.h"
 
 #import "SMEGlobals.h"
 #import "SMEUserDefaultsAdditions.h"
@@ -14,18 +14,21 @@
 #import "SMEURLAdditions.h"
 #import "SMESession.h"
 
-@interface SMERequest (Private)
+@interface SMEMethodRequest (Private)
 -(NSURLConnection *)connection;
 -(void)setConnection:(NSURLConnection *)c;
 
--(NSMutableData *)response;
--(void)setResponse:(NSMutableData *)data;
+-(NSMutableData *)responseData;
+-(void)setResponseData:(NSMutableData *)data;
 
 -(SEL)callback;
 -(void)setCallback:(SEL)c;
 
 -(id)target;
 -(void)setTarget:(id)t;
+
+-(NSHTTPURLResponse *)httpResponse;
+-(void)setHttpResponse:(NSHTTPURLResponse *)resp;
 
 -(void)setWasSuccessful:(BOOL)v;
 
@@ -53,7 +56,7 @@
 }
 @end
 
-@implementation SMERequest
+@implementation SMEMethodRequest
 
 -(id)init {
 	if((self = [super init]) == nil)
@@ -65,14 +68,15 @@
 	return self;
 }
 
-+(SMERequest *)request {
++(SMEMethodRequest *)request {
 	return [[[[self class] alloc] init] autorelease];
 }
 
 -(void)dealloc {
+	[[self httpResponse] release];
 	[[self connection] release];
 	[[self error] release];
-	[[self response] release];
+	[[self responseData] release];
 	[[self requestUrl] release];
 	[[self requestDict] release];
 	[[self target] release];
@@ -102,19 +106,19 @@
 	}
 }
 
--(NSMutableData *)response {
-	return response;
+-(NSMutableData *)responseData {
+	return responseData;
 }
 
 -(void)setResponse:(NSMutableData *)data {
-	if(response != data) {
-		[response release];
-		response = [data retain];	
+	if(responseData != data) {
+		[responseData release];
+		responseData = [data retain];	
 	}
 }
 
 -(void)appendToResponse:(NSData *)data {
-	[[self response] appendData:data];
+	[[self responseData] appendData:data];
 }
 
 -(NSURLConnection *)connection {
@@ -153,8 +157,19 @@
 		[target release];
 		target = [t retain];
 	}
-	
 }
+
+-(NSHTTPURLResponse *)httpResponse {
+	return httpResponse;
+}
+
+-(void)setHttpResponse:(NSHTTPURLResponse *)resp {
+	if(resp != httpResponse) {
+		[httpResponse release];
+		httpResponse = [resp retain];
+	}
+}
+
 
 -(BOOL)connectionIsOpen {
 	return connectionIsOpen;
@@ -185,6 +200,8 @@
 	
 	NSURLRequest *req = [NSURLRequest smRequestWithURL:url];
 	[self setResponse:[NSMutableData data]];
+	[self setError:nil];
+	[self setWasSuccessful:NO];
 	
 	[self setConnection:[NSURLConnection connectionWithRequest:req delegate:self]]; // begin request
 	[self setConnectionIsOpen:YES];
@@ -213,8 +230,8 @@
 }
 
 #pragma mark NSURLConnection Delegate Methods
-- (NSURLRequest *)connection:(NSURLConnection *)conn willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)response {
-	return request;
+-(NSURLRequest *)connection:(NSURLConnection *)connection willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponse {
+	return request;  // allow any redirects
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
@@ -223,8 +240,9 @@
 - (void)connection:(NSURLConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
 }
 
-- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
-	[[self response] setLength:0];
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)aResponse {
+	[[self responseData] setLength:0]; // reset
+	[self setHttpResponse:(NSHTTPURLResponse *)aResponse];
 }
 
 - (NSCachedURLResponse *)connection:(NSURLConnection *)connection willCacheResponse:(NSCachedURLResponse *)cachedResponse {
@@ -236,13 +254,21 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-	[self setWasSuccessful:YES];
-	[self setError:nil];
+	if([[self httpResponse] statusCode] == 200) { // can we just expect 200?
+		[self setWasSuccessful:YES];
+		[self setError:nil];
+	} else {
+		[self setWasSuccessful:NO];
+		[self setError:[NSError errorWithDomain:NSLocalizedString(@"HTTP Error", @"HTTP error domain")
+										   code:[[self httpResponse] statusCode]
+									   userInfo:[NSDictionary dictionaryWithObject:[NSHTTPURLResponse localizedStringForStatusCode:[[self httpResponse] statusCode]] forKey:NSLocalizedDescriptionKey]]];
+	}
+	
 	[[self target] performSelector:callback withObject:self];
 	[self setConnectionIsOpen:NO];
 	
 	if(IsNetworkTracingEnabled()) {
-		NSString *responseAsString = [[[NSString alloc] initWithData:[self response]
+		NSString *responseAsString = [[[NSString alloc] initWithData:[self responseData]
 															encoding:NSUTF8StringEncoding] autorelease];
 		NSLog(@"response: %@", responseAsString);
 	}	
@@ -256,7 +282,7 @@
 }
 
 -(NSData *)data {
-	return [NSData dataWithData:response];
+	return [NSData dataWithData:[self responseData]];
 }
 
 @end

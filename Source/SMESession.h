@@ -7,11 +7,9 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "SMERequest.h"
+#import "SMEMethodRequest.h"
 #import "SMEUploadRequest.h"
 #import "SMEUploadObserver.h"
-
-#define NO_CATEGORIES_FOUND_CODE 15
 
 @class SMEAlbumRef, SMEImageRef, SMEAlbum;
 

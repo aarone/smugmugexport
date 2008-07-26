@@ -7,7 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-@class SMERequest, SMEImageRef, SMEResponse;
+@class SMEMethodRequest, SMEImageRef, SMEResponse;
 
 // protocol for monitoring an upload
 @protocol SMEUploadObserver

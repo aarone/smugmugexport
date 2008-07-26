@@ -10,20 +10,21 @@
 #import "SMEDecoder.h"
 #import "SMEAlbumRef.h"
 
-@interface SMERequest : NSObject {
+@interface SMEMethodRequest : NSObject {
 	NSURLConnection *connection;
-	NSMutableData *response;
+	NSMutableData *responseData;
 	SEL callback;
 	id target;
 	BOOL wasSuccessful;
 	BOOL connectionIsOpen;
 	NSError *error;
+	NSHTTPURLResponse *httpResponse;
 	
 	NSDictionary *requestDict;
 	NSURL *requestUrl;
 }
 
-+(SMERequest *)request;
++(SMEMethodRequest *)request;
 
 #pragma mark REST method invocation API
 
@@ -67,11 +68,15 @@
 
 /*!
   @method     error
-  @abstract   Returns the last error encountered during the REST call or nil if no errors have been encountered.
-  @discussion This is simply the error from the underlying NSURLConnection.
+  @abstract   Returns the last error encountered for the connection or nil if no errors have been encountered.
+  @discussion This is can be an error from the underlying NSURLConnection or an HTTP error.
  */
 -(NSError *)error;
 
+/*!
+ @method data
+ @abstract Returns the response data from the underlying connection.
+ */
 -(NSData *)data;
 
 @end

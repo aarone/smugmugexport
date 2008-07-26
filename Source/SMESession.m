@@ -8,7 +8,7 @@
 
 #import "SMESession.h"
 #import "SMEGlobals.h"
-#import "SMERequest.h"
+#import "SMEMethodRequest.h"
 #import "SMEDecoder.h"
 #import "SMEUserDefaultsAdditions.h"
 #import "SMEJSONDecoder.h"
@@ -23,8 +23,9 @@
 #import "SMEUploadRequest.h"
 
 /*
- * Class wraps the repetitive process of invoking remote smugmgu methods, asynchronously getting a callback
- * upon request completion, and handling the result.
+ * Class wraps the repetitive process of invoking remote methods, asynchronously getting a callback
+ * upon request completion, transforming the result, and returning the transformed response to a 
+ * target on the main thread.
  * 
   send message invokeMethodAndHandleResponse:req to handler
    
@@ -39,7 +40,7 @@
 }
 +(ResponseHandler *)responseHandler:(id)target callback:(SEL)callback transformer:(id)transformer transformSel:(SEL)transformSel;
 -(id)initWithResponseHandler:(id)target callback:(SEL)callback transformer:(id)transformer transformSel:(SEL)transformSel;
--(void)invokeMethodAndHandleResponse:(SMERequest *)req url:(NSURL *)aURL dict:(NSDictionary *)dict;
+-(void)invokeMethodAndHandleResponse:(SMEMethodRequest *)req url:(NSURL *)aURL dict:(NSDictionary *)dict;
 @end
 
 @implementation ResponseHandler
@@ -82,14 +83,14 @@
 	[super dealloc];
 }
 
--(void)invokeMethodAndHandleResponse:(SMERequest *)req url:(NSURL *)aURL dict:(NSDictionary *)dict {
+-(void)invokeMethodAndHandleResponse:(SMEMethodRequest *)req url:(NSURL *)aURL dict:(NSDictionary *)dict {
 	[req invokeMethodWithURL:aURL
 				 requestDict:dict
 			responseCallback:@selector(transformResult:)
 			  responseTarget:self];
 }
 
--(void)transformResult:(SMERequest *)req {
+-(void)transformResult:(SMEMethodRequest *)req {
 	if([[inv methodSignature] numberOfArguments] == 3) {
 		id arg = nil;
 		if(transformInv != nil && [[transformInv methodSignature] numberOfArguments] == 3) {
@@ -114,9 +115,9 @@
 -(NSURL *)baseRequestUrl;
 
 -(NSDictionary *)defaultNewAlbumPreferences;
--(void)newAlbumCreationDidComplete:(SMERequest *)req;
+-(void)newAlbumCreationDidComplete:(SMEMethodRequest *)req;
 -(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey;
--(SMERequest *)createRequest;
+-(SMEMethodRequest *)createRequest;
 -(SMEUploadRequest *)lastUploadRequest;
 -(void)setLastUploadRequest:(SMEUploadRequest *)request;	
 @end
@@ -152,7 +153,6 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)dealloc {
-
 	[[self sessionID] release];
 	[[self lastUploadRequest] release];
 	
@@ -163,14 +163,15 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	return [SMEJSONDecoder decoder];
 }
 
--(SMERequest *)createRequest {
-	return [SMERequest request];
+-(SMEMethodRequest *)createRequest {
+	return [SMEMethodRequest request];
 }
 
 #pragma mark Miscellaneous Get/Set Methods
 
 -(NSURL *)baseRequestUrl {
-	return [NSURL URLWithString:@"https://api.smugmug.com/hack/json/1.2.0/"];
+	//return [NSURL URLWithString:@"https://api.smugmug.com/hack/json/1.2.0/"];
+	return [NSURL URLWithString:@"https://api.smugmug.com/hack/json/1.6.0"];
 }
 	
 -(NSString *)sessionID {
@@ -215,9 +216,9 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 					  transformSel:@selector(transformLoginRequest:)];
 }
 
--(SMEResponse *)transformLoginRequest:(SMERequest *)req {
-	SMEResponse* resp = [SMEResponse responseWithData:[req data] decoder:[self decoder]];
-	SMESessionInfo *info = (SMESessionInfo *)[SMESessionInfo dataWithSourceData:[[resp response] objectForKey:@"Login"]];
+-(SMEResponse *)transformLoginRequest:(SMEMethodRequest *)req {
+	SMEResponse* resp = [SMEResponse responseWithCompletedRequest:req decoder:[self decoder]];
+	SMESessionInfo *info = (SMESessionInfo *)[SMESessionInfo dataWithSourceData:[[resp decodedResponse] objectForKey:@"Login"]];
 	[resp setSMData:info];
 	
 	// the only state of a session
@@ -240,8 +241,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	
 }
 
--(SMEResponse *)transformLogoutRequest:(SMERequest *)req {
-	SMEResponse *resp = [SMEResponse responseWithData:[req data] decoder:[self decoder]];
+-(SMEResponse *)transformLogoutRequest:(SMEMethodRequest *)req {
+	SMEResponse *resp = [SMEResponse responseWithCompletedRequest:req decoder:[self decoder]];
 	return resp;
 }
 
@@ -271,11 +272,11 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 					  transformSel:@selector(transformAlbumsRequest:)];	
 }
 
--(SMEResponse *)transformAlbumsRequest:(SMERequest *)req {
-	SMEResponse *resp = [SMEResponse responseWithData:[req data] decoder:[self decoder]];
+-(SMEResponse *)transformAlbumsRequest:(SMEMethodRequest *)req {
+	SMEResponse *resp = [SMEResponse responseWithCompletedRequest:req decoder:[self decoder]];
 
 	NSMutableArray *result = [NSMutableArray array];
-	NSEnumerator *albumEnum = [[[resp response] objectForKey:@"Albums"] objectEnumerator];
+	NSEnumerator *albumEnum = [[[resp decodedResponse] objectForKey:@"Albums"] objectEnumerator];
 	NSDictionary *albumDict = nil;
 	while(albumDict = [albumEnum nextObject])
 		[result addObject:[SMEConciseAlbum albumWithDictionary:[NSMutableDictionary dictionaryWithDictionary:albumDict]]];
@@ -297,15 +298,15 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 					  transformSel:@selector(transformCategoriesRequest:)];
 }
 
--(SMEResponse *)transformCategoryForCategoryKey:(NSString *)categoryKey categoryClass:(Class)categoryClass request:(SMERequest *)req{
-	SMEResponse *resp = [SMEResponse responseWithData:[req data] decoder:[self decoder]];
+-(SMEResponse *)transformCategoryForCategoryKey:(NSString *)categoryKey categoryClass:(Class)categoryClass request:(SMEMethodRequest *)req{
+	SMEResponse *resp = [SMEResponse responseWithCompletedRequest:req decoder:[self decoder]];
 	
-	if([resp  code] == NO_CATEGORIES_FOUND_CODE) {
+	if([resp smErrorCode] == NO_CATEGORIES_FOUND_CODE) {
 		[resp setSMData:[NSArray array]];
 		return resp;
 	}
 	
-	NSMutableArray *returnedCategories = [NSMutableArray arrayWithArray:[[resp response] objectForKey:categoryKey]];
+	NSMutableArray *returnedCategories = [NSMutableArray arrayWithArray:[[resp decodedResponse] objectForKey:categoryKey]];
 	
 	[returnedCategories sortUsingSelector:@selector(compareByTitle:)];
 	NSEnumerator *e = [returnedCategories objectEnumerator];
@@ -317,11 +318,11 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	return resp;
 }
 
--(SMEResponse *)transformSubCategoriesRequest:(SMERequest *)req {
+-(SMEResponse *)transformSubCategoriesRequest:(SMEMethodRequest *)req {
 	return [self transformCategoryForCategoryKey:@"SubCategories" categoryClass:[SMESubCategory class] request:req];
 }
 
--(SMEResponse *)transformCategoriesRequest:(SMERequest *)req {
+-(SMEResponse *)transformCategoriesRequest:(SMEMethodRequest *)req {
 	return [self transformCategoryForCategoryKey:@"Categories" categoryClass:[SMECategory class] request:req];
 }
 
@@ -352,8 +353,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 					  transformSel:@selector(transformDeleteResponse:)];
 }
 
--(SMEResponse *)transformDeleteResponse:(SMERequest *)req {
-	SMEResponse *resp = [SMEResponse responseWithData:[req data] decoder:[self decoder]];
+-(SMEResponse *)transformDeleteResponse:(SMEMethodRequest *)req {
+	SMEResponse *resp = [SMEResponse responseWithCompletedRequest:req decoder:[self decoder]];
 	return resp;
 }
 
@@ -373,8 +374,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 					  transformSel:@selector(transformCreateNewAlbumResponse:)];
 }
 
--(SMEResponse *)transformCreateNewAlbumResponse:(SMERequest *)req {
-	SMEResponse *resp = [SMEResponse responseWithData:[req data] decoder:[self decoder]];
+-(SMEResponse *)transformCreateNewAlbumResponse:(SMEMethodRequest *)req {
+	SMEResponse *resp = [SMEResponse responseWithCompletedRequest:req decoder:[self decoder]];
 	return resp;
 }
 
@@ -393,8 +394,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 					  transformSel:@selector(transformEditAlbumResponse:)];
 }
 
--(SMEResponse *)transformEditAlbumResponse:(SMERequest *)req {
-	SMEResponse *resp = [SMEResponse responseWithData:[req data] decoder:[self decoder]];
+-(SMEResponse *)transformEditAlbumResponse:(SMEMethodRequest *)req {
+	SMEResponse *resp = [SMEResponse responseWithCompletedRequest:req decoder:[self decoder]];
 	return resp;
 }
 
@@ -415,9 +416,9 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 					  transformSel:@selector(albumInfoFetchDidComplete:)];
 }
 
--(SMEResponse *)albumInfoFetchDidComplete:(SMERequest *)req {
-	SMEResponse *resp = [SMEResponse responseWithData:[req data] decoder:[self decoder]];
-	[resp setSMData:[SMEAlbum albumWithDictionary:[[resp response] objectForKey:@"Album"]]];
+-(SMEResponse *)albumInfoFetchDidComplete:(SMEMethodRequest *)req {
+	SMEResponse *resp = [SMEResponse responseWithCompletedRequest:req decoder:[self decoder]];
+	[resp setSMData:[SMEAlbum albumWithDictionary:[[resp decodedResponse] objectForKey:@"Album"]]];
 	return resp;
 }
 
@@ -438,9 +439,9 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 #pragma mark Fetch Image
--(SMEResponse *)imageFetchDidComplete:(SMERequest *)req {
-	SMEResponse *resp = [SMEResponse responseWithData:[req data] decoder:[self decoder]];
-	SMEImageURLs *urls = (SMEImageURLs *)[SMEImageURLs dataWithSourceData:[[resp response] objectForKey:@"Image"]];
+-(SMEResponse *)imageFetchDidComplete:(SMEMethodRequest *)req {
+	SMEResponse *resp = [SMEResponse responseWithCompletedRequest:req decoder:[self decoder]];
+	SMEImageURLs *urls = (SMEImageURLs *)[SMEImageURLs dataWithSourceData:[[resp decodedResponse] objectForKey:@"Image"]];
 	[resp setSMData:urls];
 	return resp;
 }
@@ -488,7 +489,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)uploadFailed:(SMEUploadRequest *)request withError:(NSString *)reason {
-	SMEResponse *resp = [SMEResponse responseWithData:[request responseData] decoder:[self decoder]];
+	SMEResponse *resp = [SMEResponse responseWithCompletedRequest:request decoder:[self decoder]];
 	[[self observer] performSelectorOnMainThread:@selector(uploadDidFail:)
 									  withObject:resp
 								   waitUntilDone:NO];
@@ -501,8 +502,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)uploadComplete:(SMEUploadRequest *)request {
-	SMEResponse *resp = [SMEResponse responseWithData:[request responseData] decoder:[self decoder]];
-	SMEImageRef *ref = [SMEImageRef refWithDictionary:[[resp response] objectForKey:@"Image"]];
+	SMEResponse *resp = [SMEResponse responseWithCompletedRequest:request decoder:[self decoder]];
+	SMEImageRef *ref = [SMEImageRef refWithDictionary:[[resp decodedResponse] objectForKey:@"Image"]];
 	[resp setSMData:ref];
 	[self performSelectorOnMainThread:@selector(notifyDelegateOfUploadSuccess:)
 						   withObject:resp

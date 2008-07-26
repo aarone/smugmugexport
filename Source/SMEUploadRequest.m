@@ -29,6 +29,8 @@
 -(NSMutableData *)response;
 -(void)setResponse:(NSMutableData *)data;
 
+-(void)setWasSuccessful:(BOOL)v;
+-(void)setError:(NSError *)err;
 -(void)setFilename:(NSString *)filename;
 -(void)setSessionId:(NSString *)anId;
 -(void)setAlbumRef:(SMEAlbumRef *)ref;
@@ -83,6 +85,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	[[self imageData] release];
 	[[self response] release];
 	[[self filename] release];
+	[[self error] release];
 	
 	[super dealloc];
 }
@@ -275,6 +278,8 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(void)transferComplete {
+	[self setWasSuccessful:NO];
+	[self setError:nil];
 	[[self observer] uploadComplete:self];
 	[self destroyUploadResources];
 }
@@ -311,6 +316,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 		[self setIsUploading:NO];		
 	}
 	
+	[self setWasSuccessful:NO];
 	[[self observer] uploadCanceled:self];	
 	[self destroyUploadResources];
 }
@@ -332,6 +338,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 
 -(void)errorOccurred: (CFStreamError *)err {
 	NSString *errorText = [self errorDescriptionForError:err];
+	[self setWasSuccessful:NO];
 	[[self observer] uploadFailed:self withError:errorText];
 	[self destroyUploadResources];
 }
@@ -425,5 +432,27 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	}
 }
 		
+-(BOOL)wasSuccessful {
+	return wasSuccessful;
+}
+
+-(void)setWasSuccessful:(BOOL)v {
+	wasSuccessful = v;
+}
+
+-(NSError *)error {
+	return error;
+}
+
+-(void)setError:(NSError *)err {
+	if(err != error) {
+		[error release];
+		error = [err retain];
+	}
+}
+
+-(NSData *)data {
+	return [NSData dataWithData:[self response]];
+}
 
 @end

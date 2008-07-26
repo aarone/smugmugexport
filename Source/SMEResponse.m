@@ -11,56 +11,68 @@
 #import "SMEGlobals.h"
 
 @interface SMEResponse (Private)
--(NSDictionary *)decodedResponse:(NSData *)data decoder:(NSObject<SMEDecoder> *)decoder;
+-(NSDictionary *)decodeResponse:(NSData *)data decoder:(NSObject<SMEDecoder> *)decoder;
+-(void)setConnectionError:(NSError *)err;
 @end
 
 @implementation SMEResponse
 
--(id)initWithData:(NSData *)data decoder:(NSObject<SMEDecoder> *)aDecoder {
+-(id)initWithCompletedRequest:(SMEMethodRequest *)req decoder:(NSObject<SMEDecoder> *)aDecoder {
 	if( ! (self = [super init]))
 		return nil;
 		
-	@try {		
-		response = IsEmpty(data) ? nil : [[self decodedResponse:data decoder:aDecoder] retain];
+	@try {
+		if([req wasSuccessful]) {
+			decodedResponse = IsEmpty([req data]) ? nil : [[self decodeResponse:[req data] decoder:aDecoder] retain];
+		} else {
+			[self setConnectionError:[req error]];
+		}
+		
 	} @catch (NSException *ex) {
 		NSLog(@"Error decoding response: %@", ex);
-		response = nil;
+		decodedResponse = nil;
 	}
 	
 	return self;
 }
 
-+(SMEResponse *)responseWithData:(NSData *)data decoder:(NSObject<SMEDecoder> *)aDecoder {
-	return [[[[self class] alloc] initWithData:data decoder:aDecoder] autorelease];
++(SMEResponse *)responseWithCompletedRequest:(SMEMethodRequest *)req decoder:(NSObject<SMEDecoder> *)aDecoder {
+	return [[[[self class] alloc] initWithCompletedRequest:req decoder:aDecoder] autorelease];
 }
 
 -(void)dealloc {
-	[response release];
+	[decodedResponse release];
+	[connectionError release];
 	[smData release];
 	
 	[super dealloc];
 }
 
--(NSDictionary *)response {
-	return response;
-}
-
--(unsigned int)code {
-	return [[response objectForKey:@"code"] intValue];
-}
-
 -(NSString *)errorMessage {
-	return response == nil ? 
-		NSLocalizedString(@"No data in response", @"Error message when no response is received.") : 
-		[response objectForKey:@"message"];
+	return connectionError != nil ? [connectionError localizedDescription] : [self smErrorMessage];
 }
 
--(NSDictionary *)decodedResponse:(NSData *)data decoder:(NSObject<SMEDecoder> *)decoder {	
+-(NSDictionary *)decodedResponse {
+	return decodedResponse;
+}
+
+-(unsigned int)smErrorCode {
+	return [[decodedResponse objectForKey:@"code"] intValue];
+}
+
+-(NSString *)smErrorMessage {
+	return decodedResponse == nil ? 
+		NSLocalizedString(@"No data in response", @"Error message when no response is received.") : 
+		[decodedResponse objectForKey:@"message"];
+}
+
+-(NSDictionary *)decodeResponse:(NSData *)data decoder:(NSObject<SMEDecoder> *)decoder {	
 	return [decoder decodedResponse:data];
 }
 
 -(BOOL)wasSuccessful {
-	return [[response objectForKey:@"stat"] isEqualToString:@"ok"];
+	return connectionError != nil &&
+		[[decodedResponse objectForKey:@"stat"] isEqualToString:@"ok"];
 }
 
 -(id)smData {
@@ -71,6 +83,17 @@
 	if(data != smData) {
 		[smData release];
 		smData = [data retain];
+	}
+}
+
+-(NSError *)connectionError {
+	return connectionError;
+}
+
+-(void)setConnectionError:(NSError *)err {
+	if(err != connectionError) {
+		[connectionError release];
+		connectionError = [err retain];
 	}
 }
 

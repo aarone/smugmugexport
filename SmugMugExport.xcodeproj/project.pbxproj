@@ -44,7 +44,7 @@
 		93DD11EC0E17EC8C00275408 /* SMEResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD11EA0E17EC8C00275408 /* SMEResponse.m */; };
 		93DD12D70E182D5100275408 /* SMESession.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD12D60E182D5100275408 /* SMESession.m */; };
 		93DD12D80E182D5100275408 /* SMESession.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD12D60E182D5100275408 /* SMESession.m */; };
-		93DD89D80C8C526100A6131B /* SMERequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD89D60C8C526100A6131B /* SMERequest.m */; };
+		93DD89D80C8C526100A6131B /* SMEMethodRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DD89D60C8C526100A6131B /* SMEMethodRequest.m */; };
 		93DE06B00DE990ED0029F0FA /* JSON.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 93DE06380DE98DD60029F0FA /* JSON.framework */; };
 		93E58BE10D84690C00DA6105 /* SMEImageRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 93E58BE00D84690C00DA6105 /* SMEImageRef.m */; };
 		93E58C820D84732E00DA6105 /* SMEAlbumRef.m in Sources */ = {isa = PBXBuildFile; fileRef = 93E58C800D84732E00DA6105 /* SMEAlbumRef.m */; };
@@ -145,8 +145,8 @@
 		93DD12D50E182D5100275408 /* SMESession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMESession.h; path = Source/SMESession.h; sourceTree = "<group>"; };
 		93DD12D60E182D5100275408 /* SMESession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMESession.m; path = Source/SMESession.m; sourceTree = "<group>"; };
 		93DD88F60C8C4AE000A6131B /* SMEDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEDecoder.h; path = Source/SMEDecoder.h; sourceTree = "<group>"; };
-		93DD89D50C8C526100A6131B /* SMERequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMERequest.h; path = Source/SMERequest.h; sourceTree = "<group>"; };
-		93DD89D60C8C526100A6131B /* SMERequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMERequest.m; path = Source/SMERequest.m; sourceTree = "<group>"; };
+		93DD89D50C8C526100A6131B /* SMEMethodRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEMethodRequest.h; path = Source/SMEMethodRequest.h; sourceTree = "<group>"; };
+		93DD89D60C8C526100A6131B /* SMEMethodRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEMethodRequest.m; path = Source/SMEMethodRequest.m; sourceTree = "<group>"; };
 		93DE06380DE98DD60029F0FA /* JSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JSON.framework; path = Resources/Frameworks/JSON.framework; sourceTree = "<group>"; };
 		93E58BDF0D84690C00DA6105 /* SMEImageRef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEImageRef.h; path = Source/SMEImageRef.h; sourceTree = "<group>"; };
 		93E58BE00D84690C00DA6105 /* SMEImageRef.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEImageRef.m; path = Source/SMEImageRef.m; sourceTree = "<group>"; };
@@ -319,8 +319,8 @@
 				93DD12D60E182D5100275408 /* SMESession.m */,
 				93DD12080E17F04E00275408 /* Types */,
 				93EBDDE30C8CF5EA00905273 /* SMEUploadObserver.h */,
-				93DD89D50C8C526100A6131B /* SMERequest.h */,
-				93DD89D60C8C526100A6131B /* SMERequest.m */,
+				93DD89D50C8C526100A6131B /* SMEMethodRequest.h */,
+				93DD89D60C8C526100A6131B /* SMEMethodRequest.m */,
 				939FDC890E2A5FA8001D6B9B /* SMEUploadRequest.h */,
 				939FDC880E2A5FA8001D6B9B /* SMEUploadRequest.m */,
 				93DD11E90E17EC8C00275408 /* SMEResponse.h */,
@@ -507,7 +507,7 @@
 				938E26AB0C0F47EA0059F26B /* SMEURLAdditions.m in Sources */,
 				938E27490C0F4DE10059F26B /* SMEStringAdditions.m in Sources */,
 				935A1A870C1CC2CC00043E12 /* SMEUserDefaultsAdditions.m in Sources */,
-				93DD89D80C8C526100A6131B /* SMERequest.m in Sources */,
+				93DD89D80C8C526100A6131B /* SMEMethodRequest.m in Sources */,
 				933A9E560CB7C53900B7B2A5 /* SMETableView.m in Sources */,
 				933AA0920CB825CA00B7B2A5 /* SMEExportBox.m in Sources */,
 				933AA0B30CB8273000B7B2A5 /* SMEUserDefaults.m in Sources */,
@@ -625,7 +625,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
@@ -672,7 +672,7 @@
 					ppc,
 				);
 				COPY_PHASE_STRIP = YES;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",

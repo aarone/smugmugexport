@@ -17,7 +17,7 @@
 #import "SMEUserDefaultsAdditions.h"
 #import "SMEDataAdditions.h"
 #import "SMEStringAdditions.h"
-#import "SMERequest.h"
+#import "SMEMethodRequest.h"
 #import "SMEAlbum.h"
 #import "SMEResponse.h"
 #import "SMESubCategory.h"
@@ -356,7 +356,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[self setIsBusy:NO];
 	[self presentError:[NSString stringWithFormat:
 						NSLocalizedString(@"Error from Smugmug: %@", @"Error string for remote errors"), 
-						[resp errorMessage]]];
+						[resp smErrorMessage]]];
 }
 
 -(void)errorAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
@@ -660,7 +660,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
     [sheet orderOut:self];
 }
 
-#pragma mark ALbum Fetch Callback
+#pragma mark Album Fetch Callback
 
 -(void)albumFetchComplete:(SMEResponse *)resp {
 	if(![resp wasSuccessful]) {
@@ -946,7 +946,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)subcategoryFetchDidComplete:(SMEResponse *)resp {
 	// smugmug considers zero categories to be an error. weird!
-	if(! [resp wasSuccessful] && [resp code] != NO_CATEGORIES_FOUND_CODE) {
+	if(! [resp wasSuccessful] && [resp smErrorCode] != NO_CATEGORIES_FOUND_CODE) {
 		[self presentRemoteError:resp];
 		return;
 	}

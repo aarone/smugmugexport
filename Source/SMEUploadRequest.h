@@ -32,6 +32,9 @@
 	SMEAlbumRef *albumRef;
 	NSString *caption;
 	NSArray *keywords;
+	
+	BOOL wasSuccessful;
+	NSError *error;
 }
 
 +(SMEUploadRequest *)uploadRequest;
@@ -53,5 +56,10 @@
 -(SMEAlbumRef *)albumRef;
 -(NSString *)caption;
 -(NSArray *)keywords;
+
+
+-(NSData *)data;
+-(BOOL)wasSuccessful;
+-(NSError *)error;
 
 @end
