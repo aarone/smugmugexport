@@ -170,8 +170,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 #pragma mark Miscellaneous Get/Set Methods
 
 -(NSURL *)baseRequestUrl {
-	//return [NSURL URLWithString:@"https://api.smugmug.com/hack/json/1.2.0/"];
-	return [NSURL URLWithString:@"https://api.smugmug.com/hack/json/1.6.0"];
+	return [NSURL URLWithString:@"https://api.smugmug.com/hack/json/1.2.0/"];
 }
 	
 -(NSString *)sessionID {
@@ -301,7 +300,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 -(SMEResponse *)transformCategoryForCategoryKey:(NSString *)categoryKey categoryClass:(Class)categoryClass request:(SMEMethodRequest *)req{
 	SMEResponse *resp = [SMEResponse responseWithCompletedRequest:req decoder:[self decoder]];
 	
-	if([resp smErrorCode] == NO_CATEGORIES_FOUND_CODE) {
+	if([[[resp error] domain] isEqualToString:SMESmugMugErrorDomain] &&
+	   [[resp error] code] == NO_CATEGORIES_FOUND_CODE) {
 		[resp setSMData:[NSArray array]];
 		return resp;
 	}

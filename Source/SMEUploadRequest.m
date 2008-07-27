@@ -278,7 +278,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(void)transferComplete {
-	[self setWasSuccessful:NO];
+	[self setWasSuccessful:YES];
 	[self setError:nil];
 	[[self observer] uploadComplete:self];
 	[self destroyUploadResources];
@@ -310,14 +310,19 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 
 -(void)cancelUpload {
 	@synchronized(self) {
-		if(![self isUploading])
+		if(![self isUploading]) {
+			// we're stuck in the upload completed state
+			[[self observer] uploadCanceled:self];	
+			[self destroyUploadResources];
 			return;
+		}
 		
-		[self setIsUploading:NO];		
+		// we're in the middle of an upload
+		[self setIsUploading:NO];
+		[self setWasSuccessful:NO];
 	}
 	
-	[self setWasSuccessful:NO];
-	[[self observer] uploadCanceled:self];	
+	[[self observer] uploadCanceled:self];
 	[self destroyUploadResources];
 }
 

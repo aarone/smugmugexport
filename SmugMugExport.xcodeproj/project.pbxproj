@@ -114,6 +114,7 @@
 		933AA0CA0CB827CF00B7B2A5 /* SMEExportPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEExportPlugin.m; path = Source/SMEExportPlugin.m; sourceTree = "<group>"; };
 		935A1A840C1CC2CC00043E12 /* SMEUserDefaultsAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEUserDefaultsAdditions.h; path = Source/SMEUserDefaultsAdditions.h; sourceTree = "<group>"; };
 		935A1A850C1CC2CC00043E12 /* SMEUserDefaultsAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEUserDefaultsAdditions.m; path = Source/SMEUserDefaultsAdditions.m; sourceTree = "<group>"; };
+		93728C230E3BAA250063C869 /* SMERequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMERequest.h; path = Source/SMERequest.h; sourceTree = "<group>"; };
 		9382617D0E1E7F6700A29C9F /* SMEData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEData.h; path = Source/SMEData.h; sourceTree = "<group>"; };
 		9382617E0E1E7F6700A29C9F /* SMEData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEData.m; path = Source/SMEData.m; sourceTree = "<group>"; };
 		938261800E1E7F7000A29C9F /* SMESessionInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMESessionInfo.h; path = Source/SMESessionInfo.h; sourceTree = "<group>"; };
@@ -318,6 +319,7 @@
 				93DD12D50E182D5100275408 /* SMESession.h */,
 				93DD12D60E182D5100275408 /* SMESession.m */,
 				93DD12080E17F04E00275408 /* Types */,
+				93728C230E3BAA250063C869 /* SMERequest.h */,
 				93EBDDE30C8CF5EA00905273 /* SMEUploadObserver.h */,
 				93DD89D50C8C526100A6131B /* SMEMethodRequest.h */,
 				93DD89D60C8C526100A6131B /* SMEMethodRequest.m */,

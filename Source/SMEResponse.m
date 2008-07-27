@@ -9,25 +9,32 @@
 #import "SMEResponse.h"
 #import "SMEDecoder.h"
 #import "SMEGlobals.h"
+#import "SMERequest.h"
 
 @interface SMEResponse (Private)
 -(NSDictionary *)decodeResponse:(NSData *)data decoder:(NSObject<SMEDecoder> *)decoder;
--(void)setConnectionError:(NSError *)err;
+-(void)setError:(NSError *)err;
+-(NSError *)smugmugError;
 @end
+
+NSString *SMESmugMugErrorDomain = nil;
 
 @implementation SMEResponse
 
--(id)initWithCompletedRequest:(SMEMethodRequest *)req decoder:(NSObject<SMEDecoder> *)aDecoder {
+/*
+ Should just have a single NSError in public interface for smugmug errors
+ */
+-(id)initWithCompletedRequest:(NSObject<SMERequest> *)req decoder:(NSObject<SMEDecoder> *)aDecoder {
 	if( ! (self = [super init]))
 		return nil;
 		
 	@try {
 		if([req wasSuccessful]) {
 			decodedResponse = IsEmpty([req data]) ? nil : [[self decodeResponse:[req data] decoder:aDecoder] retain];
+			[self setError:[self smugmugError]]; // may be nil which is ok
 		} else {
-			[self setConnectionError:[req error]];
+			[self setError:[req error]]; // an underlying communication error
 		}
-		
 	} @catch (NSException *ex) {
 		NSLog(@"Error decoding response: %@", ex);
 		decodedResponse = nil;
@@ -36,20 +43,20 @@
 	return self;
 }
 
-+(SMEResponse *)responseWithCompletedRequest:(SMEMethodRequest *)req decoder:(NSObject<SMEDecoder> *)aDecoder {
++(SMEResponse *)responseWithCompletedRequest:(NSObject<SMERequest> *)req decoder:(NSObject<SMEDecoder> *)aDecoder {
 	return [[[[self class] alloc] initWithCompletedRequest:req decoder:aDecoder] autorelease];
+}
+
++(void)initialize {
+	SMESmugMugErrorDomain = @"SmugMug Error";
 }
 
 -(void)dealloc {
 	[decodedResponse release];
-	[connectionError release];
 	[smData release];
+	[error release];
 	
 	[super dealloc];
-}
-
--(NSString *)errorMessage {
-	return connectionError != nil ? [connectionError localizedDescription] : [self smErrorMessage];
 }
 
 -(NSDictionary *)decodedResponse {
@@ -66,13 +73,23 @@
 		[decodedResponse objectForKey:@"message"];
 }
 
+-(NSError *)smugmugError {
+	BOOL hasSmugMugError = ![[decodedResponse objectForKey:@"stat"] isEqualToString:@"ok"];
+	if(!hasSmugMugError)
+		return nil;
+	
+	return [NSError errorWithDomain:SMESmugMugErrorDomain
+							   code:[self smErrorCode]
+						   userInfo:[NSDictionary dictionaryWithObject:[self smErrorMessage]
+																forKey:NSLocalizedDescriptionKey]];
+}
+
 -(NSDictionary *)decodeResponse:(NSData *)data decoder:(NSObject<SMEDecoder> *)decoder {	
 	return [decoder decodedResponse:data];
 }
-
+	
 -(BOOL)wasSuccessful {
-	return connectionError != nil &&
-		[[decodedResponse objectForKey:@"stat"] isEqualToString:@"ok"];
+	return error == nil;
 }
 
 -(id)smData {
@@ -86,14 +103,14 @@
 	}
 }
 
--(NSError *)connectionError {
-	return connectionError;
+-(NSError *)error {
+	return error;
 }
 
--(void)setConnectionError:(NSError *)err {
-	if(err != connectionError) {
-		[connectionError release];
-		connectionError = [err retain];
+-(void)setError:(NSError *)err {
+	if(err != error) {
+		[error release];
+		error = [err retain];
 	}
 }
 

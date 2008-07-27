@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "SMERequest.h";
 
 @class SMEUploadRequest, SMEAlbumRef;
 
@@ -18,7 +19,7 @@
 -(void)uploadComplete:(SMEUploadRequest *)request;
 @end
 
-@interface SMEUploadRequest : NSObject {
+@interface SMEUploadRequest : NSObject<SMERequest> {
 	CFRunLoopRef uploadRunLoop;
 	CFReadStreamRef readStream;
 	

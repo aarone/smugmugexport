@@ -7,27 +7,25 @@
 //
 
 #import <Cocoa/Cocoa.h>
-
-@protocol SMEDecoder;
+ 
+@protocol SMEDecoder, SMERequest;
 @class SMEMethodRequest;
+
+extern NSString *SMESmugMugErrorDomain;
 
 // some snugmug error codes
 #define NO_CATEGORIES_FOUND_CODE 15
+#define INVALID_LOGIN 1
 #define SUCCESS_CODE 0
 
 @interface SMEResponse : NSObject {
 	NSDictionary *decodedResponse;
-	NSError *connectionError;
 	id smData;
+	NSError *error;
 }
 
--(id)initWithCompletedRequest:(SMEMethodRequest *)data decoder:(NSObject<SMEDecoder> *)aDecoder;
-+(SMEResponse *)responseWithCompletedRequest:(SMEMethodRequest *)req decoder:(NSObject<SMEDecoder> *)aDecoder;
-
--(NSString *)errorMessage;
-
--(unsigned int)smErrorCode;
--(NSString *)smErrorMessage;
+-(id)initWithCompletedRequest:(NSObject<SMERequest> *)req decoder:(NSObject<SMEDecoder> *)aDecoder;
++(SMEResponse *)responseWithCompletedRequest:(NSObject<SMERequest> *)req decoder:(NSObject<SMEDecoder> *)aDecoder;
 
 // underlying response data decoded as a NSDictionary
 -(NSDictionary *)decodedResponse;
@@ -38,6 +36,6 @@
 
 -(BOOL)wasSuccessful;
 
--(NSError *)connectionError;
+-(NSError *)error;
 
 @end

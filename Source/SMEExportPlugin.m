@@ -354,9 +354,8 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)presentRemoteError:(SMEResponse *)resp {
 	[self setIsBusy:NO];
-	[self presentError:[NSString stringWithFormat:
-						NSLocalizedString(@"Error from Smugmug: %@", @"Error string for remote errors"), 
-						[resp smErrorMessage]]];
+	NSString *err = [NSString stringWithFormat:NSLocalizedString(@"%@ %d: %@", @"Format string for errors: (domain code : description)"), [[resp error] domain], [[resp error] code], [[resp error] localizedDescription]];
+	[self presentError:err];
 }
 
 -(void)errorAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
@@ -614,17 +613,20 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[self setStatusText:@""];
 	[self setIsLoggingIn:NO];
 	[self setLoginSheetStatusMessage:@""];
-	
+
+	NSString *err = NSLocalizedString(@"Login Failed", @"Status text for failed login");
 	if(! [response wasSuccessful]) {
-		NSString *err = NSLocalizedString(@"Login Failed", @"Status text for failed login");
 		// login request spawned from login sheet
 		if([[self loginPanel] isVisible]) {
 			[self setLoginSheetStatusMessage:err];
 			/* we act like we haven't atttempted a log in if the login fails. */
 			[self setLoginAttempted:NO];			
-		} else { // autologin via keychain info
+		} else if([[[response error] domain] isEqualToString:SMESmugMugErrorDomain] &&
+				  [[response error] code] == INVALID_LOGIN) {  // an invalid password
 			[self setStatusText:err];
 			[self showLoginSheet:self];
+		} else { // some other kind of error
+			[self presentRemoteError:response];
 		}
 		
 		[self setSessionInfo:nil];
@@ -946,7 +948,9 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)subcategoryFetchDidComplete:(SMEResponse *)resp {
 	// smugmug considers zero categories to be an error. weird!
-	if(! [resp wasSuccessful] && [resp smErrorCode] != NO_CATEGORIES_FOUND_CODE) {
+	if(! [resp wasSuccessful] && 
+	   [[[resp error] domain] isEqualToString:SMESmugMugErrorDomain] &&
+	   [[resp error] code] != NO_CATEGORIES_FOUND_CODE) {
 		[self presentRemoteError:resp];
 		return;
 	}
@@ -1118,10 +1122,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 -(void)uploadDidFail:(SMEResponse *)resp {
-	[[self growlDelegate] notifyUploadError:[resp errorMessage]];
+	[[self growlDelegate] notifyUploadError:[[resp error] localizedDescription]];
 	[self performUploadCompletionTasks:NO];
-	NSString *errorString = NSLocalizedString(@"Image upload failed (%@).", @"Error message to display when upload fails.");
-	[self presentError:[NSString stringWithFormat:errorString, [resp errorMessage]]];
+//	NSString *errorString = NSLocalizedString(@"Image upload failed (%@).", @"Error message to display when upload fails.");
+	[self presentRemoteError:resp];
 }
 
 -(void)uploadMadeProgress:(NSData *)imageData bytesWritten:(long)bytesWritten ofTotalBytes:(long)totalBytes {	

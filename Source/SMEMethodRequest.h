@@ -9,8 +9,9 @@
 #import <Cocoa/Cocoa.h>
 #import "SMEDecoder.h"
 #import "SMEAlbumRef.h"
+#import "SMERequest.h"
 
-@interface SMEMethodRequest : NSObject {
+@interface SMEMethodRequest : NSObject<SMERequest> {
 	NSURLConnection *connection;
 	NSMutableData *responseData;
 	SEL callback;
