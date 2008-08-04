@@ -165,19 +165,24 @@
 	[[self albumData] setBool:v	forKey:@"FamilyEdit"];
 }
 
+-(NSString *)emptyIfNil:(NSString *)aString {
+	return aString == nil ? @"" : aString;
+}
+
 -(NSDictionary *)toEditDictionary {
 	NSMutableDictionary *result = [NSMutableDictionary dictionary];
 	[result setObject:[self albumId] forKey:@"AlbumID"];
 	[result setObject:[NSNumber numberWithInt:[[self category] identifier]] forKey:@"CategoryID"];
 	[result setObject:[NSNumber numberWithInt:[[self subCategory] identifier]] forKey:@"SubCategoryID"];
-	[result setObject:[self title] forKey:@"Title"];
-	[result setObject:[self description] forKey:@"Description"];
+	[result setObject:[self emptyIfNil:[self title]] forKey:@"Title"];
+	[result setObject:[self emptyIfNil:[self description]] forKey:@"Description"];
+	[result setObject:[self emptyIfNil:[self keywords]] forKey:@"Keywords"];
 	[result setObject:[NSNumber numberWithBool:[self isPublic]] forKey:@"Public"];
 	[result setObject:[NSNumber numberWithBool:[self isSharingEnabled]] forKey:@"Share"];
 	[result setObject:[NSNumber numberWithBool:[self isPrintable]] forKey:@"Printable"];
 	[result setObject:[NSNumber numberWithBool:[self showsFilenames]] forKey:@"Filenames"];
 	[result setObject:[NSNumber numberWithBool:[self allowsComments]] forKey:@"Comments"];
-	[result setObject:[NSNumber numberWithBool:[self allowsExternalLinking]] forKey:@"FriendEdit"];
+	[result setObject:[NSNumber numberWithBool:[self allowsExternalLinking]] forKey:@"External"];
 	[result setObject:[NSNumber numberWithBool:[self showsOriginals]] forKey:@"Originals"];
 	[result setObject:[NSNumber numberWithBool:[self allowsFriendsToEdit]] forKey:@"FriendEdit"];
 	[result setObject:[NSNumber numberWithBool:[self displaysEXIFInfo]] forKey:@"EXIF"];

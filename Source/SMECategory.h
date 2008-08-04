@@ -13,6 +13,7 @@
 	NSArray *childSubCategories;
 }
 
++(SMECategory *)nullCategory;
 -(unsigned int)identifier;
 -(NSString *)title;
 -(NSDictionary *)toDict;

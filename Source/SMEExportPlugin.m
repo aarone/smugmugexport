@@ -104,7 +104,7 @@
 -(SMEAlbum *)selectedAlbum;
 
 -(void)setInsertionPoint:(NSWindow *)aWindow;
--(void)presentError:(NSString *)errorText;
+-(void)presentError:(NSError *)error;
 
 -(BOOL)isUploading;
 -(void)setIsUploading:(BOOL)v;
@@ -153,7 +153,7 @@
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful;
 -(void)uploadNextImage;
 
--(void)presentRemoteError:(SMEResponse *)resp;
+-(NSError *)smugmugError:(NSString *)error code:(int)code;
 
 -(NSString *)GrowlFrameworkPath;
 -(BOOL)isGrowlLoaded;
@@ -334,28 +334,28 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 }
 
 #pragma mark Error Handling
--(void)presentError:(NSString *)errorText {
+
+-(NSError *)smugmugError:(NSString *)error code:(int)code {
+	return [NSError errorWithDomain:NSLocalizedString(@"SmugMugExport Error", @"SmugMugExport Error Domain")
+							   code:code 
+						   userInfo:[NSDictionary dictionaryWithObject:error forKey:NSLocalizedDescriptionKey]];
+}
+
+-(void)presentError:(NSError *)err {
+	[self setIsBusy:NO];
+
 	if([self sheetIsDisplayed]) {
-		[[self albumEditController] showError:errorText];
+		[[self albumEditController] setIsBusy:NO];
+		[[self albumEditController] showError:err];
 		return;
 	}
 	
-	NSAlert *alert = [[NSAlert alloc] init];
-	[alert setAlertStyle:NSWarningAlertStyle];
-	[alert setMessageText:errorText];
-	[alert addButtonWithTitle:@"Continue"];
-	
+	NSAlert *alert = [[NSAlert alertWithError:err] retain]; // needs to exist outside of the pool, it's released below
 	errorAlertSheetIsVisisble = YES;
 	[alert beginSheetModalForWindow:[[self exportManager] window]
 					  modalDelegate:self
 					 didEndSelector:@selector(errorAlertDidEnd:returnCode:contextInfo:)
 						contextInfo:NULL];
-}
-
--(void)presentRemoteError:(SMEResponse *)resp {
-	[self setIsBusy:NO];
-	NSString *err = [NSString stringWithFormat:NSLocalizedString(@"%@ %d: %@", @"Format string for errors: (domain code : description)"), [[resp error] domain], [[resp error] code], [[resp error] localizedDescription]];
-	[self presentError:err];
 }
 
 -(void)errorAlertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
@@ -626,7 +626,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 			[self setStatusText:err];
 			[self showLoginSheet:self];
 		} else { // some other kind of error
-			[self presentRemoteError:response];
+			[self presentError:[response error]];
 		}
 		
 		[self setSessionInfo:nil];
@@ -664,13 +664,28 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 #pragma mark Album Fetch Callback
 
--(void)albumFetchComplete:(SMEResponse *)resp {
+-(BOOL)commonPostAlbumFetchTasks:(SMEResponse *)resp {
 	if(![resp wasSuccessful]) {
-		// TODO report error
-		return;
+		[self presentError:[resp error]];
+		return NO;
 	}
 	
 	[self setAlbums:[resp smData]];
+	return YES;
+}
+
+-(void)albumFetchFromEditDidComplete:(SMEResponse *)resp {
+	if(![self commonPostAlbumFetchTasks:resp])
+		return;
+}
+
+-(void)albumFetchComplete:(SMEResponse *)resp {
+	if(![self commonPostAlbumFetchTasks:resp])
+		return;
+	
+	// typically, after we fetch a list of albums, we select the top-most albums;
+	// if we don't want to do that, we use the callback albumFetchFromEditDidComplete: when
+	// fetching albums
 	[albumsArrayController setSelectionIndex:0]; 
 }
 
@@ -734,6 +749,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 -(void)createNewAlbumDidComplete:(SMEResponse *)resp {
 	
 	[[self albumEditController] setIsBusy:NO];
+
 	if([resp wasSuccessful]) {
 		[albumEditController closeSheet];
 		[albumsArrayController setSelectionIndex:0]; // default to selecting the new album which should be album 0
@@ -798,8 +814,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)deleteAlbumDidComplete:(SMEResponse *)resp {
 	if(![resp wasSuccessful])
-		[self presentError:NSLocalizedString(@"Album deletion failed.", 
-											 @"Error message to display when album delete fails.")];
+		[self presentError:[resp error]];
 	
 	[self setIsBusy:NO];
 	[self setIsDeletingAlbum:NO];
@@ -837,18 +852,18 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 	SMEAlbum *theAlbum = [resp smData];
 	SMESubCategory *subCategory = [theAlbum subCategory];
-	// FIXME setting a category wipes out a subcategory; this is weird but required to make binding stuff work
+
 	[theAlbum setCategory:[self categoryWithId:[[theAlbum category] identifier]]];
 	[theAlbum setSubCategory:subCategory];
 	
 	if(![resp wasSuccessful]) {
-		[self presentRemoteError:resp];
+		[self presentError:[resp error]];
 		return;
 	}
 	
 	[albumEditController showAlbumEditSheet:self 
 								  forWindow:[[self exportManager] window]
-								   forAlbum:[resp smData]];
+								   forAlbum:theAlbum];
 }
 
 -(void)editAlbum:(SMEAlbum *)album {
@@ -858,14 +873,14 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)albumEditDidEnd:(SMEResponse *)resp {
 	if(![resp wasSuccessful]) {
-		[self presentRemoteError:resp];
+		[self presentError:[resp error]];
 	} else {
 		// a visible title of an album may have changed..
-		[[self session] fetchAlbumsWithTarget:self callback:@selector(albumFetchComplete:)];
+		[[self session] fetchAlbumsWithTarget:self callback:@selector(albumFetchFromEditDidComplete:)];
+		[[self albumEditController] closeSheet];
 	}
 	
 	[[self albumEditController] setIsBusy:NO];
-	[[self albumEditController] closeSheet];
 }
 
 #pragma mark Image Url Fetching
@@ -936,7 +951,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 
 -(void)categoryFetchComplete:(SMEResponse *)resp {
 	if(! [resp wasSuccessful]) {
-		[self presentRemoteError:resp];
+		[self presentError:[resp error]];
 		return;
 	}
 	[self setCategories:[resp smData]];
@@ -951,7 +966,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	if(! [resp wasSuccessful] && 
 	   [[[resp error] domain] isEqualToString:SMESmugMugErrorDomain] &&
 	   [[resp error] code] != NO_CATEGORIES_FOUND_CODE) {
-		[self presentRemoteError:resp];
+		[self presentError:[resp error]];
 		return;
 	}
 	
@@ -989,7 +1004,8 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	NSString *thumbnailPath = [exportManager thumbnailPathAtIndex:[self imagesUploaded]];
 	NSImage *img = [[[NSImage alloc] initWithData:[NSData dataWithContentsOfFile: thumbnailPath]] autorelease];
 	if(img == nil) {
-		[self presentError:NSLocalizedString(@"Cannot load image thumbnail", @"Error message when thumbnail is nil")];
+		[self presentError:[self smugmugError:NSLocalizedString(@"Cannot load image.", @"Error message when thumbnail is nil")
+										 code:THUMBNAIL_NOT_FOUND_ERROR_CODE]];
 		[self performUploadCompletionTasks:NO];
 		return;
 	}
@@ -1002,31 +1018,24 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[self uploadCurrentImage];
 }
 
--(NSData *)sourceDataAtPath:(NSString *)pathToImage isImage:(BOOL)isImage errorString:(NSString **)err {
-	
-	NSString *application = nil;
-	NSString *filetype = nil;
-	BOOL result = [[NSWorkspace sharedWorkspace] getInfoForFile:pathToImage
-													application:&application
-														   type:&filetype];
-	if(result == NO) {
-		*err =  [NSString stringWithFormat:NSLocalizedString(@"Upload failed: error accessing image: %@.", @"Error message when an image cannot be read."), pathToImage];
-		return nil;
-	}
-	
-	BOOL isJpeg = [[filetype lowercaseString] isEqual:@"jpg"];
-	
-	if(!isJpeg && ShouldScaleImages())
-		NSLog(@"The image (%@) is not a jpeg and cannot be scaled by this program (yet).", pathToImage);
-	
+-(NSData *)sourceDataAtPath:(NSString *)pathToImage isMovie:(BOOL)isMovie errorString:(NSString **)err {
+			
 	NSError *error = nil;
 	NSData *imgData = [NSData dataWithContentsOfFile:pathToImage options:0 error:&error];
 	if(imgData == nil) {
 		*err = [error localizedDescription];
 		return nil;
 	}
+
+	if(isMovie) {
+		// return source data if the uploaded item is a movie
+		return imgData;
+	}
 	
-	if(isJpeg && ShouldScaleImages() && isImage) {
+	if(!ShouldScaleImages())
+		return imgData;
+	
+//	if(isJpeg){
 		int maxWidth = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleWidth] intValue];
 		int maxHeight = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleHeight] intValue];
 		
@@ -1044,7 +1053,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		
 		// no scale
 		return imgData;
-	}
+//	}
 	
 	// the default operation
 	return imgData;
@@ -1065,7 +1074,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	
 	NSString *error = nil;
 	NSData *srcData = [self sourceDataAtPath:nextFile 
-									   isImage:![[self exportManager] originalIsMovieAtIndex:[self imagesUploaded]]
+									 isMovie:[[self exportManager] originalIsMovieAtIndex:[self imagesUploaded]]
 								   errorString:&error];	
 	if(srcData == nil) {
 		if([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMContinueUploadOnFileIOError] boolValue]) {
@@ -1074,7 +1083,10 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 		} else {
 			NSLog(@"Error reading image data for image: %@. The upload was canceled.", nextFile);
 			[self performUploadCompletionTasks:NO];
-			[self presentError:error];
+			[self presentError:[self smugmugError:
+			 [NSString stringWithFormat:
+			  NSLocalizedString(@"Error reading image file %@", @"Error text when an image cannot be read"), nextFile]
+											 code:IMAGE_NOT_FOUND_ERROR_CODE]];
 		}
 		return;
 	}
@@ -1125,7 +1137,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[[self growlDelegate] notifyUploadError:[[resp error] localizedDescription]];
 	[self performUploadCompletionTasks:NO];
 //	NSString *errorString = NSLocalizedString(@"Image upload failed (%@).", @"Error message to display when upload fails.");
-	[self presentRemoteError:resp];
+	[self presentError:[resp error]];
 }
 
 -(void)uploadMadeProgress:(NSData *)imageData bytesWritten:(long)bytesWritten ofTotalBytes:(long)totalBytes {	
@@ -1140,7 +1152,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 										  NSLocalizedString(@"%0.0fKB of %0.0fKB", @"upload progress expression"), 
 										  bytesWritten/1024.0, totalBytes/1024.0]];
 	} else {
-		[self setImageUploadProgressText:NSLocalizedString(@"Waiting for response...", @"status indicator to display when all bytes have been sent but we're waiting for a resonse from SmugMug")];
+		[self setImageUploadProgressText:NSLocalizedString(@"Awaiting response...", @"status indicator to display when all bytes have been sent but we're waiting for a resonse from SmugMug")];
 	}
 }
 
@@ -1169,7 +1181,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 -(void)uploadDidComplete:(SMEResponse *)resp filename:(NSString *)filename data:(NSData *)imageData {
 	if(! [resp wasSuccessful]) {
 		[self performUploadCompletionTasks:NO];
-		[self presentRemoteError:resp];
+		[self presentError:[resp error]];
 		return;
 	}
 	

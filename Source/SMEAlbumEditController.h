@@ -17,9 +17,6 @@
 	IBOutlet NSObjectController *albumInfoController;
 	
 	SMEAlbum *album;
-	NSArray *categories;
-	NSArray *subcategories;
-	NSString *albumActionButtonText;
 	
 	BOOL isBusy;
 	BOOL nibLoaded;
@@ -43,7 +40,7 @@
 				forWindow:(NSWindow *)aWindow
 				 forAlbum:(SMEAlbum *)album;
 
--(void)showError:(NSString *)err;
+-(void)showError:(NSError *)err;
 
 -(id)delegate;
 -(void)closeSheet;

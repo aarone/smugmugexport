@@ -39,6 +39,7 @@
 
 -(void)setAlbumData:(NSMutableDictionary *)d;
 -(NSMutableDictionary *)albumData;
+
 -(NSDictionary *)categoryDict;
 -(NSDictionary *)subCategoryDict;
 

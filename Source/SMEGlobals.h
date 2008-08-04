@@ -46,6 +46,9 @@ extern NSString *SMUploadedFilenameOptionTitle;
 
 #define kCFBundleShortVersionStringKey @"CFBundleShortVersionString"
 
+#define THUMBNAIL_NOT_FOUND_ERROR_CODE 5
+#define IMAGE_NOT_FOUND_ERROR_CODE 6
+
 static inline BOOL IsEmpty(id thing) {
     return thing == nil
 	|| ([thing respondsToSelector:@selector(length)]

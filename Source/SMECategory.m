@@ -11,9 +11,19 @@
 
 @implementation SMECategory
 
++(SMECategory *)nullCategory {
+	return [[[[self class] alloc] initWithSourceData:[NSDictionary dictionaryWithObjectsAndKeys:
+			 [NSNumber numberWithInt:0], @"id",
+													  NSLocalizedString(@"No Value", @"Null category title"), @"Title",nil]] autorelease];
+}
+
 -(void)dealloc {
 	[childSubCategories release];
 	[super dealloc];
+}
+
+-(NSString *)description {
+	return [NSString stringWithFormat:@"category %d", [self identifier]];
 }
 
 -(unsigned int)identifier  {

@@ -9,14 +9,13 @@
 #import "SMEAlbumEditController.h"
 #import "SMEGlobals.h"
 #import "SMEExportPlugin.h"
+#import "SMEAlbum.h"
+#import "SMECategory.h"
+#import "SMESubCategory.h"
 
 @interface SMEAlbumEditController (Private) 
--(NSArray *)subCategoriesForCategory:(NSDictionary *)aCategory;
--(NSDictionary *)createNullSubcategory;
 -(NSArray *)categories;
 -(NSArray *)subcategories;
--(NSPredicate *)createRelevantSubCategoryFilterForCategory:(NSDictionary *)aCategory;
--(void)refreshCategorySelections:(BOOL)clearsSubcategory;
 -(BOOL)isEditing;
 -(void)setIsEditing:(BOOL)v;
 -(SMEAlbum *)album;
@@ -37,6 +36,9 @@
 }
 
 -(void)dealloc {
+	[[self album] release];
+	[[self statusText] release];
+	
 	[super dealloc];
 }
 
@@ -44,11 +46,24 @@
 	[self setKeys:[NSArray arrayWithObject:@"isEditing"] triggerChangeNotificationsForDependentKey:@"albumActionButtonText"];
 }
 
+	
 -(void)setDelegate:(id)aDelegate {
 	delegate = aDelegate;
 }
 
--(void)awakeFromNib {}
+-(void)awakeFromNib {
+	[self addObserver:self forKeyPath:@"album.category" options:NSKeyValueObservingOptionNew context:NULL];	
+}
+
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+	if([keyPath isEqualToString:@"album.category"]) {
+		[self willChangeValueForKey:@"subcategories"];
+		[self didChangeValueForKey:@"subcategories"];
+		if(![[[[self album] category] childSubCategories] containsObject:[[self album] subCategory]])
+			[[self album] setSubCategory:[SMESubCategory nullSubCategory]];
+		
+	}
+}
 
 +(SMEAlbumEditController *)controller {
 	return [[[[self class] alloc] init] autorelease];
@@ -61,8 +76,8 @@
 	nibLoaded = YES;
 }
 
--(void)showError:(NSString *)err {
-	[self setStatusText:err];
+-(void)showError:(NSError *)err {
+	[[NSAlert alertWithError:err] runModal];
 }
 
 -(NSWindow *)newAlbumSheet {
@@ -180,14 +195,6 @@
 	return isSheetOpen;
 }
 
--(NSArray *)categories {
-	return [delegate categories];
-}
-
--(NSArray *)subcategories {
-	return [delegate subcategories];
-}
-
 -(SMEAlbum *)album {
 	return album;
 }
@@ -197,6 +204,24 @@
 		[album release];
 		album = [anAlbum retain];
 	}
+}
+
+-(NSArray *)categories {
+	return [[self delegate] categories];
+}
+
+-(NSArray *)subcategories {
+	if([[[[self album] category] childSubCategories] count] == 0)
+		return [[[self album] category] childSubCategories];
+
+ 	// otherwise, add a placehold subcategory for 'No Value'
+	NSMutableArray *result = [NSMutableArray arrayWithArray:[[[self album] category] childSubCategories]];
+	SMESubCategory *nullSubCategory = [SMESubCategory nullSubCategory];
+	if([result containsObject:nullSubCategory])
+		return [[[self album] category] childSubCategories];
+
+	[result addObject:nullSubCategory];
+	return [NSArray arrayWithArray:result];	
 }
 
 -(NSString *)statusText {

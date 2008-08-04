@@ -14,6 +14,7 @@
 @interface SMEMethodRequest : NSObject<SMERequest> {
 	NSURLConnection *connection;
 	NSMutableData *responseData;
+	
 	SEL callback;
 	id target;
 	BOOL wasSuccessful;

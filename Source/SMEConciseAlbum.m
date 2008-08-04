@@ -111,7 +111,6 @@
 		[category release];
 		category = [cat retain];
 	}
-	[self setSubCategory:nil]; // subcategories are subordinates of categories
 }
 
 -(NSMutableDictionary *)albumData {
@@ -136,8 +135,8 @@
 
 -(NSDictionary *)toDictionary {
 	NSMutableDictionary *result = [NSMutableDictionary dictionaryWithDictionary:[self albumData]];
-	[result nilSafeSetObject:[self categoryDict] forKey:@"Category"];
-	[result nilSafeSetObject:[self subCategoryDict] forKey:@"SubCategory"];
+	[result nilSafeSetObject:[NSNumber numberWithInt:[[self category] identifier]] forKey:@"CategoryID"];
+	[result nilSafeSetObject:[NSNumber numberWithInt:[[self subCategory] identifier]] forKey:@"SubCategoryID"];
 	return [NSDictionary dictionaryWithDictionary:result];
 }
 

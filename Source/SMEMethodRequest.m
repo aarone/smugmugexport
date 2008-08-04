@@ -279,6 +279,9 @@
 	[self setError:e];
 	[[self target] performSelector:callback withObject:self];
 	[self setConnectionIsOpen:NO];
+	if(IsNetworkTracingEnabled()) {
+		NSLog(@"An error occurred : %@", [e localizedDescription]);
+	}
 }
 
 -(NSData *)data {

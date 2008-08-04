@@ -13,6 +13,7 @@
 
 }
 
++(SMESubCategory *)nullSubCategory;
 -(unsigned int)parentCategoryIdentifier;
 
 @end
