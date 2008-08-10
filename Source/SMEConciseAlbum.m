@@ -41,6 +41,7 @@
 			[self setSubCategory:(SMESubCategory *)[SMESubCategory dataWithSourceData:[self subCategoryDict]]];
 	}
 	
+
 	return self;
 }
 

@@ -188,7 +188,8 @@
 
 -(void)closeSheet {
 	[self setIsBusy:NO];
-	[NSApp endSheet:newAlbumSheet];
+	if(newAlbumSheet != nil && [newAlbumSheet isVisible])
+		[NSApp endSheet:newAlbumSheet];
 }
 
 -(BOOL)isSheetOpen {

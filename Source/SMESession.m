@@ -103,7 +103,7 @@
 		[arg retain]; // not retained by retainArguments above
 	}
 
-	[inv performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:YES];
+	[inv performSelectorOnMainThread:@selector(invoke) withObject:nil waitUntilDone:NO];
 }
 
 @end

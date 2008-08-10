@@ -875,7 +875,8 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 }
 
 -(void)albumEditDidEnd:(SMEResponse *)resp {
-	if(![resp wasSuccessful]) {
+	// album edits return errors when an edit doesn't change any album settings (this is odd)
+	if(![resp wasSuccessful] || [[resp error] code] != IMAGE_EDIT_SYSTEM_ERROR_CODE) {
 		[self presentError:[resp error]];
 	} else {
 		// a visible title of an album may have changed..

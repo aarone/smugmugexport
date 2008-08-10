@@ -13,7 +13,8 @@
 @interface SMEConciseAlbum : NSObject {
 	NSMutableDictionary *albumData;
 	SMECategory *category;
-	SMESubCategory * subCategory;	
+	SMESubCategory * subCategory;
+	BOOL hasChanges;
 }
 
 -(id)initWithDictionary:(NSMutableDictionary *)dict;
@@ -36,6 +37,7 @@
 
 -(NSMutableDictionary *)albumData;
 
+-(BOOL)hasChanges;
 
 -(void)setAlbumData:(NSMutableDictionary *)d;
 -(NSMutableDictionary *)albumData;

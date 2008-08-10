@@ -264,24 +264,25 @@
 									   userInfo:[NSDictionary dictionaryWithObject:[NSHTTPURLResponse localizedStringForStatusCode:[[self httpResponse] statusCode]] forKey:NSLocalizedDescriptionKey]]];
 	}
 	
-	[[self target] performSelector:callback withObject:self];
-	[self setConnectionIsOpen:NO];
-	
 	if(IsNetworkTracingEnabled()) {
 		NSString *responseAsString = [[[NSString alloc] initWithData:[self responseData]
 															encoding:NSUTF8StringEncoding] autorelease];
 		NSLog(@"response: %@", responseAsString);
-	}	
+	}
+	
+	[[self target] performSelector:callback withObject:self];
+	[self setConnectionIsOpen:NO];
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)e {
+	if(IsNetworkTracingEnabled()) {
+		NSLog(@"An error occurred : %@", [e localizedDescription]);
+	}
+	
 	[self setWasSuccessful:NO];
 	[self setError:e];
 	[[self target] performSelector:callback withObject:self];
 	[self setConnectionIsOpen:NO];
-	if(IsNetworkTracingEnabled()) {
-		NSLog(@"An error occurred : %@", [e localizedDescription]);
-	}
 }
 
 -(NSData *)data {

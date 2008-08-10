@@ -48,6 +48,7 @@ extern NSString *SMUploadedFilenameOptionTitle;
 
 #define THUMBNAIL_NOT_FOUND_ERROR_CODE 5
 #define IMAGE_NOT_FOUND_ERROR_CODE 6
+#define IMAGE_EDIT_SYSTEM_ERROR_CODE 5
 
 static inline BOOL IsEmpty(id thing) {
     return thing == nil
