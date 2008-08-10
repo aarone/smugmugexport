@@ -200,6 +200,7 @@ NSString *SMUploadedFilename = @"SMUploadFilename";
 NSString *SMLastUpdateCheck = @"SMLastUpdateCheck";
 NSString *SMUpdateCheckInterval = @"SMUpdateCheckInterval";
 NSString *SMContinueUploadOnFileIOError = @"SMContinueUploadOnFileIOError";
+NSString *SMECaptionFormatString = @"SMECaptionFormatString";
 
 static const int AlbumUrlFetchRetryCount = 5;
 static const int SMDefaultScaledHeight = 2592;
@@ -207,6 +208,7 @@ static const int SMDefaultScaledWidth = 2592;
 static const NSTimeInterval SMDefaultUpdateCheckInterval = 24.0*60.0*60.0;
 
 NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/versionInfo.plist";
+NSString *SMEDefaultCaptionFormat = @"%caption";
 
 @implementation SMEExportPlugin
 
@@ -297,6 +299,7 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	[defaultsDict setObject:[NSDate distantPast] forKey:SMLastUpdateCheck];
 	[defaultsDict setObject:[NSNumber numberWithInt:SMDefaultUpdateCheckInterval] forKey:SMUpdateCheckInterval];
 	[defaultsDict setObject:no forKey:SMContinueUploadOnFileIOError];
+	[defaultsDict setObject:SMEDefaultCaptionFormat forKey:SMECaptionFormatString];
 	
 	[[NSUserDefaults smugMugUserDefaults] registerDefaults:defaultsDict];
 	
@@ -1059,6 +1062,27 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	return imgData;
 }
 
+-(NSString *)formatCaptionWithTitle:(NSString *)title caption:(NSString *)caption {
+	NSString *captionFormat = [[NSUserDefaults smugMugUserDefaults] objectForKey:@"SMECaptionFormatString"];
+	if(captionFormat == nil)
+		captionFormat = SMEDefaultCaptionFormat;
+	
+	
+	NSMutableString *result = [NSMutableString stringWithString:captionFormat];
+	if(title != nil)
+		[result replaceOccurrencesOfString:@"%title"
+								withString:title 
+								   options:0 
+									 range:NSMakeRange(0, [result length])];
+	if(caption != nil)
+		[result replaceOccurrencesOfString:@"%caption"
+								withString:caption
+								   options:0 
+									 range:NSMakeRange(0, [result length])];
+	return [NSString stringWithString:result];
+	
+}
+
 -(void)uploadCurrentImage {
 	
 	NSString *nextFile = nil;
@@ -1099,10 +1123,11 @@ NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/ver
 	
 	NSString *filename = [self chooseUploadFilename:[[nextFile pathComponents] lastObject] 
 											  title:title];
+	NSString *caption = [self formatCaptionWithTitle:title caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
 	[[self session] uploadImageData:srcData
 							filename:filename
 							   album:[[self selectedAlbum] ref]
-							 caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]
+							 caption:caption
 							keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]
 						   observer:self];		
 	
