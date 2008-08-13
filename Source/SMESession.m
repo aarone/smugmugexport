@@ -14,7 +14,6 @@
 #import "SMEJSONDecoder.h"
 #import "SMEAlbum.h"
 #import "SMEImageRef.h"
-#import "SMAlbumInfo.h"
 #import "SMEResponse.h"
 #import "SMESessionInfo.h"
 #import "SMECategory.h"
