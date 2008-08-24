@@ -17,13 +17,13 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>7</string>
+	<string>8</string>
 	<key>CSResourcesFileMapped</key>
 	<string>yes</string>
 	<key>NSMainNibFile</key>
 	<string>SmugMugExport</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.8</string>
+	<string>1.0.9</string>
 	<key>NSPrincipalClass</key>
 	<string>SMEExportPlugin</string>
 </dict>

@@ -17,8 +17,6 @@
 										 NSLocalizedString(@"No Value", @"null subcategory name"), @"Title",
 										 [SMECategory nullCategory], @"Category",
 													 nil]] autorelease];
-			
-			
 }
 
 -(unsigned int)parentCategoryIdentifier {

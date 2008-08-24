@@ -37,8 +37,6 @@
 
 -(NSMutableDictionary *)albumData;
 
--(BOOL)hasChanges;
-
 -(void)setAlbumData:(NSMutableDictionary *)d;
 -(NSMutableDictionary *)albumData;
 

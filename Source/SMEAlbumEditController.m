@@ -57,11 +57,12 @@
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
 	if([keyPath isEqualToString:@"album.category"]) {
+		if(![[[[self album] category] childSubCategories] containsObject:[[self album] subCategory]]) {
+			[[self album] setSubCategory:[SMESubCategory nullSubCategory]];
+		}
 		[self willChangeValueForKey:@"subcategories"];
 		[self didChangeValueForKey:@"subcategories"];
-		if(![[[[self album] category] childSubCategories] containsObject:[[self album] subCategory]])
-			[[self album] setSubCategory:[SMESubCategory nullSubCategory]];
-		
+
 	}
 }
 
@@ -212,8 +213,9 @@
 }
 
 -(NSArray *)subcategories {
-	if([[[[self album] category] childSubCategories] count] == 0)
+	if([[[[self album] category] childSubCategories] count] == 0) {
 		return [[[self album] category] childSubCategories];
+	}
 
  	// otherwise, add a placehold subcategory for 'No Value'
 	NSMutableArray *result = [NSMutableArray arrayWithArray:[[[self album] category] childSubCategories]];

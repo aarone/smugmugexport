@@ -876,7 +876,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 
 -(void)albumEditDidEnd:(SMEResponse *)resp {
 	// album edits return errors when an edit doesn't change any album settings (this is odd)
-	if(![resp wasSuccessful] || [[resp error] code] != IMAGE_EDIT_SYSTEM_ERROR_CODE) {
+	if(![resp wasSuccessful] && [[resp error] code] != IMAGE_EDIT_SYSTEM_ERROR_CODE) {
 		[self presentError:[resp error]];
 	} else {
 		// a visible title of an album may have changed..
@@ -1039,25 +1039,23 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	if(!ShouldScaleImages())
 		return imgData;
 	
-//	if(isJpeg){
-		int maxWidth = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleWidth] intValue];
-		int maxHeight = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleHeight] intValue];
-		
-		// allow no input and treat it like infinity
-		if(maxWidth == 0)
-			maxWidth = INT_MAX;
-		if(maxHeight == 0)
-			maxHeight = INT_MAX;
-		
-		NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc] initWithData:imgData] autorelease];
-		
-		// scale
-		if([rep pixelsWide] > maxWidth || [rep pixelsHigh] > maxHeight)
-			return [rep scaledRepToMaxWidth:maxWidth maxHeight:maxHeight];
-		
-		// no scale
-		return imgData;
-//	}
+	unsigned int maxWidth = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleWidth] intValue];
+	unsigned int maxHeight = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleHeight] intValue];
+	
+	// allow no input and treat it like infinity
+	if(maxWidth == 0)
+		maxWidth = INT_MAX;
+	if(maxHeight == 0)
+		maxHeight = INT_MAX;
+	
+	NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc] initWithData:imgData] autorelease];
+	
+	// scale
+	if([rep pixelsWide] > maxWidth || [rep pixelsHigh] > maxHeight)
+		return [rep scaledRepToMaxWidth:maxWidth maxHeight:maxHeight];
+	
+	// no scale
+	return imgData;
 	
 	// the default operation
 	return imgData;
@@ -1082,6 +1080,10 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 									 range:NSMakeRange(0, [result length])];
 	return [NSString stringWithString:result];
 	
+}
+
+-(unsigned int)isIPhoto7 {
+	return [[self exportManager] respondsToSelector:@selector(imageTitleAtIndex:)];
 }
 
 -(void)uploadCurrentImage {
@@ -1116,14 +1118,9 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 		return;
 	}
 	
-	NSString *title = nil;
-	if([[self exportManager] respondsToSelector:@selector(imageCaptionAtIndex:)])
-		title = [[self exportManager] imageCaptionAtIndex:[self imagesUploaded]]; // iPhoto <=6
-	else
-		title = [[self exportManager] imageTitleAtIndex:[self imagesUploaded]]; // iPhoto 7
-	
-	NSString *filename = [self chooseUploadFilename:[[nextFile pathComponents] lastObject] 
-											  title:title];
+	NSString *title =  [self isIPhoto7] ? [[self exportManager] imageTitleAtIndex:[self imagesUploaded]] :
+		[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]];
+	NSString *filename = [self chooseUploadFilename:[[nextFile pathComponents] lastObject] title:title];
 	NSString *caption = [self formatCaptionWithTitle:title caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
 	[[self session] uploadImageData:srcData
 							filename:filename
@@ -1645,7 +1642,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 }
 
 -(id)defaultFileName {
-	return nil;
+	return @"";
 }
 
 -(id)getDestinationPath {
@@ -1672,8 +1669,8 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	// notification, only a 'tab will be focused' notification
 	[self performSelector:@selector(attemptLoginIfNecessary) 
 			   withObject:nil
-			   afterDelay:0.5
-				  inModes:[NSArray arrayWithObjects: NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
+			   afterDelay:1.0
+				  inModes:[NSArray arrayWithObjects: NSModalPanelRunLoopMode, nil]];
 }
 
 -(id)lastView {
@@ -1691,8 +1688,11 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 -(void)clickExport {
 }
 
-- (BOOL)handlesMovieFiles {
-	return YES;
+-(BOOL)handlesMovieFiles {
+	if([self isIPhoto7]) // returning YES will crash iPhoto 6
+		return YES;
+	
+	return NO;
 }
 
 -(NSString *)JSONFrameworkPath {

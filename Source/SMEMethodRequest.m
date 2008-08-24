@@ -206,8 +206,9 @@
 	[self setConnection:[NSURLConnection connectionWithRequest:req delegate:self]]; // begin request
 	[self setConnectionIsOpen:YES];
 	
-	while ( [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
-									 beforeDate:[NSDate distantFuture]] 
+	NSRunLoop *rl = [NSRunLoop currentRunLoop];
+	while ( [rl runMode:NSDefaultRunLoopMode
+			 beforeDate:[NSDate distantFuture]] 
 			&& [self connectionIsOpen]);
 	
 	[pool release];
