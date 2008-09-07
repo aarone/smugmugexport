@@ -165,6 +165,8 @@
 -(void)loadJSON;
 -(void)unloadJSON;
 -(void)unloadFramework:(NSString *)fwPath;
+
+-(BOOL)pluginPaneIsVisible;
 @end
 
 // UI keys
@@ -353,6 +355,9 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 		return;
 	}
 	
+	if(![self pluginPaneIsVisible])
+		return;
+
 	NSAlert *alert = [[NSAlert alertWithError:err] retain]; // needs to exist outside of the pool, it's released below
 	errorAlertSheetIsVisisble = YES;
 	[alert beginSheetModalForWindow:[[self exportManager] window]
@@ -383,6 +388,9 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 }
 
 -(void)displayUserUpdatePolicy {
+	if(![self pluginPaneIsVisible])
+		return;
+
 	NSAlert *alert = [[NSAlert alloc] init];
 	[alert addButtonWithTitle:NSLocalizedString(@"Automatically Check", @"Option button text for automatically checking for updates")];
 	[alert addButtonWithTitle:NSLocalizedString(@"Manually Check", @"Option button text for automatically checking for updates")];
@@ -448,25 +456,32 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	if(remoteInfo == nil)
 		return;
 	
-	NSString *remoteVersion = [remoteInfo objectForKey:@"remoteVersion"];
+	NSNumber *remoteVersion = [remoteInfo objectForKey:(NSString *)kCFBundleVersionKey];
 	if(remoteVersion == nil) {
 		return;
 	}
 	
-	NSString *localVersion = [[[self thisBundle] infoDictionary] objectForKey:(NSString *)kCFBundleShortVersionStringKey];
+	NSNumber *localVersion = [[[self thisBundle] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
 	if(localVersion == nil) {
 		NSLog(@"undefined bundle version found during update.");
 		NSBeep();
 		return;
 	}
-
-	if([localVersion compareVersionToVersion:remoteVersion] == NSOrderedAscending)
+	
+	if([localVersion intValue] < [remoteVersion intValue])
 		[self displayUpdateAvailable:remoteInfo];
 	else if([displayAlertIfNoUpdateAvailable boolValue])
 		[self displayNoUpdateAvailable];
 }
 
+-(BOOL)pluginPaneIsVisible {
+	return [[[self exportManager] window] isVisible];
+}
+
 -(void)displayNoUpdateAvailable {
+	if(![self pluginPaneIsVisible])
+		return;
+	
 	NSAlert *alert = [[NSAlert alloc] init];
 	[alert addButtonWithTitle:NSLocalizedString(@"Dismiss", @"Dismiss button to dismiss no new version available button.")];
 	[alert setMessageText: [NSString stringWithFormat:NSLocalizedString(@"You are running the newest version of SmugMugExport (%@).", @"Message text for no update available text"), [[[self thisBundle] infoDictionary] objectForKey:(NSString *)kCFBundleShortVersionStringKey]]];
@@ -476,6 +491,9 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 }
 
 -(void)displayUpdateAvailable:(NSDictionary *)remoteInfo {
+	if(![self pluginPaneIsVisible])
+		return;
+
 	NSAlert *alert = [[NSAlert alloc] init];
 	[alert addButtonWithTitle:NSLocalizedString(@"Download New Version", @"Button text to confirm download of a new version.")];
 	[alert addButtonWithTitle:NSLocalizedString(@"Later", @"Button text to decline invitation to download a new version.")];

@@ -12,5 +12,4 @@
 @interface NSString (SMEDataAdditions)
 
 -(NSString *)urlEscapedString;
--(NSComparisonResult)compareVersionToVersion:(NSString *)aVersion;
 @end
