@@ -448,16 +448,30 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	return [NSBundle bundleForClass:[SMEExportPlugin class]];
 }
 
+-(NSError *)versionCheckError:(NSString *)msg {
+	return [NSError errorWithDomain:NSLocalizedString(@"SmugMugExport Error", @"SmugMugExport Error Domain")
+							   code:SMUGMUG_VERSION_CHECK_ERROR
+						   userInfo:[NSDictionary dictionaryWithObject:msg forKey:NSLocalizedDescriptionKey]];
+}
+
 -(void)remoteVersionInfoWasFetch:(NSDictionary *)args {
 	[self setIsUpdateInProgress:NO];
 	NSDictionary *remoteInfo = [args objectForKey:@"remoteInfo"];
 	NSNumber *displayAlertIfNoUpdateAvailable = [args objectForKey:@"displayAlertIfNoUpdateAvailable"];
 	// remoteInfo == nil => no check performed
-	if(remoteInfo == nil)
+	
+	if(remoteInfo == nil) {
+		if(![displayAlertIfNoUpdateAvailable boolValue])
+			return;
+		[self presentError:[self versionCheckError:NSLocalizedString(@"Error fetching remote version info", @"Error string when fetching remote version info fails.")]];
 		return;
+	} 
 	
 	NSNumber *remoteVersion = [remoteInfo objectForKey:(NSString *)kCFBundleVersionKey];
 	if(remoteVersion == nil) {
+		if(![displayAlertIfNoUpdateAvailable boolValue])
+			return;
+		[self presentError:[self versionCheckError:NSLocalizedString(@"Error fetching remote version info", @"Error string when fetching remote version info fails.")]];		
 		return;
 	}
 	
@@ -1687,7 +1701,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	// notification, only a 'tab will be focused' notification
 	[self performSelector:@selector(attemptLoginIfNecessary) 
 			   withObject:nil
-			   afterDelay:1.0
+			   afterDelay:0.5
 				  inModes:[NSArray arrayWithObjects: NSModalPanelRunLoopMode, nil]];
 }
 

@@ -27,7 +27,7 @@
  agerson@mac.com
 </blockquote>
  
- I made some changes to this class.
+
 */
 @interface SMEKeychainManager : NSObject {
 

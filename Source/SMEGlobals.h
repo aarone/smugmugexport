@@ -50,6 +50,8 @@ extern NSString *SMUploadedFilenameOptionTitle;
 #define IMAGE_NOT_FOUND_ERROR_CODE 6
 #define IMAGE_EDIT_SYSTEM_ERROR_CODE 5
 
+#define SMUGMUG_VERSION_CHECK_ERROR 7
+
 static inline BOOL IsEmpty(id thing) {
     return thing == nil
 	|| ([thing respondsToSelector:@selector(length)]
