@@ -7,15 +7,15 @@
 //
 
 #import <Cocoa/Cocoa.h>
-@class SMEMethodRequest, SMEImageRef, SMEResponse;
+@class SMEMethodRequest, SMEImageRef, SMEResponse, SMEImage;
 
 // protocol for monitoring an upload
 @protocol SMEUploadObserver
 
 -(void)uploadDidFail:(SMEResponse *)resp;
 
--(void)uploadMadeProgress:(NSData *)imageData bytesWritten:(long)bytesWritten ofTotalBytes:(long)totalBytes;
+-(void)uploadMadeProgress:(SMEImage *)theImage bytesWritten:(long)bytesWritten ofTotalBytes:(long)totalBytes;
 
--(void)uploadDidComplete:(SMEResponse *)resp filename:(NSString *)filename data:(NSData *)imageData;
+-(void)uploadDidComplete:(SMEResponse *)resp image:(SMEImage *)theImage;
 
 @end

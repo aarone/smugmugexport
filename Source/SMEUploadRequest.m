@@ -7,6 +7,8 @@
 //
 
 #import "SMEUploadRequest.h"
+#import "SMEImage.h"
+#import "SMESession.h"
 #import "SMEDataAdditions.h"
 #import "SMEAlbumRef.h"
 #import "SMEGlobals.h"
@@ -23,19 +25,16 @@
 -(void)setObserver:(NSObject<SMEUploadRequestObserver> *)anObserver;
 -(NSObject<SMEUploadRequestObserver> *)observer;
 
--(NSData *)imageData;
--(void)setImageData:(NSData *)imgData;
+-(void)setWasSuccessful:(BOOL)v;
+-(void)setError:(NSError *)err;
+
+-(void)setSession:(SMESession *)anId;
+-(void)setAlbumRef:(SMEAlbumRef *)ref;
+-(void)setImage:(SMEImage *)anImage;
+
 
 -(NSMutableData *)response;
 -(void)setResponse:(NSMutableData *)data;
-
--(void)setWasSuccessful:(BOOL)v;
--(void)setError:(NSError *)err;
--(void)setFilename:(NSString *)filename;
--(void)setSessionId:(NSString *)anId;
--(void)setAlbumRef:(SMEAlbumRef *)ref;
--(void)setCaption:(NSString *)aCaption;
--(void)setKeywords:(NSArray *)kw;
 
 -(void)appendToResponse;
 
@@ -82,10 +81,9 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(void)dealloc {
-	[[self imageData] release];
-	[[self response] release];
-	[[self filename] release];
-	[[self error] release];
+	[self setImage:nil];
+	[self setResponse:nil];
+	[self setError:nil];
 	
 	[super dealloc];
 }
@@ -137,20 +135,14 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	return [NSString stringWithFormat:@"\"%@\"", [theKeywords componentsJoinedByString:@"\" \""]];
 }
 
--(void)uploadImageData:(NSData *)theImageData
-			  filename:(NSString *)aFilename
-			 sessionId:(NSString *)aSessionId
-				 album:(SMEAlbumRef *)anAlbumRef
-			   caption:(NSString *)aCaption
-			  keywords:(NSArray *)theKeywords
-			  observer:(NSObject<SMEUploadRequestObserver> *)anObserver {
+-(void)uploadImage:(SMEImage *)theImage
+	   withSession:(SMESession *)theSession
+		 intoAlbum:(SMEAlbumRef *)anAlbumRef
+		  observer:(NSObject<SMEUploadRequestObserver> *)anObserver {
 	
-	[self setImageData:theImageData];
-	[self setFilename:aFilename];
-	[self setSessionId:aSessionId];
+	[self setImage:theImage];
+	[self setSession:theSession];
 	[self setAlbumRef:anAlbumRef];
-	[self setCaption:aCaption];
-	[self setKeywords:theKeywords];
 	[self setObserver:anObserver];	
 	[NSThread detachNewThreadSelector:@selector(startImageUpload) 
 							 toTarget:self 
@@ -161,32 +153,32 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
 	if(IsNetworkTracingEnabled()) {
-		NSLog(@"Posting image to %@", [self postUploadURL:[self filename]]);
+		NSLog(@"Posting image to %@", [self postUploadURL:[[self image] title]]);
 	}
 	
-	NSURL *requestUrl = [NSURL URLWithString:[self postUploadURL:[self filename]]];
+	NSURL *requestUrl = [NSURL URLWithString:[self postUploadURL:[[self image] title]]];
 	CFHTTPMessageRef myRequest = CFHTTPMessageCreateRequest(kCFAllocatorDefault, CFSTR("POST"), (CFURLRef)requestUrl, kCFHTTPVersion1_1);
 	
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("User-Agent"), (CFStringRef)[SMESession UserAgent]);
-	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-Length"), (CFStringRef)[NSString stringWithFormat:@"%d", [[self imageData] length]]);
-	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-MD5"), (CFStringRef)[[self imageData] md5HexString]);
-	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-SessionID"), (CFStringRef)[self sessionId]);
+	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-Length"), (CFStringRef)[NSString stringWithFormat:@"%d", [[[self image] imageData] length]]);
+	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("Content-MD5"), (CFStringRef)[[[self image] imageData] md5HexString]);
+	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-SessionID"), (CFStringRef)[[self session] sessionID]);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Version"), (CFStringRef)[self uploadApiVersion]);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-ResponseType"), (CFStringRef)[self uploadResponseType]);	
-	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-FileName"), (CFStringRef)[self cleanNewlines:[self filename]]);
+	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-FileName"), (CFStringRef)[self cleanNewlines:[[self image] title]]);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-AlbumID"), (CFStringRef)[[self albumRef] albumId]);
 	
-	if(!IsEmpty([self caption]))
-		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Caption"), (CFStringRef)[self cleanNewlines:[self caption]]);
+	if(!IsEmpty([[self image] caption]))
+		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Caption"), (CFStringRef)[self cleanNewlines:[[self image] caption]]);
 	
-	if(!IsEmpty([self keywords]))
-		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Keywords"), (CFStringRef)[self cleanKeywords:[self keywords]]);
+	if(!IsEmpty([[self image] keywords]))
+		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Keywords"), (CFStringRef)[self cleanKeywords:[[self image] keywords]]);
 	
 	if(IsNetworkTracingEnabled()) {
 		NSLog(@"Image headers: %@", [self imageHeadersForRequest:&myRequest]);
 	}
 	
-	CFHTTPMessageSetBody(myRequest, (CFDataRef)[self imageData]);
+	CFHTTPMessageSetBody(myRequest, (CFDataRef)[[self image] imageData]);
 	
 	readStream = CFReadStreamCreateForHTTPRequest(kCFAllocatorDefault, myRequest);
 	CFRelease(myRequest);
@@ -271,9 +263,9 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	CFNumberGetValue (bytesWrittenProperty, 3, &bytesWritten);
 	CFRelease(bytesWrittenProperty);
 	
-	[[self observer] uploadMadeProgress:self bytesWritten:bytesWritten ofTotalBytes:[[self imageData] length]];
+	[[self observer] uploadMadeProgress:self bytesWritten:bytesWritten ofTotalBytes:[[[self image] imageData] length]];
 	
-	if(bytesWritten >= [[self imageData] length])
+	if(bytesWritten >= [[[self image] imageData] length])
 		[timer invalidate];
 }
 
@@ -359,21 +351,6 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	}
 }
 
--(NSData *)responseData {
-	return [NSData dataWithData:[self response]];
-}
-
--(NSData *)imageData {
-	return imageData;
-}
-
--(void)setImageData:(NSData *)imgData {
-	if(imageData != imgData) {
-		[imageData release];
-		imageData = [imgData retain];
-	}
-}
-
 -(BOOL)isUploading {
 	return isUploading;
 }
@@ -381,26 +358,26 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 -(void)setIsUploading:(BOOL)v {
 	isUploading = v;
 }
-
--(NSString *)filename {
-	return filename;
+	
+-(SMEImage *)image {
+	return image;
 }
 
--(void)setFilename:(NSString *)fn {
-	if(fn != filename) {
-		[filename release];
-		filename = [fn retain];
+-(void)setImage:(SMEImage *)anImage {
+	if(image != anImage) {
+		[image release];
+		image = [anImage retain];
 	}
 }
-
--(NSString *)sessionId {
-	return sessionId;
+	
+-(SMESession *)session {
+	return session;
 }
 
--(void)setSessionId:(NSString *)anId {
-	if(anId != sessionId) {
-		[sessionId release];
-		sessionId = [anId retain];
+-(void)setSession:(SMESession *)aSession {
+	if(aSession != session) {
+		[session release];
+		session = [aSession retain];
 	}
 }
 
@@ -412,28 +389,6 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	if(ref != albumRef) {
 		[albumRef release];
 		albumRef = [ref retain];
-	}
-}
-
--(NSString *)caption {
-	return caption;
-}
-
--(void)setCaption:(NSString *)aCaption {
-	if(aCaption != caption) {
-		[caption release];
-		caption = [aCaption retain];
-	}
-}
-
--(NSArray *)keywords {
-	return keywords;
-}
-
--(void)setKeywords:(NSArray *)kw {
-	if(kw != keywords) {
-		[keywords release];
-		keywords = [kw retain];
 	}
 }
 		
@@ -456,7 +411,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	}
 }
 
--(NSData *)data {
+-(NSData *)responseData {
 	return [NSData dataWithData:[self response]];
 }
 

@@ -75,6 +75,8 @@
 				<string>id</string>
 				<key>showPreferences</key>
 				<string>id</string>
+				<key>vaultLinkClicked</key>
+				<string>id</string>
 			</dict>
 			<key>CLASS</key>
 			<string>SMEExportPlugin</string>
@@ -102,6 +104,8 @@
 				<string>NSBox</string>
 				<key>uploadPanel</key>
 				<string>NSPanel</string>
+				<key>vaultLink</key>
+				<string>WebView</string>
 			</dict>
 			<key>SUPERCLASS</key>
 			<string>NSObject</string>

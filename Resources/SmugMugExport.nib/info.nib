@@ -3,16 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>IBFramework Version</key>
-	<string>670</string>
+	<string>672</string>
 	<key>IBLastKnownRelativeProjectPath</key>
 	<string>../SmugMugExport.xcodeproj</string>
 	<key>IBOldestOS</key>
 	<integer>4</integer>
 	<key>IBOpenObjects</key>
 	<array>
-		<integer>19</integer>
 		<integer>62</integer>
-		<integer>6</integer>
+		<integer>7</integer>
+		<integer>343</integer>
+		<integer>19</integer>
 	</array>
 	<key>IBSystem Version</key>
 	<string>9E17</string>

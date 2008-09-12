@@ -19,11 +19,17 @@
 #import "SMEStringAdditions.h"
 #import "SMEMethodRequest.h"
 #import "SMEAlbum.h"
+#import "SMEAccountInfo.h"
 #import "SMEResponse.h"
 #import "SMESubCategory.h"
 #import "SMECategory.h"
+#import "SMEImage.h"
 #import "SMEImageURLs.h"
 #import "SMEGrowlDelegate.h"
+
+@interface WebView (WebKitStuffThatIsntPublic)
+-(void)setDrawsBackground:(BOOL)drawsBackground;
+@end
 
 @interface SMEExportPlugin (Private)
 -(ExportMgr *)exportManager;
@@ -40,8 +46,8 @@
 -(SMESession *)session;
 -(void)setSession:(SMESession *)m;
 
--(SMESessionInfo *)sessionInfo;
--(void)setSessionInfo:(SMESessionInfo *)m;
+-(SMEAccountInfo *)accountInfo;
+-(void)setAccountInfo:(SMEAccountInfo *)m;
 
 -(NSString *)username;
 -(void)setUsername:(NSString *)n;
@@ -122,7 +128,6 @@
 -(NSPanel *)loginPanel;
 
 -(BOOL)sheetIsDisplayed;
--(void)uploadCurrentImage;
 
 -(void)openLastGalleryInBrowser;
 
@@ -137,7 +142,6 @@
 -(void)setAlbumEditController:(SMEAlbumEditController *)aController;
 
 -(NSArray *)filenameSelectionOptions;
--(NSString *)chooseUploadFilename:(NSString *)filename title:(NSString *)imageTitle;
 -(void)displayUserUpdatePolicy;
 
 
@@ -151,7 +155,13 @@
 -(void)resetAlbumUrlFetchAttemptCount;
 
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful;
+
+-(BOOL)isIPhoto7;
+-(NSData *)sourceDataAtPath:(NSString *)pathToImage isMovie:(BOOL)isMovie errorString:(NSString **)err;
+-(NSString *)formatCaptionWithTitle:(NSString *)title caption:(NSString *)caption;
+-(SMEImage *)nextImage;
 -(void)uploadNextImage;
+
 
 -(NSError *)smugmugError:(NSString *)error code:(int)code;
 
@@ -203,6 +213,7 @@ NSString *SMLastUpdateCheck = @"SMLastUpdateCheck";
 NSString *SMUpdateCheckInterval = @"SMUpdateCheckInterval";
 NSString *SMContinueUploadOnFileIOError = @"SMContinueUploadOnFileIOError";
 NSString *SMECaptionFormatString = @"SMECaptionFormatString";
+NSString *SMEUploadToVault = @"SMEUploadToVault";
 
 static const int AlbumUrlFetchRetryCount = 5;
 static const int SMDefaultScaledHeight = 2592;
@@ -302,7 +313,8 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	[defaultsDict setObject:[NSNumber numberWithInt:SMDefaultUpdateCheckInterval] forKey:SMUpdateCheckInterval];
 	[defaultsDict setObject:no forKey:SMContinueUploadOnFileIOError];
 	[defaultsDict setObject:SMEDefaultCaptionFormat forKey:SMECaptionFormatString];
-	
+	[defaultsDict setObject:[NSNumber numberWithBool:NO] forKey:SMEUploadToVault];
+		
 	[[NSUserDefaults smugMugUserDefaults] registerDefaults:defaultsDict];
 	
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.accounts"] triggerChangeNotificationsForDependentKey:@"accounts"];
@@ -313,6 +325,16 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 -(void)awakeFromNib {
 	[albumsTableView setTarget:self];
 	[albumsTableView setDoubleAction:@selector(showEditAlbumSheet:)];
+
+	if([vaultLink respondsToSelector:@selector(setDrawsBackground:)])
+		[vaultLink setDrawsBackground:NO];
+	[[[vaultLink mainFrame] frameView] setAllowsScrolling:NO];
+	[vaultLink setFrameLoadDelegate:self];
+	[[vaultLink mainFrame] loadHTMLString:@"(Requires <a href=\"http://www.smugmug.com/price/smugvault.mg\">SmugVault</a>)" baseURL:nil];
+}
+- (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame {
+	NSURL *url = [[[frame provisionalDataSource] request] URL];
+	[[NSWorkspace sharedWorkspace] openURL:url];
 }
 
 -(BOOL)sheetIsDisplayed {
@@ -664,11 +686,11 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 			[self presentError:[response error]];
 		}
 		
-		[self setSessionInfo:nil];
+		[self setAccountInfo:nil];
 		return NO;
 	}
 	
-	[self setSessionInfo:(SMESessionInfo *)[response smData]];
+	[self setAccountInfo:(SMEAccountInfo *)[response smData]];
 	[self setCategories:nil];
 	[self setSubcategories:nil];
 	[[self session] fetchAlbumsWithTarget:self callback:@selector(albumFetchComplete:)];
@@ -727,7 +749,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 #pragma mark Logout 
 -(void)logoutDidComplete:(SMEResponse *)resp {
 	[[self growlDelegate] notifyLougout:[self selectedAccount]];
-	[self setSessionInfo:nil];
+	[self setAccountInfo:nil];
 	[[self postLogoutInvocation] invokeWithTarget:self];
 }
 
@@ -1015,6 +1037,52 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 
 #pragma mark Upload Methods
 
+-(SMEImage *)nextImage {
+	
+	NSString *nextFile = nil;
+	
+	BOOL sendToVault = [[self accountInfo] hasVaultEnabled] &&
+		[[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEUploadToVault] boolValue];
+	
+	// if it's a movie or we're sending to vault, get the original source data
+	if([[self exportManager] originalIsMovieAtIndex:[self imagesUploaded]] || sendToVault) {
+		// get the movie:
+		nextFile = [[self exportManager] sourcePathAtIndex:[self imagesUploaded]];
+	} else { // get jpeg equivalent
+		nextFile = [[self exportManager] imagePathAtIndex:[self imagesUploaded]];
+	}
+	
+	NSString *error = nil;
+	NSData *srcData = [self sourceDataAtPath:nextFile 
+									 isMovie:[[self exportManager] originalIsMovieAtIndex:[self imagesUploaded]]
+								 errorString:&error];	
+	if(srcData == nil) {
+		if([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMContinueUploadOnFileIOError] boolValue]) {
+			NSLog(@"Error reading image data for image: %@. The image will be skipped.", nextFile);
+			[self uploadNextImage];
+		} else {
+			NSLog(@"Error reading image data for image: %@. The upload was canceled.", nextFile);
+			[self performUploadCompletionTasks:NO];
+			[self presentError:[self smugmugError:
+								[NSString stringWithFormat:
+								 NSLocalizedString(@"Error reading image file %@", @"Error text when an image cannot be read"), nextFile]
+											 code:IMAGE_NOT_FOUND_ERROR_CODE]];
+		}
+		return nil;
+	}	
+	
+	NSString *iPhotoTitle =  [self isIPhoto7] ? [[self exportManager] imageTitleAtIndex:[self imagesUploaded]] :
+		[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]];
+	NSString *selectedUploadFilenameOption = [[NSUserDefaults smugMugUserDefaults] objectForKey:SMUploadedFilename];
+	NSString *title = [selectedUploadFilenameOption isEqualToString:SMUploadedFilenameOptionTitle] ?
+		iPhotoTitle:[nextFile lastPathComponent];	
+	NSString *caption = [self formatCaptionWithTitle:title caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
+	return [SMEImage imageWithTitle:title 
+							caption:caption 
+						   keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]
+						  imageData:srcData];	
+}
+
 -(void)startUpload {
 	if([self sheetIsDisplayed]) // this should be impossible
 		return;
@@ -1051,7 +1119,9 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	[self setUploadSiteUrl:nil];
 	[self setSiteUrlHasBeenFetched:NO];
 	
-	[self uploadCurrentImage];
+	[[self session] uploadImage:[self nextImage]
+					  intoAlbum:[[self selectedAlbum] ref]
+					   observer:self];
 }
 
 -(NSData *)sourceDataAtPath:(NSString *)pathToImage isMovie:(BOOL)isMovie errorString:(NSString **)err {
@@ -1114,59 +1184,8 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	
 }
 
--(unsigned int)isIPhoto7 {
+-(BOOL)isIPhoto7 {
 	return [[self exportManager] respondsToSelector:@selector(imageTitleAtIndex:)];
-}
-
--(void)uploadCurrentImage {
-	
-	NSString *nextFile = nil;
-	
-	// if it's a movie, get the movie source
-	if([[self exportManager] originalIsMovieAtIndex:[self imagesUploaded]]) {
-		// get the movie:
-		nextFile = [[self exportManager] sourcePathAtIndex:[self imagesUploaded]];
-	} else {
-		// or a jpeg
-		nextFile = [[self exportManager] imagePathAtIndex:[self imagesUploaded]];
-	}
-	
-	NSString *error = nil;
-	NSData *srcData = [self sourceDataAtPath:nextFile 
-									 isMovie:[[self exportManager] originalIsMovieAtIndex:[self imagesUploaded]]
-								   errorString:&error];	
-	if(srcData == nil) {
-		if([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMContinueUploadOnFileIOError] boolValue]) {
-			NSLog(@"Error reading image data for image: %@. The image will be skipped.", nextFile);
-			[self uploadNextImage];
-		} else {
-			NSLog(@"Error reading image data for image: %@. The upload was canceled.", nextFile);
-			[self performUploadCompletionTasks:NO];
-			[self presentError:[self smugmugError:
-			 [NSString stringWithFormat:
-			  NSLocalizedString(@"Error reading image file %@", @"Error text when an image cannot be read"), nextFile]
-											 code:IMAGE_NOT_FOUND_ERROR_CODE]];
-		}
-		return;
-	}
-	
-	NSString *title =  [self isIPhoto7] ? [[self exportManager] imageTitleAtIndex:[self imagesUploaded]] :
-		[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]];
-	NSString *filename = [self chooseUploadFilename:[[nextFile pathComponents] lastObject] title:title];
-	NSString *caption = [self formatCaptionWithTitle:title caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
-	[[self session] uploadImageData:srcData
-							filename:filename
-							   album:[[self selectedAlbum] ref]
-							 caption:caption
-							keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]
-						   observer:self];		
-	
-}
-
--(NSString *)chooseUploadFilename:(NSString *)filename title:(NSString *)imageTitle {
-	NSString *selectedUploadFilenameOption = [[NSUserDefaults smugMugUserDefaults] objectForKey:SMUploadedFilename];
-	return [selectedUploadFilenameOption isEqualToString:SMUploadedFilenameOptionTitle] ?
-											  imageTitle:filename;
 }
 	
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful {
@@ -1195,7 +1214,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	[self presentError:[resp error]];
 }
 
--(void)uploadMadeProgress:(NSData *)imageData bytesWritten:(long)bytesWritten ofTotalBytes:(long)totalBytes {	
+-(void)uploadMadeProgress:(SMEImage *)theImage bytesWritten:(long)bytesWritten ofTotalBytes:(long)totalBytes {
 	float progressForFile = MIN(100.0, ceil(100.0*(float)bytesWritten/(float)totalBytes));
 	[self setFileUploadProgress:[NSNumber numberWithFloat:progressForFile]];
 	
@@ -1229,11 +1248,13 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 		[img setScalesWhenResized:YES];
 		[self setCurrentThumbnail:img];
 		
-		[self uploadCurrentImage];		
+		[[self session] uploadImage:[self nextImage]
+						  intoAlbum:[[self selectedAlbum] ref]
+						   observer:self];	
 	}	
 }
 
--(void)uploadDidComplete:(SMEResponse *)resp filename:(NSString *)filename data:(NSData *)imageData {
+-(void)uploadDidComplete:(SMEResponse *)resp image:(SMEImage *)theImage {
 	if(! [resp wasSuccessful]) {
 		[self performUploadCompletionTasks:NO];
 		[self presentError:[resp error]];
@@ -1247,7 +1268,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 		[[self session] fetchImageURLs:ref withTarget:self callback:@selector(imageUrlFetchDidCompleteForImageRef:)];
 	}
 
-	[[self growlDelegate] notifyImageUploaded:filename image:imageData];
+	[[self growlDelegate] notifyImageUploaded:[theImage title] image:[theImage imageData]];
 	[self uploadNextImage];
 }
 
@@ -1262,7 +1283,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 #pragma mark Get and Set properties
 
 -(BOOL)isLoggedIn {
-	return sessionInfo != nil; 
+	return accountInfo != nil; 
 }
 
 -(BOOL)isLoggingIn {
@@ -1493,14 +1514,14 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 }
 
 
--(SMESessionInfo *)sessionInfo {
-	return sessionInfo;
+-(SMEAccountInfo *)accountInfo {
+	return accountInfo;
 }
 
--(void)setSessionInfo:(SMESessionInfo *)m {
-	if(sessionInfo != m) {
-		[sessionInfo release];	
-		sessionInfo = [m retain];		
+-(void)setAccountInfo:(SMEAccountInfo *)m {
+	if(accountInfo != m) {
+		[accountInfo release];	
+		accountInfo = [m retain];		
 	}
 }
 

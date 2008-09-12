@@ -13,7 +13,7 @@
 
 -(NSError *)error;
 
--(NSData *)data;
+-(NSData *)responseData;
 
 -(BOOL)wasSuccessful;
 

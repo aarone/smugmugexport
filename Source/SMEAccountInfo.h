@@ -10,7 +10,7 @@
 
 #import "SMEData.h"
 
-@interface SMESessionInfo : SMEData {
+@interface SMEAccountInfo : SMEData {
 
 }
 
@@ -18,6 +18,6 @@
 -(NSString *)passwordHash;
 -(NSString *)accountType;
 -(unsigned int)filesizeLimit;
--(BOOL)smugVault;
+-(BOOL)hasVaultEnabled;
 -(NSString *)sessionId;
 @end

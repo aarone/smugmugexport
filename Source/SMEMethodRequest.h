@@ -13,7 +13,8 @@
 
 @interface SMEMethodRequest : NSObject<SMERequest> {
 	NSURLConnection *connection;
-	NSMutableData *responseData;
+	
+	NSMutableData *mutableResponseData;
 	
 	SEL callback;
 	id target;
@@ -79,6 +80,6 @@
  @method data
  @abstract Returns the response data from the underlying connection.
  */
--(NSData *)data;
+-(NSData *)responseData;
 
 @end

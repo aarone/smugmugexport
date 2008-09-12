@@ -43,6 +43,8 @@
 			  password:(NSString *)password 
 				apiKey:(NSString *)apiKey;
 
+-(NSString *)sessionID;
+
 /* response has no domain specific representation */
 -(void)logoutWithTarget:(id)target
 			   callback:(SEL)callback;
@@ -73,12 +75,9 @@
 -(void)fetchImageURLs:(SMEImageRef *)imageRef withTarget:(id)target callback:(SEL)callback;
 
 
--(void)uploadImageData:(NSData *)imageData
-			  filename:(NSString *)filename
-				 album:(SMEAlbumRef *)albumRef
-			   caption:(NSString *)caption
-			  keywords:(NSArray *)keywords
-			  observer:(NSObject<SMEUploadObserver>*)observer;
+-(void)uploadImage:(SMEImage *)theImage
+		 intoAlbum:(SMEAlbumRef *)albumRef
+		  observer:(NSObject<SMEUploadObserver> *)anObserver;
 -(void)stopUpload;
 
 @end

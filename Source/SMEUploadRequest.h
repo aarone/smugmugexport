@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "SMERequest.h";
 
-@class SMEUploadRequest, SMEAlbumRef;
+@class SMEUploadRequest, SMEAlbumRef, SMEImage, SMESession;
 
 // protocol for monitoring an upload
 @protocol SMEUploadRequestObserver
@@ -26,40 +26,31 @@
 	NSObject<SMEUploadRequestObserver> *observer;
 	BOOL isUploading;
 	NSMutableData *response;
-
-	NSData *imageData;
-	NSString *filename;
+	
 	NSString *sessionId;
 	SMEAlbumRef *albumRef;
-	NSString *caption;
-	NSArray *keywords;
+	SMEImage *image;
+	SMESession *session;
 	
 	BOOL wasSuccessful;
 	NSError *error;
 }
 
 +(SMEUploadRequest *)uploadRequest;
--(void)uploadImageData:(NSData *)theImageData
-			  filename:(NSString *)filename
-			 sessionId:(NSString *)sessionId
-				 album:(SMEAlbumRef *)albumRef
-			   caption:(NSString *)caption
-			  keywords:(NSArray *)keywords
-			  observer:(NSObject<SMEUploadRequestObserver> *)anObserver;
+-(void)uploadImage:(SMEImage *)theImage
+	   withSession:(SMESession *)session
+		 intoAlbum:(SMEAlbumRef *)albumRef
+		  observer:(NSObject<SMEUploadRequestObserver> *)anObserver;
 
 -(void)cancelUpload;
 -(NSData *)responseData;
 
-// the parameters set data for the upload
--(NSString *)filename;
--(NSData *)imageData; 
--(NSString *)sessionId;
+-(SMESession *)session;
 -(SMEAlbumRef *)albumRef;
--(NSString *)caption;
--(NSArray *)keywords;
+-(SMEImage *)image;
 
+-(NSData *)responseData;
 
--(NSData *)data;
 -(BOOL)wasSuccessful;
 -(NSError *)error;
 

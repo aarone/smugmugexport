@@ -15,7 +15,7 @@
 #import "SMEAlbum.h"
 #import "SMEImageRef.h"
 #import "SMEResponse.h"
-#import "SMESessionInfo.h"
+#import "SMEAccountInfo.h"
 #import "SMECategory.h"
 #import "SMESubCategory.h"
 #import "SMEImageURLs.h"
@@ -216,7 +216,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
 -(SMEResponse *)transformLoginRequest:(SMEMethodRequest *)req {
 	SMEResponse* resp = [SMEResponse responseWithCompletedRequest:req decoder:[self decoder]];
-	SMESessionInfo *info = (SMESessionInfo *)[SMESessionInfo dataWithSourceData:[[resp decodedResponse] objectForKey:@"Login"]];
+	SMEAccountInfo *info = (SMEAccountInfo *)[SMEAccountInfo dataWithSourceData:[[resp decodedResponse] objectForKey:@"Login"]];
 	[resp setSMData:info];
 	
 	// the only state of a session
@@ -446,23 +446,14 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 #pragma mark Upload
--(void)uploadImageData:(NSData *)imageData
-			  filename:(NSString *)filename
-				 album:(SMEAlbumRef *)albumRef
-			  caption:(NSString *)caption
-			  keywords:(NSArray *)keywords
-			  observer:(NSObject<SMEUploadObserver>*)anObserver {
+-(void)uploadImage:(SMEImage *)theImage
+		 intoAlbum:(SMEAlbumRef *)albumRef
+		  observer:(NSObject<SMEUploadObserver> *)anObserver {
 	
 	SMEUploadRequest *uploadRequest = [SMEUploadRequest uploadRequest];
 	[self setLastUploadRequest:uploadRequest];
 	observer = anObserver; // delegate non-retaining semantics to avoid retain cycles
-	[uploadRequest uploadImageData:imageData
-						  filename:filename
-						 sessionId:[self sessionID]
-							 album:albumRef
-						  caption:caption
-						  keywords:keywords
-						  observer:self];
+	[uploadRequest uploadImage:theImage withSession:self intoAlbum:albumRef observer:self];
 }
 
 -(NSObject<SMEUploadObserver>*)observer {
@@ -477,7 +468,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 
 -(void)uploadMadeProgress:(SMEUploadRequest *)request bytesWritten:(long)numberOfBytes ofTotalBytes:(long)totalBytes {
 	[self performSelectorOnMainThread:@selector(notifyDelegateOfProgress:) 
-						   withObject:[NSArray arrayWithObjects:[request imageData], [NSNumber numberWithLong:numberOfBytes], [NSNumber numberWithLong:totalBytes], nil]
+						   withObject:[NSArray arrayWithObjects:[request image] , [NSNumber numberWithLong:numberOfBytes], [NSNumber numberWithLong:totalBytes], nil]
 						waitUntilDone:NO];
 }
 
@@ -495,9 +486,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)notifyDelegateOfUploadSuccess:(SMEResponse *)resp {
-	[[self observer] uploadDidComplete:resp 
-							  filename:[[self lastUploadRequest] filename] 
-								 data:[[self lastUploadRequest] imageData]];
+	[[self observer] uploadDidComplete:resp
+								 image:[[self lastUploadRequest] image]];
 }
 
 -(void)uploadComplete:(SMEUploadRequest *)request {

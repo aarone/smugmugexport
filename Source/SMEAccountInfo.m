@@ -6,10 +6,10 @@
 //  Copyright 2008 Aaron Evans. All rights reserved.
 //
 
-#import "SMESessionInfo.h"
+#import "SMEAccountInfo.h"
 
 
-@implementation SMESessionInfo
+@implementation SMEAccountInfo
 
 -(NSDictionary *)userInfo {
 	return [[self sourceData] objectForKey:@"User"];
@@ -27,7 +27,7 @@
 	return [[[self sourceData] objectForKey:@"FileSizeLimit"] intValue];
 }
 
--(BOOL)smugVault {
+-(BOOL)hasVaultEnabled {
 	return [[[self sourceData] objectForKey:@"SmugVault"] boolValue];
 }
 

@@ -18,8 +18,8 @@
 -(NSURLConnection *)connection;
 -(void)setConnection:(NSURLConnection *)c;
 
--(NSMutableData *)responseData;
--(void)setResponseData:(NSMutableData *)data;
+-(NSMutableData *)mutableResponseData;
+-(void)setMutableResponseData:(NSMutableData *)data;
 
 -(SEL)callback;
 -(void)setCallback:(SEL)c;
@@ -76,7 +76,7 @@
 	[[self httpResponse] release];
 	[[self connection] release];
 	[[self error] release];
-	[[self responseData] release];
+	[[self mutableResponseData] release];
 	[[self requestUrl] release];
 	[[self requestDict] release];
 	[[self target] release];
@@ -106,19 +106,19 @@
 	}
 }
 
--(NSMutableData *)responseData {
-	return responseData;
+-(NSMutableData *)mutableResponseData {
+	return mutableResponseData;
 }
 
--(void)setResponse:(NSMutableData *)data {
-	if(responseData != data) {
-		[responseData release];
-		responseData = [data retain];	
+-(void)setMutableResponseData:(NSMutableData *)data {
+	if(mutableResponseData != data) {
+		[mutableResponseData release];
+		mutableResponseData = [data retain];	
 	}
 }
 
 -(void)appendToResponse:(NSData *)data {
-	[[self responseData] appendData:data];
+	[[self mutableResponseData] appendData:data];
 }
 
 -(NSURLConnection *)connection {
@@ -199,7 +199,7 @@
 	}
 	
 	NSURLRequest *req = [NSURLRequest smRequestWithURL:url];
-	[self setResponse:[NSMutableData data]];
+	[self setMutableResponseData:[NSMutableData data]];
 	[self setError:nil];
 	[self setWasSuccessful:NO];
 	
@@ -242,7 +242,7 @@
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)aResponse {
-	[[self responseData] setLength:0]; // reset
+	[[self mutableResponseData] setLength:0]; // reset
 	[self setHttpResponse:(NSHTTPURLResponse *)aResponse];
 }
 
@@ -266,7 +266,7 @@
 	}
 	
 	if(IsNetworkTracingEnabled()) {
-		NSString *responseAsString = [[[NSString alloc] initWithData:[self responseData]
+		NSString *responseAsString = [[[NSString alloc] initWithData:[self mutableResponseData]
 															encoding:NSUTF8StringEncoding] autorelease];
 		NSLog(@"response: %@", responseAsString);
 	}
@@ -286,8 +286,8 @@
 	[self setConnectionIsOpen:NO];
 }
 
--(NSData *)data {
-	return [NSData dataWithData:[self responseData]];
+-(NSData *)responseData {
+	return [NSData dataWithData:[self mutableResponseData]];
 }
 
 @end

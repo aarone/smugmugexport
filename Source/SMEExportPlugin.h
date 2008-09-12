@@ -6,12 +6,15 @@
 //  Copyright 2006 Aaron Evans. All rights reserved.
 //
 
+
 #import <Cocoa/Cocoa.h>
 #import <Growl/Growl.h>
+#import <WebKit/WebKit.h>
+
 #import "ExportPluginProtocol.h"
 #import "SMESession.h"
 
-@class SMESession, ExportMgr, SMEAccountManager, SMEAlbumEditController, SMESessionInfo, SMEGrowlDelegate;
+@class SMESession, ExportMgr, SMEAccountManager, SMEAlbumEditController, SMEAccountInfo, SMEGrowlDelegate, SMEAccountInfo;
 @protocol ExportPluginProtocol, SMESessionDelegate;
 
 @interface SMEExportPlugin : NSObject <ExportPluginProtocol, SMEUploadObserver> {
@@ -25,7 +28,8 @@
 	IBOutlet NSArrayController *albumsArrayController;
 	IBOutlet NSPanel *newAlbumSheet;
 	IBOutlet NSPanel *preferencesPanel;
-	IBOutlet NSTableView *albumsTableView; 
+	IBOutlet NSTableView *albumsTableView;
+	IBOutlet WebView *vaultLink;
 	
 	NSString *username;  // this is the username bound to the textfield, account manager holds the real username
 	NSString *password; // same goes for password..
@@ -46,7 +50,7 @@
 	NSArray *albums;
 	NSArray *categories;
 	NSArray *subcategories;
-	SMESessionInfo *sessionInfo;
+	SMEAccountInfo *accountInfo;
 	
 	NSInvocation *postLogoutInvocation; // do this after a logout is complete
 

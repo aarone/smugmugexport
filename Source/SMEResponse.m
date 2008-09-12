@@ -30,7 +30,7 @@ NSString *SMESmugMugErrorDomain = nil;
 		
 	@try {
 		if([req wasSuccessful]) {
-			decodedResponse = IsEmpty([req data]) ? nil : [[self decodeResponse:[req data] decoder:aDecoder] retain];
+			decodedResponse = IsEmpty([req responseData]) ? nil : [[self decodeResponse:[req responseData] decoder:aDecoder] retain];
 			[self setError:[self smugmugError]]; // may be nil which is ok
 		} else {
 			[self setError:[req error]]; // an underlying communication error
