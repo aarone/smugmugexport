@@ -16,12 +16,6 @@ extern NSString *SMSelectedScalingTag;
 // use image keywords as smugmug tags?
 extern NSString *SMUseKeywordsAsTags; 
 
-// max width for images if scaling is enabled
-extern NSString *SMImageScaleWidth; 
-
-// max height for images if scaling is enabled
-extern NSString *SMImageScaleHeight; 
-
 // show an alert before deleting an album
 extern NSString *SMShowAlbumDeleteAlert;
 

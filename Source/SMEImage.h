@@ -14,22 +14,20 @@
 	NSString *caption;
 	NSArray *keywords;
 	NSData *imageData;
-	
-	BOOL shouldConvertToJpeg;
-	
-	unsigned int maxDimension;
-	BOOL shouldScale;
+	NSString *thumbnailPath;
 }
 
 -(id)initWithTitle:(NSString *)aTitle 
 		   caption:(NSString *)aCaption
 		  keywords:(NSArray *)theKeywords
-		 imageData:(NSData *)theData;
+		 imageData:(NSData *)theData
+	 thumbnailPath:(NSString *)pathToThumbnail;
 
 +(SMEImage *)imageWithTitle:(NSString *)aTitle
 					caption:(NSString *)aCaption
 				   keywords:(NSArray *)theKeywords
-				  imageData:(NSData *)theData;
+				  imageData:(NSData *)theData
+			  thumbnailPath:(NSString *)pathToThumbnail;
 
 -(NSString *)title;
 -(void)setTitle:(NSString *)aTitle;
@@ -42,5 +40,9 @@
 
 -(NSData *)imageData;
 -(void)setImageData:(NSData *)theData;
+
+-(NSString *)thumbnailPath;
+-(void)setThumbnailPath:(NSString *)pathToThumbnail;
+-(NSData *)thumbnail;
 
 @end

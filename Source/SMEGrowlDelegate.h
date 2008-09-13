@@ -8,6 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class SMEImage;
 
 @interface SMEGrowlDelegate : NSObject<GrowlApplicationBridgeDelegate> {
 
@@ -15,7 +16,7 @@
 
 +(SMEGrowlDelegate *)growlDelegate;
 
--(void)notifyImageUploaded:(NSString *)imageFilename image:(NSData *)image;
+-(void)notifyImageUploaded:(SMEImage *)anImage;
 -(void)notifyLogin:(NSString *)account;
 -(void)notifyLougout:(NSString *)account;
 -(void)notifyUploadCompleted:(int)imagesUploaded uploadSiteUrl:(NSString *)siteUrl;

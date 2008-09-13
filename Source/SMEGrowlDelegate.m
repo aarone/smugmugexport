@@ -9,6 +9,7 @@
 #import <Growl/Growl.h>
 #import "SMEGrowlDelegate.h"
 #import "SMEBitmapImageRepAdditions.h"
+#import "SMEImage.h"
 
 // Growl Notification Keys
 NSString *SMGrowlUploadCompleted = nil;
@@ -37,11 +38,11 @@ NSString *SMGrowlLogout = nil;
 
 +(void)initializeLocalizableStrings {	
 	// Growl stuff
-	SMGrowlUploadCompleted = NSLocalizedString(@"Upload Completed", @"Upload completed growl notification name");
-	SMGrowlUploadError = NSLocalizedString(@"Upload Error", @"Upload error growl notification name");
-	SMGrowlImageUploaded = NSLocalizedString(@"Image Uploaded", @"Image uploaded growl notification name");
-	SMGrowlLogin = NSLocalizedString(@"Logged In", @"Logged in growl notification name");
-	SMGrowlLogout = NSLocalizedString(@"Logged Out", @"Logged out growl notification name");
+	SMGrowlUploadCompleted = NSLocalizedString(@" Upload Completed", @"Upload completed growl notification name");
+	SMGrowlUploadError = NSLocalizedString(@" Upload Error", @"Upload error growl notification name");
+	SMGrowlImageUploaded = NSLocalizedString(@" Image Uploaded", @"Image uploaded growl notification name");
+	SMGrowlLogin = NSLocalizedString(@" Logged In", @"Logged in growl notification name");
+	SMGrowlLogout = NSLocalizedString(@" Logged Out", @"Logged out growl notification name");
 }
 
 -(NSDictionary *)registrationDictionaryForGrowl {
@@ -82,16 +83,11 @@ NSString *SMGrowlLogout = nil;
 -(void)growlNotificationTimedOut:(id)clickContext {
 }
 
--(NSData *)notificationThumbnail:(NSData *)fullsizeImageData {
-	NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc] initWithData:fullsizeImageData] autorelease];
-	return [rep scaledRepToMaxWidth:120 maxHeight:120];	
-}
-
--(void)notifyImageUploaded:(NSString *)imageFilename image:(NSData *)image{	
+-(void)notifyImageUploaded:(SMEImage *)anImage {	
 	[GrowlApplicationBridge notifyWithTitle:NSLocalizedString(@"Image Uploaded", @"Growl notification title for image uploaded event")
-								description:imageFilename
+								description:[anImage title]
 						   notificationName:SMGrowlImageUploaded
-								   iconData:[self notificationThumbnail:image]
+								   iconData:[anImage thumbnail]
 								   priority:0
 								   isSticky:NO
 							   clickContext:nil];

@@ -157,7 +157,7 @@
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful;
 
 -(BOOL)isIPhoto7;
--(NSData *)sourceDataAtPath:(NSString *)pathToImage isMovie:(BOOL)isMovie errorString:(NSString **)err;
+-(NSData *)sourceDataAtPath:(NSString *)pathToImage shouldScale:(BOOL)shouldScale errorString:(NSString **)err;
 -(NSString *)formatCaptionWithTitle:(NSString *)title caption:(NSString *)caption;
 -(SMEImage *)nextImage;
 -(void)uploadNextImage;
@@ -200,6 +200,7 @@ NSString *SMSelectedScalingTag = @"SMSelectedScalingTag";
 NSString *SMUseKeywordsAsTags = @"SMUseKeywordsAsTags";
 NSString *SMImageScaleWidth = @"SMImageScaleWidth";
 NSString *SMImageScaleHeight = @"SMImageScaleHeight";
+NSString *SMImageScaleMaxDimension = @"SMImageScaleMaxDimension";
 NSString *SMShowAlbumDeleteAlert = @"SMShowAlbumDeleteAlert";
 NSString *SMEnableNetworkTracing = @"SMEnableNetworkTracing";
 NSString *SMEnableAlbumFetchDelay = @"SMEnableAlbumFetchDelay";
@@ -218,6 +219,8 @@ NSString *SMEUploadToVault = @"SMEUploadToVault";
 static const int AlbumUrlFetchRetryCount = 5;
 static const int SMDefaultScaledHeight = 2592;
 static const int SMDefaultScaledWidth = 2592;
+static const int SMDefaultScaledMaxDimension = 2592;
+
 static const NSTimeInterval SMDefaultUpdateCheckInterval = 24.0*60.0*60.0;
 
 NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/versionInfo.plist";
@@ -304,6 +307,23 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	[defaultsDict setObject:[NSNumber numberWithInt:0] forKey:SMSelectedScalingTag];
 	[defaultsDict setObject:[NSNumber numberWithInt: SMDefaultScaledWidth] forKey:SMImageScaleWidth];
 	[defaultsDict setObject:[NSNumber numberWithInt: SMDefaultScaledHeight] forKey:SMImageScaleHeight];
+	
+	NSNumber *currentWidthPref = [[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleWidth];
+	NSNumber *currentHeightPref = [[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleHeight];
+
+	/* 
+	 * Width and height prefs have been replaced by a single dimension and if the user has previously used
+	 * a width or height preference, we try to migrate that dimension as the new default max dimension.
+	 */
+	unsigned int defaultWidthDim = SMDefaultScaledMaxDimension;
+	if(currentWidthPref != nil && currentHeightPref != nil)
+		defaultWidthDim = MIN([currentWidthPref intValue], [currentHeightPref intValue]);
+	else if(currentWidthPref != nil)
+		defaultWidthDim = [currentWidthPref intValue];
+	else if(currentHeightPref != nil)
+		defaultWidthDim = [currentHeightPref intValue];
+	[defaultsDict setObject:[NSNumber numberWithInt:defaultWidthDim] forKey:SMImageScaleMaxDimension];
+	
 	[defaultsDict setObject:defaultRemoteVersionInfo forKey:SMRemoteInfoURL];
 	[defaultsDict setObject:yes forKey:SMCheckForUpdates];
 	[defaultsDict setObject:SMUploadedFilenameOptionFilename forKey:SMUploadedFilename];
@@ -325,12 +345,12 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 -(void)awakeFromNib {
 	[albumsTableView setTarget:self];
 	[albumsTableView setDoubleAction:@selector(showEditAlbumSheet:)];
-
+	
 	if([vaultLink respondsToSelector:@selector(setDrawsBackground:)])
 		[vaultLink setDrawsBackground:NO];
 	[[[vaultLink mainFrame] frameView] setAllowsScrolling:NO];
 	[vaultLink setFrameLoadDelegate:self];
-	[[vaultLink mainFrame] loadHTMLString:@"(Requires <a href=\"http://www.smugmug.com/price/smugvault.mg\">SmugVault</a>)" baseURL:nil];
+	[[vaultLink mainFrame] loadHTMLString:NSLocalizedString(@"(Requires <a href=\"http://www.smugmug.com/price/smugvault.mg\">SmugVault</a>)", @"HTML fragment to ") baseURL:nil];
 }
 - (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame {
 	NSURL *url = [[[frame provisionalDataSource] request] URL];
@@ -1041,21 +1061,27 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	
 	NSString *nextFile = nil;
 	
-	BOOL sendToVault = [[self accountInfo] hasVaultEnabled] &&
-		[[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEUploadToVault] boolValue];
 	
-	// if it's a movie or we're sending to vault, get the original source data
-	if([[self exportManager] originalIsMovieAtIndex:[self imagesUploaded]] || sendToVault) {
-		// get the movie:
+	/* send to vault if
+		1) vault is turned on for the account
+		2) vault upload preference is set in the plugin 
+		3) the image is a RAW image or a movie
+	 */
+	BOOL sendToVault = [[self accountInfo] hasVaultEnabled] &&
+		[[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEUploadToVault] boolValue] &&
+		( [[self exportManager] originalIsRawAtIndex:[self imagesUploaded]] ||
+		 [[self exportManager] originalIsMovieAtIndex:[self imagesUploaded]] );
+	
+	// if we're sending to vault, get the original source data
+	if(sendToVault)
 		nextFile = [[self exportManager] sourcePathAtIndex:[self imagesUploaded]];
-	} else { // get jpeg equivalent
+	else // get jpeg equivalent
 		nextFile = [[self exportManager] imagePathAtIndex:[self imagesUploaded]];
-	}
 	
 	NSString *error = nil;
-	NSData *srcData = [self sourceDataAtPath:nextFile 
-									 isMovie:[[self exportManager] originalIsMovieAtIndex:[self imagesUploaded]]
-								 errorString:&error];	
+	NSData *srcData = [self sourceDataAtPath:nextFile
+								 shouldScale:!sendToVault
+								 errorString:&error];
 	if(srcData == nil) {
 		if([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMContinueUploadOnFileIOError] boolValue]) {
 			NSLog(@"Error reading image data for image: %@. The image will be skipped.", nextFile);
@@ -1077,10 +1103,12 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	NSString *title = [selectedUploadFilenameOption isEqualToString:SMUploadedFilenameOptionTitle] ?
 		iPhotoTitle:[nextFile lastPathComponent];	
 	NSString *caption = [self formatCaptionWithTitle:title caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
-	return [SMEImage imageWithTitle:title 
-							caption:caption 
+	
+	return [SMEImage imageWithTitle:title
+							caption:caption
 						   keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]
-						  imageData:srcData];	
+						  imageData:srcData
+					  thumbnailPath:[[self exportManager] thumbnailPathAtIndex:[self imagesUploaded]]];
 }
 
 -(void)startUpload {
@@ -1124,8 +1152,8 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 					   observer:self];
 }
 
--(NSData *)sourceDataAtPath:(NSString *)pathToImage isMovie:(BOOL)isMovie errorString:(NSString **)err {
-			
+-(NSData *)sourceDataAtPath:(NSString *)pathToImage shouldScale:(BOOL)shouldScale errorString:(NSString **)err {
+	
 	NSError *error = nil;
 	NSData *imgData = [NSData dataWithContentsOfFile:pathToImage options:0 error:&error];
 	if(imgData == nil) {
@@ -1133,33 +1161,28 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 		return nil;
 	}
 
-	if(isMovie) {
-		// return source data if the uploaded item is a movie
+	if(!shouldScale) {
+		// return source data if the uploaded item is a movie or raw image and we shouldn't try to
+		// scale it
 		return imgData;
 	}
 	
 	if(!ShouldScaleImages())
 		return imgData;
 	
-	unsigned int maxWidth = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleWidth] intValue];
-	unsigned int maxHeight = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleHeight] intValue];
+	unsigned int maxDimension = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleMaxDimension] intValue];
 	
 	// allow no input and treat it like infinity
-	if(maxWidth == 0)
-		maxWidth = INT_MAX;
-	if(maxHeight == 0)
-		maxHeight = INT_MAX;
+	if(maxDimension == 0)
+		maxDimension = INT_MAX;
 	
 	NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc] initWithData:imgData] autorelease];
-	
+
 	// scale
-	if([rep pixelsWide] > maxWidth || [rep pixelsHigh] > maxHeight)
-		return [rep scaledRepToMaxWidth:maxWidth maxHeight:maxHeight];
+	if([rep pixelsWide] > maxDimension || [rep pixelsHigh] > maxDimension)
+		return [rep scaledRepToMaxWidth:maxDimension maxHeight:maxDimension];
 	
 	// no scale
-	return imgData;
-	
-	// the default operation
 	return imgData;
 }
 
@@ -1268,7 +1291,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 		[[self session] fetchImageURLs:ref withTarget:self callback:@selector(imageUrlFetchDidCompleteForImageRef:)];
 	}
 
-	[[self growlDelegate] notifyImageUploaded:[theImage title] image:[theImage imageData]];
+	[[self growlDelegate] notifyImageUploaded:theImage];
 	[self uploadNextImage];
 }
 

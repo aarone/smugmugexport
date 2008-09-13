@@ -13,7 +13,9 @@
 -(id)initWithTitle:(NSString *)aTitle 
 		   caption:(NSString *)aCaption
 		  keywords:(NSArray *)theKeywords
-		 imageData:(NSData *)theData {
+		 imageData:(NSData *)theData
+	 thumbnailPath:(NSString *)pathToThumbnail {
+	
 	if( nil == (self = [super init]))
 		return nil;
 	
@@ -21,15 +23,17 @@
 	[self setCaption:aCaption];
 	[self setKeywords:theKeywords];
 	[self setImageData:theData];
-	
+	[self setThumbnailPath:pathToThumbnail];
+		
 	return self;	
 }
 
 +(SMEImage *)imageWithTitle:(NSString *)aTitle
 					caption:(NSString *)aCaption
 				   keywords:(NSArray *)theKeywords
-				  imageData:(NSData *)theData {
-	return [[[[self class] alloc] initWithTitle:aTitle caption:aCaption keywords:theKeywords imageData:theData] autorelease];
+				  imageData:(NSData *)theData 
+			  thumbnailPath:(NSString *)pathToThumbnail {
+	return [[[[self class] alloc] initWithTitle:aTitle caption:aCaption keywords:theKeywords imageData:theData thumbnailPath:pathToThumbnail] autorelease];
 }
 
 -(void)dealloc {
@@ -37,6 +41,7 @@
 	[self setCaption:nil];
 	[self setKeywords:nil];
 	[self setImageData:nil];
+	[self setThumbnailPath:nil];
 	
 	[super dealloc];
 }
@@ -83,6 +88,21 @@
 		[imageData release];
 		imageData = [theData retain];
 	}
+}
+
+-(NSString *)thumbnailPath {
+	return thumbnailPath;
+}
+
+-(void)setThumbnailPath:(NSString *)pathToThumbnail {
+	if(thumbnailPath != pathToThumbnail) {
+		[thumbnailPath release];
+		thumbnailPath = [pathToThumbnail retain];
+	}
+}
+
+-(NSData *)thumbnail {
+	return [NSData dataWithContentsOfFile:thumbnailPath];
 }
 
 @end
