@@ -7,7 +7,6 @@
 //
 
 #import "SMEExportPlugin.h"
-#import "SMESession.h"
 #import "ExportPluginProtocol.h"
 #import "ExportMgr.h"
 #import "SMEAlbumEditController.h"
@@ -17,15 +16,8 @@
 #import "SMEUserDefaultsAdditions.h"
 #import "SMEDataAdditions.h"
 #import "SMEStringAdditions.h"
-#import "SMEMethodRequest.h"
-#import "SMEAlbum.h"
-#import "SMEAccountInfo.h"
-#import "SMEResponse.h"
-#import "SMESubCategory.h"
-#import "SMECategory.h"
-#import "SMEImage.h"
-#import "SMEImageURLs.h"
 #import "SMEGrowlDelegate.h"
+#import "SMESmugMugCore.h"
 
 @interface WebView (WebKitStuffThatIsntPublic)
 -(void)setDrawsBackground:(BOOL)drawsBackground;
@@ -304,7 +296,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	[defaultsDict setObject:no forKey:SMEnableNetworkTracing];
 	[defaultsDict setObject:yes forKey:SMEnableAlbumFetchDelay];
 	[defaultsDict setObject:[NSNumber numberWithFloat:[NSBitmapImageRep defaultJpegScalingFactor]] forKey:SMJpegQualityFactor];
-	[defaultsDict setObject:[NSNumber numberWithInt:0] forKey:SMSelectedScalingTag];
+	[defaultsDict setObject:[NSNumber numberWithBool:NO] forKey:SMSelectedScalingTag];
 	[defaultsDict setObject:[NSNumber numberWithInt: SMDefaultScaledWidth] forKey:SMImageScaleWidth];
 	[defaultsDict setObject:[NSNumber numberWithInt: SMDefaultScaledHeight] forKey:SMImageScaleHeight];
 	
@@ -1167,7 +1159,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 		return imgData;
 	}
 	
-	if(!ShouldScaleImages())
+	if([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMSelectedScalingTag] boolValue])
 		return imgData;
 	
 	unsigned int maxDimension = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleMaxDimension] intValue];

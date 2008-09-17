@@ -33,23 +33,4 @@ extern NSString *SMUploadedFilenameOptionFilename;
 extern NSString *SMUploadedFilenameOptionTitle;
 
 
-// conveinent macros
-#define ShouldScaleImages() ([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMSelectedScalingTag] intValue] != 0)
-#define IsNetworkTracingEnabled() ([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEnableNetworkTracing] boolValue])
-#define EnableAlbumFetchDelay() ([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEnableAlbumFetchDelay] boolValue])
 
-#define kCFBundleShortVersionStringKey @"CFBundleShortVersionString"
-
-#define THUMBNAIL_NOT_FOUND_ERROR_CODE 5
-#define IMAGE_NOT_FOUND_ERROR_CODE 6
-#define IMAGE_EDIT_SYSTEM_ERROR_CODE 5
-
-#define SMUGMUG_VERSION_CHECK_ERROR 7
-
-static inline BOOL IsEmpty(id thing) {
-    return thing == nil
-	|| ([thing respondsToSelector:@selector(length)]
-        && [(NSData *)thing length] == 0)
-	|| ([thing respondsToSelector:@selector(count)]
-        && [(NSArray *)thing count] == 0);
-}
