@@ -15,7 +15,7 @@
 #import "SMEBitmapImageRepAdditions.h"
 #import "SMEUserDefaultsAdditions.h"
 #import "SMEDataAdditions.h"
-#import "SMEStringAdditions.h"
+
 #import "SMEGrowlDelegate.h"
 #import "SMESmugMugCore.h"
 
@@ -1170,9 +1170,10 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	
 	NSBitmapImageRep *rep = [[[NSBitmapImageRep alloc] initWithData:imgData] autorelease];
 
+	NSNumber *scalingFactor = [[NSUserDefaults smugMugUserDefaults] objectForKey:SMJpegQualityFactor];
 	// scale
 	if([rep pixelsWide] > maxDimension || [rep pixelsHigh] > maxDimension)
-		return [rep scaledRepToMaxWidth:maxDimension maxHeight:maxDimension];
+		return [rep scaledRepToMaxWidth:maxDimension maxHeight:maxDimension scaleFactor:[scalingFactor floatValue]];
 	
 	// no scale
 	return imgData;

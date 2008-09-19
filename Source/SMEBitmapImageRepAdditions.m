@@ -7,16 +7,11 @@
 //
 
 #import "SMEBitmapImageRepAdditions.h"
-#import "SMEUserDefaultsAdditions.h"
-#import "SMEGlobals.h"
 
 static const float DefaultJpegScalingFactor = 0.9;
 
 /*
- * there are two problems with this category that I'd like to fix someday:
- *  1) it's only been tested with jpegs and only returns jpegs
- *  2) it accesses a default value for scaling quality that should probably be
- *     an argument to the methods
+ *  this has only been tested with jpegs and only returns jpegs; 
  */
 @implementation NSBitmapImageRep (SMEBitmapImageRepAdditions)
 
@@ -24,7 +19,7 @@ static const float DefaultJpegScalingFactor = 0.9;
 	return DefaultJpegScalingFactor;
 }
 
--(NSData *)scaledRepToMaxWidth:(float)maxWidth maxHeight:(float)maxHeight {
+-(NSData *)scaledRepToMaxWidth:(float)maxWidth maxHeight:(float)maxHeight scaleFactor:(float)defaultScalingFactor {
 	
 	int inputImageWidth = [self pixelsWide];
 	int inputImageHeight = [self pixelsHigh];
@@ -40,21 +35,21 @@ static const float DefaultJpegScalingFactor = 0.9;
 	}
 	
 	NSAssert(scaleFactor > 0.0 && scaleFactor <= 1.0, @"This is a bug.  The scaling factor should never be negative.");
-	return [self scaledRepToWidth:scaleFactor height:scaleFactor];	
+	return [self scaledRepToWidth:scaleFactor height:scaleFactor scaleFactor:defaultScalingFactor];	
 }
 
--(NSData *)scaledRepToWidth:(float)widthFactor height:(float)heightFactor {
+-(NSData *)scaledRepToWidth:(float)widthFactor height:(float)heightFactor scaleFactor:(float)scalingFactor {
 	
 	// we copy the properties that relate to jpegs
 	NSSet *propertiesToTransfer = [NSSet setWithObjects:NSImageEXIFData, NSImageColorSyncProfileData, 
 		NSImageProgressive, nil];
 	NSMutableDictionary *outgoingImageProperties = [NSMutableDictionary dictionary];
 	
-	NSNumber *scalingFactor = [[NSUserDefaults smugMugUserDefaults] objectForKey:SMJpegQualityFactor];
-	if(scalingFactor == nil || [scalingFactor floatValue] < 0 || [scalingFactor floatValue] > 1.0)
-		scalingFactor = [NSNumber numberWithFloat:DefaultJpegScalingFactor];
 	
-	[outgoingImageProperties setObject:scalingFactor forKey:NSImageCompressionFactor];
+	if(scalingFactor < 0 || scalingFactor > 1.0)
+		scalingFactor = DefaultJpegScalingFactor;
+	
+	[outgoingImageProperties setObject:[NSNumber numberWithFloat:scalingFactor] forKey:NSImageCompressionFactor];
 	NSEnumerator *propertyEnumerator = [propertiesToTransfer objectEnumerator];
 	id key;
 	while(key = [propertyEnumerator nextObject]) {

@@ -12,7 +12,7 @@
 @interface NSBitmapImageRep (SMEBitmapImageRepAdditions)
 
 +(float)defaultJpegScalingFactor;
--(NSData *)scaledRepToMaxWidth:(float)maxWidth maxHeight:(float)maxFactor;
--(NSData *)scaledRepToWidth:(float)widthFactor height:(float)heightFactor;
+-(NSData *)scaledRepToMaxWidth:(float)maxWidth maxHeight:(float)maxHeight scaleFactor:(float)scalingFactor;
+-(NSData *)scaledRepToWidth:(float)widthFactor height:(float)heightFactor scaleFactor:(float)scalingFactor;
 
 @end
