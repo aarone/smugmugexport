@@ -325,8 +325,8 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	[defaultsDict setObject:[NSNumber numberWithInt:SMDefaultUpdateCheckInterval] forKey:SMUpdateCheckInterval];
 	[defaultsDict setObject:no forKey:SMContinueUploadOnFileIOError];
 	[defaultsDict setObject:SMEDefaultCaptionFormat forKey:SMECaptionFormatString];
-	[defaultsDict setObject:[NSNumber numberWithBool:NO] forKey:SMEUploadToVault];
-		
+	[defaultsDict setObject:no forKey:SMEUploadToVault];
+	
 	[[NSUserDefaults smugMugUserDefaults] registerDefaults:defaultsDict];
 	
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.accounts"] triggerChangeNotificationsForDependentKey:@"accounts"];
@@ -1064,8 +1064,8 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 		( [[self exportManager] originalIsRawAtIndex:[self imagesUploaded]] ||
 		 [[self exportManager] originalIsMovieAtIndex:[self imagesUploaded]] );
 	
-	// if we're sending to vault, get the original source data
-	if(sendToVault)
+	// if we're sending to vault or it's a movie, get the original source data
+	if(sendToVault || [[self exportManager] originalIsMovieAtIndex:[self imagesUploaded]])
 		nextFile = [[self exportManager] sourcePathAtIndex:[self imagesUploaded]];
 	else // get jpeg equivalent
 		nextFile = [[self exportManager] imagePathAtIndex:[self imagesUploaded]];
