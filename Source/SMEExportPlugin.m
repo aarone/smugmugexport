@@ -82,6 +82,9 @@
 -(BOOL)isUpdateInProgress;
 -(void)setIsUpdateInProgress:(BOOL)v;
 
+-(BOOL)isLoginSheetDismissed;
+-(void)setIsLoginSheetDismissed:(BOOL)v;
+
 -(SMEAccountManager *)accountManager;
 -(void)setAccountManager:(SMEAccountManager *)mgr;
 
@@ -226,6 +229,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	
 	exportManager = exportMgr;
 	[self loadJSON];
+	[self setIsLoginSheetDismissed:NO];
 	[self setGrowlDelegate:[SMEGrowlDelegate growlDelegate]];
 	[self loadGrowl];
 
@@ -280,6 +284,12 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 }
 
 +(void)initialize {
+	
+	//	return ![[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEUploadToVault] boolValue] ||	![[self accountInfo] hasVaultEnabled];
+	// - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+	[self setKeys:[NSArray arrayWithObjects:@"accountInfo", nil]
+		triggerChangeNotificationsForDependentKey:@"isScalingUIEnabled"];
+	
 	[self initializeLocalizableStrings];
 	
 	NSNumber *no = [NSNumber numberWithBool:NO];
@@ -334,7 +344,20 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	
 }
 
+- (void)observeValueForKeyPath:(NSString *)keyPath
+					  ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context {
+	[self willChangeValueForKey:@"isScalingUIEnabled"];
+	[self didChangeValueForKey:@"isScalingUIEnabled"];	
+}
+
 -(void)awakeFromNib {
+	[self addObserver:self 
+		   forKeyPath:@"defaults.SMEUploadToVault"
+			  options:NSKeyValueObservingOptionNew
+			  context:NULL];
+	
 	[albumsTableView setTarget:self];
 	[albumsTableView setDoubleAction:@selector(showEditAlbumSheet:)];
 	
@@ -342,11 +365,26 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 		[vaultLink setDrawsBackground:NO];
 	[[[vaultLink mainFrame] frameView] setAllowsScrolling:NO];
 	[vaultLink setFrameLoadDelegate:self];
-	[[vaultLink mainFrame] loadHTMLString:NSLocalizedString(@"(Requires <a href=\"http://www.smugmug.com/price/smugvault.mg\">SmugVault</a>)", @"HTML fragment to ") baseURL:nil];
+	WebPreferences *prefs = [WebPreferences standardPreferences];
+	[prefs setSansSerifFontFamily:@"Lucida Grande"];
+	[prefs setStandardFontFamily:@"Lucida Grande"];
+	[prefs setDefaultFontSize:13];
+	[vaultLink setPreferences:prefs];
+	[[vaultLink mainFrame] loadHTMLString:NSLocalizedString(@"(Requires <a href=\"http://www.smugmug.com/price/smugvault.mg\">SmugVault</a>)", @"HTML fragment to display when user doesn't have SmugVault.") baseURL:nil];
 }
+
+
+
 - (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame {
 	NSURL *url = [[[frame provisionalDataSource] request] URL];
 	[[NSWorkspace sharedWorkspace] openURL:url];
+}
+
+/* when we have multiple accounts, we only want to disable the scaling UI if the user has vault enabled
+  and their account supports it.  */
+-(BOOL)isScalingUIEnabled {
+	return ![[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEUploadToVault] boolValue] ||
+		![[self accountInfo] hasVaultEnabled];
 }
 
 -(BOOL)sheetIsDisplayed {
@@ -586,6 +624,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	 * Show the login window if we're not logged in and there is no way to autologin
 	 */
 	if(![self isLoggedIn] && 
+	   ![self isLoginSheetDismissed] &&
 	   ![[self accountManager] canAttemptAutoLogin]) {
 		
 		// show the login panel after some delay
@@ -657,6 +696,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	
 	[self setLoginSheetStatusMessage:@""];
 	[self setIsLoggingIn:NO];
+	[self setIsLoginSheetDismissed:YES];
 	[NSApp endSheet:loginPanel];
 }
 
@@ -698,7 +738,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 			[self presentError:[response error]];
 		}
 		
-		[self setAccountInfo:nil];
+		//[self setAccountInfo:nil];
 		return NO;
 	}
 	
@@ -1558,6 +1598,14 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 
 -(id)name {
     return [[[self thisBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"];
+}
+
+-(BOOL)isLoginSheetDismissed {
+	return isLoginSheetDismissed;
+}
+
+-(void)setIsLoginSheetDismissed:(BOOL)v {
+	isLoginSheetDismissed = v;
 }
 
 -(NSString *)username {

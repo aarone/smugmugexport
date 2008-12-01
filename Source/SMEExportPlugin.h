@@ -58,6 +58,7 @@
 	BOOL isUploading;
 	BOOL isBusy;
 	BOOL loginAttempted;
+	BOOL isLoginSheetDismissed;
 	BOOL uploadCancelled;
 	BOOL errorAlertSheetIsVisisble;
 	BOOL siteUrlHasBeenFetched;

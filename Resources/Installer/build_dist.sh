@@ -16,6 +16,7 @@ CONFIG=Release
 echo "Building SmugMug Release"
 xcodebuild -project ${PROJ}  -target=${DISPLAY_NAME} -configuration=${CONFIG} &&
 echo "Building Distribution from build"
+set -x
 sudo rm -Rf $DST${PKG} &&
 sudo $PKG_MAKER --doc $DOC -o ${DST}${PKG} --id ${SM_ID} --version ${VERSION} --title ${DISPLAY_NAME} &&
 cd ${DST} &&

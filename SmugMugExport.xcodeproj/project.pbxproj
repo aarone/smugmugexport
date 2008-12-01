@@ -32,6 +32,7 @@
 		93459D860E8121F2001A5E0B /* SMESubCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 93459D750E8121F2001A5E0B /* SMESubCategory.m */; };
 		93459D870E8121F2001A5E0B /* SMEUploadRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 93459D780E8121F2001A5E0B /* SMEUploadRequest.m */; };
 		935A1A870C1CC2CC00043E12 /* SMEUserDefaultsAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 935A1A850C1CC2CC00043E12 /* SMEUserDefaultsAdditions.m */; };
+		9367FD4A0EE3597C004110B1 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9367FD490EE3597C004110B1 /* WebKit.framework */; };
 		937FE0B70E80926F00D2F5CE /* SMEDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 937FE0B00E80926F00D2F5CE /* SMEDataAdditions.m */; };
 		939FDC8D0E2A5FB6001D6B9B /* SMEGrowlDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 939FDC8B0E2A5FB6001D6B9B /* SMEGrowlDelegate.m */; };
 		93BD6F2F0AD84AAC007CE525 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
@@ -120,6 +121,7 @@
 		93459D780E8121F2001A5E0B /* SMEUploadRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEUploadRequest.m; path = ../../SmugMugCore/releases/1.0.0/SMEUploadRequest.m; sourceTree = SOURCE_ROOT; };
 		935A1A840C1CC2CC00043E12 /* SMEUserDefaultsAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEUserDefaultsAdditions.h; path = Source/SMEUserDefaultsAdditions.h; sourceTree = "<group>"; };
 		935A1A850C1CC2CC00043E12 /* SMEUserDefaultsAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEUserDefaultsAdditions.m; path = Source/SMEUserDefaultsAdditions.m; sourceTree = "<group>"; };
+		9367FD490EE3597C004110B1 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = /System/Library/Frameworks/WebKit.framework; sourceTree = "<absolute>"; };
 		937FE0AF0E80926F00D2F5CE /* SMEDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEDataAdditions.h; path = ../../Common/SMEDataAdditions.h; sourceTree = SOURCE_ROOT; };
 		937FE0B00E80926F00D2F5CE /* SMEDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEDataAdditions.m; path = ../../Common/SMEDataAdditions.m; sourceTree = SOURCE_ROOT; };
 		939FDC8B0E2A5FB6001D6B9B /* SMEGrowlDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEGrowlDelegate.m; path = Source/SMEGrowlDelegate.m; sourceTree = "<group>"; };
@@ -143,6 +145,7 @@
 				93BD6F2F0AD84AAC007CE525 /* Cocoa.framework in Frameworks */,
 				930DE5F30B4831D2008120ED /* Security.framework in Frameworks */,
 				930961BB0C66A164002B8DAA /* libcrypto.dylib in Frameworks */,
+				9367FD4A0EE3597C004110B1 /* WebKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -204,6 +207,7 @@
 		1058C7ACFEA557BF11CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9367FD490EE3597C004110B1 /* WebKit.framework */,
 				93188D970DE9D5C600DBC3FC /* SenTestingKit.framework */,
 				93DE06380DE98DD60029F0FA /* JSON.framework */,
 				93CE121E0D5504A800C96591 /* Growl.framework */,
@@ -452,7 +456,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
@@ -499,7 +503,7 @@
 					ppc,
 				);
 				COPY_PHASE_STRIP = YES;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
