@@ -1214,7 +1214,7 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 		return imgData;
 	}
 	
-	if([[[NSUserDefaults smugMugUserDefaults] objectForKey:SMSelectedScalingTag] boolValue])
+	if(![[[NSUserDefaults smugMugUserDefaults] objectForKey:SMSelectedScalingTag] boolValue])
 		return imgData;
 	
 	unsigned int maxDimension = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMImageScaleMaxDimension] intValue];
