@@ -285,8 +285,6 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 
 +(void)initialize {
 	
-	//	return ![[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEUploadToVault] boolValue] ||	![[self accountInfo] hasVaultEnabled];
-	// - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 	[self setKeys:[NSArray arrayWithObjects:@"accountInfo", nil]
 		triggerChangeNotificationsForDependentKey:@"isScalingUIEnabled"];
 	
@@ -360,24 +358,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	
 	[albumsTableView setTarget:self];
 	[albumsTableView setDoubleAction:@selector(showEditAlbumSheet:)];
-	
-	if([vaultLink respondsToSelector:@selector(setDrawsBackground:)])
-		[vaultLink setDrawsBackground:NO];
-	[[[vaultLink mainFrame] frameView] setAllowsScrolling:NO];
-	[vaultLink setFrameLoadDelegate:self];
-	WebPreferences *prefs = [WebPreferences standardPreferences];
-	[prefs setSansSerifFontFamily:@"Lucida Grande"];
-	[prefs setStandardFontFamily:@"Lucida Grande"];
-	[prefs setDefaultFontSize:13];
-	[vaultLink setPreferences:prefs];
-	[[vaultLink mainFrame] loadHTMLString:NSLocalizedString(@"(Requires <a href=\"http://www.smugmug.com/price/smugvault.mg\">SmugVault</a>)", @"HTML fragment to display when user doesn't have SmugVault.") baseURL:nil];
-}
-
-
-
-- (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame {
-	NSURL *url = [[[frame provisionalDataSource] request] URL];
-	[[NSWorkspace sharedWorkspace] openURL:url];
+	[self updateVaultLink];
 }
 
 /* when we have multiple accounts, we only want to disable the scaling UI if the user has vault enabled
@@ -810,6 +791,40 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 -(NSPanel *)preferencesPanel {
 	return preferencesPanel;
 }
+
+- (void)webView:(WebView *)sender 
+	decidePolicyForNavigationAction:(NSDictionary *)actionInformation 
+		request:(NSURLRequest *)request  
+		  frame:(WebFrame *)frame 
+decisionListener:(id<WebPolicyDecisionListener>)listener {
+	
+	if(! [[[request URL] host] isEqualToString:@"www.smugmug.com"]) {
+		[listener ignore];
+	} else if( [[[request URL] path] isEqualToString:@"/"]) { // the initial link (load this)
+		[listener use]; // load it
+	} else if([[[request URL] path] isEqualToString:@"/price/smugvault.mg"]) { // the link was cilcked
+		[[NSWorkspace sharedWorkspace] openURL:[request URL]];
+		[listener ignore];
+	} else {
+		[listener ignore];
+	}
+	
+}
+
+-(void)updateVaultLink {
+	if([vaultLink respondsToSelector:@selector(setDrawsBackground:)])
+		[vaultLink setDrawsBackground:NO];
+	
+	[[[vaultLink mainFrame] frameView] setAllowsScrolling:NO];
+	[[[vaultLink mainFrame] frameView] setAllowsScrolling:NO];
+	[vaultLink setPolicyDelegate:self];
+	WebPreferences *prefs = [WebPreferences standardPreferences];
+	[prefs setSansSerifFontFamily:@"Lucida Grande"];
+	[prefs setStandardFontFamily:@"Lucida Grande"];
+	[prefs setDefaultFontSize:13];
+	[vaultLink setPreferences:prefs];
+	[[vaultLink mainFrame] loadHTMLString:NSLocalizedString(@"(Requires <a href=\"/price/smugvault.mg\">SmugVault</a>)", @"HTML fragment to display when user doesn't have SmugVault.") baseURL:[NSURL URLWithString:@"http://www.smugmug.com"]];
+}	
 
 -(IBAction)showPreferences:(id)sender {
 	[NSApp beginSheet:[self preferencesPanel]
@@ -1252,8 +1267,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	if(wasSuccessful &&
 		[[[NSUserDefaults smugMugUserDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue] &&
 			[self uploadSiteUrl] != nil &&  ![self browserOpenedInGallery]) {
-		[self setBrowserOpenedInGallery:YES];
-		[[NSWorkspace sharedWorkspace] openURL:uploadSiteUrl];
+		[self openLastGalleryInBrowser];
 	}
 	
 	if(wasSuccessful && [[[NSUserDefaults smugMugUserDefaults] valueForKey:SMCloseExportWindowAfterUploadCompletion] boolValue])
