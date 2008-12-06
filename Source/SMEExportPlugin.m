@@ -284,10 +284,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 }
 
 +(void)initialize {
-	
-	[self setKeys:[NSArray arrayWithObjects:@"accountInfo", nil]
-		triggerChangeNotificationsForDependentKey:@"isScalingUIEnabled"];
-	
+		
 	[self initializeLocalizableStrings];
 	
 	NSNumber *no = [NSNumber numberWithBool:NO];
@@ -342,14 +339,6 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath
-					  ofObject:(id)object
-                        change:(NSDictionary *)change
-                       context:(void *)context {
-	[self willChangeValueForKey:@"isScalingUIEnabled"];
-	[self didChangeValueForKey:@"isScalingUIEnabled"];	
-}
-
 -(void)awakeFromNib {
 	[self addObserver:self 
 		   forKeyPath:@"defaults.SMEUploadToVault"
@@ -359,13 +348,6 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	[albumsTableView setTarget:self];
 	[albumsTableView setDoubleAction:@selector(showEditAlbumSheet:)];
 	[self updateVaultLink];
-}
-
-/* when we have multiple accounts, we only want to disable the scaling UI if the user has vault enabled
-  and their account supports it.  */
--(BOOL)isScalingUIEnabled {
-	return ![[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEUploadToVault] boolValue] ||
-		![[self accountInfo] hasVaultEnabled];
 }
 
 -(BOOL)sheetIsDisplayed {
