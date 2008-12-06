@@ -138,7 +138,7 @@
 
 -(NSArray *)filenameSelectionOptions;
 -(void)displayUserUpdatePolicy;
-
+-(void)updateVaultLink;
 
 -(void)remoteVersionInfoWasFetch:(NSDictionary *)remoteInfo;
 
