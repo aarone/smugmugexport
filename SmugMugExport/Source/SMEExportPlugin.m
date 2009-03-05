@@ -1439,6 +1439,9 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 }
 
 -(SMEGrowlDelegate *)growlDelegate {
+	if(![self isGrowlLoaded])
+		return nil;
+	
 	return growlDelegate;
 }
 

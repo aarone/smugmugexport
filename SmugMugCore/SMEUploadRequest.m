@@ -76,7 +76,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 		   session:(SMESession *)aSession
 		 intoAlbum:(SMEAlbumRef *)theAlbumRef
 		  observer:(NSObject<SMEUploadRequestObserver> *)anObserver {
-	if(nil != (self = [super init]))
+	if(nil == (self = [super init]))
 		return nil;
 	
 	[self setImage:anImage];
