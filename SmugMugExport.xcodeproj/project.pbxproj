@@ -70,6 +70,8 @@
 		9353D6030F62CA7D008EA255 /* iPhoto.6.classdump */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = iPhoto.6.classdump; sourceTree = "<group>"; };
 		9353D6040F62CA7D008EA255 /* iPhoto.7.classdump */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = iPhoto.7.classdump; sourceTree = "<group>"; };
 		9353D6050F62CA7D008EA255 /* iPhoto.8.classdump */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = iPhoto.8.classdump; sourceTree = "<group>"; };
+		935BC2880F646B5F00B0B180 /* LocationCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LocationCommon.h; path = SmugMugExport/Source/LocationCommon.h; sourceTree = "<group>"; };
+		935BC28B0F646BC200B0B180 /* iPhotoCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = iPhotoCommon.h; path = SmugMugExport/Source/iPhotoCommon.h; sourceTree = "<group>"; };
 		9367FD490EE3597C004110B1 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = /System/Library/Frameworks/WebKit.framework; sourceTree = "<absolute>"; };
 		93BD6F170AD84A49007CE525 /* SmugMugExport.iPhotoExporter */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SmugMugExport.iPhotoExporter; sourceTree = BUILT_PRODUCTS_DIR; };
 		93DBD7D00F5E1BB000E1265C /* SMEAccountInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEAccountInfo.h; path = SmugMugCore/SMEAccountInfo.h; sourceTree = "<group>"; };
@@ -259,6 +261,8 @@
 				93DBD8290F5E1C5300E1265C /* ExportMgr.h */,
 				93DBD82A0F5E1C5300E1265C /* ExportPluginBoxProtocol.h */,
 				93DBD82B0F5E1C5300E1265C /* ExportPluginProtocol.h */,
+				935BC2880F646B5F00B0B180 /* LocationCommon.h */,
+				935BC28B0F646BC200B0B180 /* iPhotoCommon.h */,
 			);
 			name = "iPhoto Interface";
 			sourceTree = "<group>";

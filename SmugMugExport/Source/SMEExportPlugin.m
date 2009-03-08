@@ -7,6 +7,8 @@
 //
 
 #import "SMEExportPlugin.h"
+#import "iPhotoCommon.h"
+#import "LocationCommon.h"
 #import "ExportPluginProtocol.h"
 #import "ExportMgr.h"
 #import "SMEAlbumEditController.h"
@@ -19,148 +21,6 @@
 #import "SMEGrowlDelegate.h"
 #import "SMESmugMugCore.h"
 
-
-@interface LocationCommon : NSObject
-{
-}
-
-+ (id)descriptionForPlace:(id)fp8;
-+ (void)stringToLatLng:(id)fp8 lat:(float *)fp12 lng:(float *)fp16;
-+ (double)distanceFrom:(double)fp8 lng1:(double)fp16 lat2:(double)fp24 lng2:(double)fp32;
-+ (struct _NSPoint)locationAlongLatitudeOfGivenDistance:(float)fp8 fromCoordinate:(struct _NSPoint)fp12;
-+ (struct _NSRect)mapRectCenteredOnCoordinate:(struct _NSPoint)fp8 withRadius:(float)fp16;
-+ (struct _NSPoint)pixelCoordinatesForGPSLocation:(struct _NSPoint)fp8 inMapBounds:(struct _NSRect)fp16 withFrame:(struct _NSRect)fp32;
-+ (struct _NSPoint)gpsCoordinatesForPixelLocation:(struct _NSPoint)fp8 inMapBounds:(struct _NSRect)fp16 withFrame:(struct _NSRect)fp32;
-+ (void)addFormattedStringsForAddress:(id)fp8 includePersonOrPlace:(BOOL)fp12;
-+ (id)itemLabelForIndex:(int)fp8;
-+ (void)addGeoHierarchy:(id)fp8 inDB:(id)fp12;
-+ (int)getPrimaryKeyForGeoType:(id)fp8 inDB:(id)fp12;
-+ (void)setLocationForPhoto:(struct IPPhotoInfo *)fp8 fromDict:(id)fp12 name:(id)fp16 preserveExistingData:(BOOL)fp20;
-+ (void)setLocationForDevicePhoto:(struct IPPhotoInfo *)fp8 fromDict:(id)fp12 name:(id)fp16 preserveExistingData:(BOOL)fp20;
-+ (void)setLocationForPhoto:(struct IPPhotoInfo *)fp8 fromHierarchy:(id)fp12 name:(id)fp16 preserveExistingData:(BOOL)fp20;
-+ (void)setLocationForPhoto:(struct IPPhotoInfo *)fp8 fromUserPlaceKey:(unsigned int)fp12;
-+ (id)inheritedlocationDictFromPhoto:(struct IPPhotoInfo *)fp8;
-+ (id)locationDictFromPhoto:(struct IPPhotoInfo *)fp8;
-+ (id)searchDictFromPhoto:(struct IPPhotoInfo *)fp8;
-+ (void)setLocationForRoll:(struct IPRoll *)fp8 fromDict:(id)fp12 name:(id)fp16 preserveExistingData:(BOOL)fp20;
-+ (void)setLocationForRoll:(struct IPRoll *)fp8 fromHierarchy:(id)fp12 name:(id)fp16 preserveExistingData:(BOOL)fp20;
-+ (void)setLocationForRoll:(struct IPRoll *)fp8 fromUserPlaceKey:(unsigned int)fp12;
-+ (id)locationDictFromRoll:(struct IPRoll *)fp8;
-+ (id)searchDictFromRoll:(struct IPRoll *)fp8;
-+ (void)assignLocationDict:(id)fp8 toRoll:(struct IPRoll *)fp12;
-+ (id)locationForiegnKeyDictFromPhoto:(struct IPPhotoInfo *)fp8;
-+ (void)assignLocationForiegnKeyDict:(id)fp8 toPhoto:(struct IPPhotoInfo *)fp12;
-+ (void)recomputeLocationBoundsForEvent:(struct IPRoll *)fp8;
-+ (void)determineLocationForEventIfNecessary:(struct IPRoll *)fp8;
-+ (void)determineLocationForEvent:(struct IPRoll *)fp8 photos:(struct IPPhotoList *)fp12;
-+ (int)predominantCountryForPhotos:(struct IPPhotoList *)fp8;
-+ (int)predominantProvinceForPhotos:(struct IPPhotoList *)fp8;
-+ (int)predominantCountyForPhotos:(struct IPPhotoList *)fp8;
-+ (int)predominantCityForPhotos:(struct IPPhotoList *)fp8;
-+ (int)predominantNeighborhoodForPhotos:(struct IPPhotoList *)fp8;
-+ (int)predominantAOIForPhotos:(struct IPPhotoList *)fp8;
-+ (int)predominantPOIForPhotos:(struct IPPhotoList *)fp8;
-+ (BOOL)gpsDataExistsForPhotos:(struct IPPhotoList *)fp8;
-+ (id)queryStringByParsingString:(id)fp8;
-+ (id)userDefaultCity;
-
-@end
-
-struct MemHandleOpaque;
-
-struct Array {
-    unsigned int magic;
-    unsigned int itemSize;
-    unsigned int itemCount;
-    int dataStored;
-    int dataAllocated;
-    int lockCount;
-    struct MemHandleOpaque *itemsHandle;
-    void *compareProc;
-    unsigned char keepSorted;
-    unsigned char isSorted;
-};
-
-struct MessageReceiver {
-    unsigned int magic;
-    unsigned int disableCount;
-    unsigned int modificationCount;
-    struct Array senders;
-    void *handlerProc;
-    void *handlerData;
-};
-
-
-@interface IPPhotoObjCProxy : NSObject
-{
-    struct IPPhotoInfo *mPhotoInfo;
-    NSNumber *mUniqueID;
-}
-
-+ (id)proxyWithPhotoInfo:(struct IPPhotoInfo *)fp8;
-- (id)initWithPhotoInfo:(struct IPPhotoInfo *)fp8;
-- (void)dealloc;
-- (struct IPPhotoInfo *)photoInfo;
-- (void)setPhotoInfo:(struct IPPhotoInfo *)fp8;
-- (id)canTerminate;
-- (id)uniqueID;
-- (id)aeDimensions;
-- (id)width;
-- (id)height;
-- (id)name;
-- (void)setName:(id)fp8;
-- (id)annotation;
-- (void)setAnnotation:(id)fp8;
-- (id)imagePath;
-- (id)thumbPath;
-- (id)aeTitle;
-- (void)setAeTitle:(id)fp8;
-- (id)aeImageFileName;
-- (id)aeThumbFileName;
-- (id)aeDate;
-- (void)setAeDate:(id)fp8;
-- (id)aeKeywords;
-- (id)handleAddScriptCommand:(id)fp8;
-- (id)handleRemoveScriptCommand:(id)fp8;
-- (id)handleDuplicateScriptCommand:(id)fp8;
-- (id)removeKeyword:(id)fp8;
-@end
-
-struct IPPhotoInfo {
-    void **_field1;
-    id _field2;
-    int _field3;
-    struct SqPhotoInfo *_field4;
-    unsigned int _field5;
-    unsigned int _field6;
-    struct IPRoll *_field7;
-    struct IPStack *_field8;
-    id _field9;
-    id _field10;
-    id _field11;
-    int _field12;
-    _Bool _field13;
-    id _field14;
-    unsigned char _field15;
-    struct IPImage *_field16[6];
-    unsigned long long _field17;
-    char _field18;
-    char _field19;
-    unsigned long _field20;
-    id _field21;
-    id _field22;
-    int _field23;
-    id _field24;
-    id _field25;
-    _Bool _field26;
-    char _field27;
-    unsigned long _field28;
-    unsigned long _field29;
-    unsigned char _field30;
-    unsigned int _field31;
-    struct CGSize _field32;
-    struct MessageReceiver _field33;
-};
 
 
 @interface WebView (WebKitStuffThatIsntPublic)
