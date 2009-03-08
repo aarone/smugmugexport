@@ -19,6 +19,150 @@
 #import "SMEGrowlDelegate.h"
 #import "SMESmugMugCore.h"
 
+
+@interface LocationCommon : NSObject
+{
+}
+
++ (id)descriptionForPlace:(id)fp8;
++ (void)stringToLatLng:(id)fp8 lat:(float *)fp12 lng:(float *)fp16;
++ (double)distanceFrom:(double)fp8 lng1:(double)fp16 lat2:(double)fp24 lng2:(double)fp32;
++ (struct _NSPoint)locationAlongLatitudeOfGivenDistance:(float)fp8 fromCoordinate:(struct _NSPoint)fp12;
++ (struct _NSRect)mapRectCenteredOnCoordinate:(struct _NSPoint)fp8 withRadius:(float)fp16;
++ (struct _NSPoint)pixelCoordinatesForGPSLocation:(struct _NSPoint)fp8 inMapBounds:(struct _NSRect)fp16 withFrame:(struct _NSRect)fp32;
++ (struct _NSPoint)gpsCoordinatesForPixelLocation:(struct _NSPoint)fp8 inMapBounds:(struct _NSRect)fp16 withFrame:(struct _NSRect)fp32;
++ (void)addFormattedStringsForAddress:(id)fp8 includePersonOrPlace:(BOOL)fp12;
++ (id)itemLabelForIndex:(int)fp8;
++ (void)addGeoHierarchy:(id)fp8 inDB:(id)fp12;
++ (int)getPrimaryKeyForGeoType:(id)fp8 inDB:(id)fp12;
++ (void)setLocationForPhoto:(struct IPPhotoInfo *)fp8 fromDict:(id)fp12 name:(id)fp16 preserveExistingData:(BOOL)fp20;
++ (void)setLocationForDevicePhoto:(struct IPPhotoInfo *)fp8 fromDict:(id)fp12 name:(id)fp16 preserveExistingData:(BOOL)fp20;
++ (void)setLocationForPhoto:(struct IPPhotoInfo *)fp8 fromHierarchy:(id)fp12 name:(id)fp16 preserveExistingData:(BOOL)fp20;
++ (void)setLocationForPhoto:(struct IPPhotoInfo *)fp8 fromUserPlaceKey:(unsigned int)fp12;
++ (id)inheritedlocationDictFromPhoto:(struct IPPhotoInfo *)fp8;
++ (id)locationDictFromPhoto:(struct IPPhotoInfo *)fp8;
++ (id)searchDictFromPhoto:(struct IPPhotoInfo *)fp8;
++ (void)setLocationForRoll:(struct IPRoll *)fp8 fromDict:(id)fp12 name:(id)fp16 preserveExistingData:(BOOL)fp20;
++ (void)setLocationForRoll:(struct IPRoll *)fp8 fromHierarchy:(id)fp12 name:(id)fp16 preserveExistingData:(BOOL)fp20;
++ (void)setLocationForRoll:(struct IPRoll *)fp8 fromUserPlaceKey:(unsigned int)fp12;
++ (id)locationDictFromRoll:(struct IPRoll *)fp8;
++ (id)searchDictFromRoll:(struct IPRoll *)fp8;
++ (void)assignLocationDict:(id)fp8 toRoll:(struct IPRoll *)fp12;
++ (id)locationForiegnKeyDictFromPhoto:(struct IPPhotoInfo *)fp8;
++ (void)assignLocationForiegnKeyDict:(id)fp8 toPhoto:(struct IPPhotoInfo *)fp12;
++ (void)recomputeLocationBoundsForEvent:(struct IPRoll *)fp8;
++ (void)determineLocationForEventIfNecessary:(struct IPRoll *)fp8;
++ (void)determineLocationForEvent:(struct IPRoll *)fp8 photos:(struct IPPhotoList *)fp12;
++ (int)predominantCountryForPhotos:(struct IPPhotoList *)fp8;
++ (int)predominantProvinceForPhotos:(struct IPPhotoList *)fp8;
++ (int)predominantCountyForPhotos:(struct IPPhotoList *)fp8;
++ (int)predominantCityForPhotos:(struct IPPhotoList *)fp8;
++ (int)predominantNeighborhoodForPhotos:(struct IPPhotoList *)fp8;
++ (int)predominantAOIForPhotos:(struct IPPhotoList *)fp8;
++ (int)predominantPOIForPhotos:(struct IPPhotoList *)fp8;
++ (BOOL)gpsDataExistsForPhotos:(struct IPPhotoList *)fp8;
++ (id)queryStringByParsingString:(id)fp8;
++ (id)userDefaultCity;
+
+@end
+
+struct MemHandleOpaque;
+
+struct Array {
+    unsigned int magic;
+    unsigned int itemSize;
+    unsigned int itemCount;
+    int dataStored;
+    int dataAllocated;
+    int lockCount;
+    struct MemHandleOpaque *itemsHandle;
+    void *compareProc;
+    unsigned char keepSorted;
+    unsigned char isSorted;
+};
+
+struct MessageReceiver {
+    unsigned int magic;
+    unsigned int disableCount;
+    unsigned int modificationCount;
+    struct Array senders;
+    void *handlerProc;
+    void *handlerData;
+};
+
+
+@interface IPPhotoObjCProxy : NSObject
+{
+    struct IPPhotoInfo *mPhotoInfo;
+    NSNumber *mUniqueID;
+}
+
++ (id)proxyWithPhotoInfo:(struct IPPhotoInfo *)fp8;
+- (id)initWithPhotoInfo:(struct IPPhotoInfo *)fp8;
+- (void)dealloc;
+- (struct IPPhotoInfo *)photoInfo;
+- (void)setPhotoInfo:(struct IPPhotoInfo *)fp8;
+- (id)canTerminate;
+- (id)uniqueID;
+- (id)aeDimensions;
+- (id)width;
+- (id)height;
+- (id)name;
+- (void)setName:(id)fp8;
+- (id)annotation;
+- (void)setAnnotation:(id)fp8;
+- (id)imagePath;
+- (id)thumbPath;
+- (id)aeTitle;
+- (void)setAeTitle:(id)fp8;
+- (id)aeImageFileName;
+- (id)aeThumbFileName;
+- (id)aeDate;
+- (void)setAeDate:(id)fp8;
+- (id)aeKeywords;
+- (id)handleAddScriptCommand:(id)fp8;
+- (id)handleRemoveScriptCommand:(id)fp8;
+- (id)handleDuplicateScriptCommand:(id)fp8;
+- (id)removeKeyword:(id)fp8;
+@end
+
+struct IPPhotoInfo {
+    void **_field1;
+    id _field2;
+    int _field3;
+    struct SqPhotoInfo *_field4;
+    unsigned int _field5;
+    unsigned int _field6;
+    struct IPRoll *_field7;
+    struct IPStack *_field8;
+    id _field9;
+    id _field10;
+    id _field11;
+    int _field12;
+    _Bool _field13;
+    id _field14;
+    unsigned char _field15;
+    struct IPImage *_field16[6];
+    unsigned long long _field17;
+    char _field18;
+    char _field19;
+    unsigned long _field20;
+    id _field21;
+    id _field22;
+    int _field23;
+    id _field24;
+    id _field25;
+    _Bool _field26;
+    char _field27;
+    unsigned long _field28;
+    unsigned long _field29;
+    unsigned char _field30;
+    unsigned int _field31;
+    struct CGSize _field32;
+    struct MessageReceiver _field33;
+};
+
+
 @interface WebView (WebKitStuffThatIsntPublic)
 -(void)setDrawsBackground:(BOOL)drawsBackground;
 @end
@@ -151,7 +295,6 @@
 
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful;
 
--(BOOL)isIPhoto7;
 -(NSData *)sourceDataAtPath:(NSString *)pathToImage shouldScale:(BOOL)shouldScale errorString:(NSString **)err;
 -(NSString *)formatCaptionWithTitle:(NSString *)title caption:(NSString *)caption;
 -(SMEImage *)nextImage;
@@ -172,6 +315,8 @@
 -(void)unloadFramework:(NSString *)fwPath;
 
 -(BOOL)pluginPaneIsVisible;
+
+-(int)iPhotoMajorVersion;
 @end
 
 // UI keys
@@ -1126,18 +1271,36 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 		return nil;
 	}	
 	
-	NSString *iPhotoTitle =  [self isIPhoto7] ? [[self exportManager] imageTitleAtIndex:[self imagesUploaded]] :
+	NSString *iPhotoTitle =  [self iPhotoMajorVersion] > 6 ? [[self exportManager] imageTitleAtIndex:[self imagesUploaded]] :
 		[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]];
 	NSString *selectedUploadFilenameOption = [[NSUserDefaults smugMugUserDefaults] objectForKey:SMUploadedFilename];
 	NSString *title = [selectedUploadFilenameOption isEqualToString:SMUploadedFilenameOptionTitle] ?
 		iPhotoTitle:[nextFile lastPathComponent];	
 	NSString *caption = [self formatCaptionWithTitle:title caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
 	
-	return [SMEImage imageWithTitle:title
-							caption:caption
-						   keywords:[[self exportManager] imageKeywordsAtIndex:[self imagesUploaded]]
-						  imageData:srcData
-					  thumbnailPath:[[self exportManager] thumbnailPathAtIndex:[self imagesUploaded]]];
+	SMEImage *img = [SMEImage imageWithTitle:title
+									 caption:caption
+									keywords:[[self exportManager] imageKeywordsAtIndex:[self	imagesUploaded]]
+								   imageData:srcData
+							   thumbnailPath:[[self exportManager] thumbnailPathAtIndex:[self imagesUploaded]]];
+	
+	// iPhoto 8 knows about locations
+	if([self iPhotoMajorVersion] >= 8) {
+		struct IPPhotoInfo *photoInfo = [[self exportManager] photoAtIndex:[self imagesUploaded]];
+		Class _LocationCommon = NSClassFromString(@"LocationCommon");
+		NSDictionary *location = [_LocationCommon locationDictFromPhoto:photoInfo];
+		[img setLatitude:[location objectForKey:@"latitude"]];
+		[img setLongitude:[location objectForKey:@"longitude"]];
+	} else if([self iPhotoMajorVersion] < 8) {
+		// we get the gps data for older versions from the photo
+		CGImageSourceRef source = CGImageSourceCreateWithData( (CFDataRef) srcData, NULL);
+		NSDictionary* metadata = (NSDictionary *)CGImageSourceCopyPropertiesAtIndex(source,0,NULL);
+		NSDictionary *gpsInfo = [metadata objectForKey:@"{GPS}"];
+		[img setLatitude:[gpsInfo objectForKey:@"Latitude"]];
+		[img setLongitude:[gpsInfo objectForKey:@"Longitude"]];		
+	}
+	
+	return img;
 }
 
 -(void)startUpload {
@@ -1176,7 +1339,8 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 	[self setUploadSiteUrl:nil];
 	[self setSiteUrlHasBeenFetched:NO];
 	
-	[[self session] uploadImage:[self nextImage]
+	SMEImage *imgToUpload = [self nextImage];
+	[[self session] uploadImage:imgToUpload
 					  intoAlbum:[[self selectedAlbum] ref]
 					   observer:self];
 }
@@ -1237,8 +1401,14 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 	
 }
 
--(BOOL)isIPhoto7 {
-	return [[self exportManager] respondsToSelector:@selector(imageTitleAtIndex:)];
+
+-(int)iPhotoMajorVersion {
+	NSString *versionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
+	NSArray *components = [versionString componentsSeparatedByString:@"."];
+	if([components count] > 0)
+		return [[components objectAtIndex:0] intValue];
+	
+	return 0;
 }
 	
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful {
@@ -1805,7 +1975,7 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 }
 
 -(BOOL)handlesMovieFiles {
-	if([self isIPhoto7]) // returning YES will crash iPhoto 6
+	if([self iPhotoMajorVersion] >= 7) // returning YES will crash iPhoto 6
 		return YES;
 	
 	return NO;
