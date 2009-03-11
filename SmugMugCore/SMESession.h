@@ -31,6 +31,7 @@
 	NSURL *baseRequestUrl;
 	SMEUploadRequest *lastUploadRequest;
 	NSObject<SMEUploadObserver>* observer;
+	BOOL isTracing;
 }
 
 +(SMESession *)session;
@@ -83,4 +84,6 @@
 
 -(void)stopUpload;
 
+-(void)setIsTracing:(BOOL)v;
+-(BOOL)isTracing;
 @end

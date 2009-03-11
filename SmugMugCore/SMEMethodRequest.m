@@ -346,9 +346,7 @@
 }
 
 -(BOOL)isTracingEnabled {
-	// TODO turn this off
-	return YES;
-//	return isTracingEnabled;
+	return isTracingEnabled;
 }
 
 

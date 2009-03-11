@@ -163,7 +163,9 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(SMEMethodRequest *)createRequest {
-	return [SMEMethodRequest request];
+	SMEMethodRequest *req = [SMEMethodRequest request];
+	[req setIsTracingEnabled:[self isTracing]];
+	return req;
 }
 
 #pragma mark Miscellaneous Get/Set Methods
@@ -460,7 +462,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	SMEUploadRequest *uploadRequest = [SMEUploadRequest uploadRequestWithImage:theImage
 																	   session:self
 																	 intoAlbum:albumRef
-																	  observer:self];	
+																	  observer:self];
+	[uploadRequest setIsTracingEnabled:[self isTracing]];
 	[self setLastUploadRequest:uploadRequest];
 	observer = anObserver; // delegate non-retaining semantics to avoid retain cycles
 	[uploadRequest beginUpload];	
@@ -528,6 +531,14 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 		[lastUploadRequest release];
 		lastUploadRequest = [request retain];
 	}
+}
+
+-(void)setIsTracing:(BOOL)v {
+	isTracing = v;
+}
+
+-(BOOL)isTracing {
+	return isTracing;
 }
 
 @end

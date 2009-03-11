@@ -1588,7 +1588,9 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 }
 
 -(SMESession *)session {
-	return session;
+	SMESession *result = session;
+	[result setIsTracing:[[[self defaults] valueForKey:SMEnableNetworkTracing] boolValue]]; 
+	return result;
 }
 
 -(void)setSession:(SMESession *)m {
