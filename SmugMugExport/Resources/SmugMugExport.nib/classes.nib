@@ -75,6 +75,8 @@
 				<string>id</string>
 				<key>showPreferences</key>
 				<string>id</string>
+				<key>toggleLoginLogout</key>
+				<string>id</string>
 				<key>vaultLinkClicked</key>
 				<string>id</string>
 			</dict>

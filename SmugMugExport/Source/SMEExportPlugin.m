@@ -51,6 +51,8 @@
 -(NSString *)password;
 -(void)setPassword:(NSString *)p;
 
+-(void)attemptLoginIfNecessary;
+
 -(BOOL)loginAttempted;
 -(void)setLoginAttempted:(BOOL)v;
 
@@ -67,6 +69,7 @@
 -(void)setIsBusy:(BOOL)v;
 
 -(BOOL)isLoggedIn;
+-(void)setIsLoggedIn:(BOOL)v;	
 
 -(BOOL)isLoggingIn;
 -(void)setIsLoggingIn:(BOOL)v;
@@ -341,7 +344,8 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.accounts"] triggerChangeNotificationsForDependentKey:@"accounts"];
 	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.selectedAccount"] triggerChangeNotificationsForDependentKey:@"selectedAccount"];
-	
+	[[self class] setKeys:[NSArray arrayWithObject:@"isLoggedIn"]
+		triggerChangeNotificationsForDependentKey:@"loginLogoutToggleButtonText"];
 }
 
 -(void)awakeFromNib {
@@ -569,6 +573,25 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 
 #pragma mark Login Methods
 
+-(NSString *)loginLogoutToggleButtonText {
+	return [self isLoggedIn] ?
+		NSLocalizedString(@"Logout", @"Text to display in login/logout toggle button when logged in")
+	:
+		NSLocalizedString(@"Login", @"Text to display in login/logout toggle button when logged out");
+}
+
+-(IBAction)toggleLoginLogout:(id)sender {
+	if([self isLoggingIn]) {
+		NSBeep();
+		return;
+	}
+	
+	if(![self isLoggedIn])
+		[self attemptLoginIfNecessary];
+	else
+		[[self session] logoutWithTarget:self callback:@selector(logoutDidComplete:)];
+}
+
 -(void)setBusyWithStatus:(NSString *)theStatusText {
 	[self setIsBusy:YES];
 	[self setStatusText:theStatusText];
@@ -705,11 +728,10 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 		} else { // some other kind of error
 			[self presentError:[response error]];
 		}
-		
-		//[self setAccountInfo:nil];
+		[self setIsLoggedIn:NO];
 		return NO;
 	}
-	
+	[self setIsLoggedIn:YES];
 	[self setAccountInfo:(SMEAccountInfo *)[response smData]];
 	[self setCategories:nil];
 	[self setSubcategories:nil];
@@ -727,7 +749,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	
 	if(![self commonPostLoginTasks:response])
 		return;
-
+	
 	[[self accountManager] addAccount:[self username] withPassword:[self password]];
 	[self setSelectedAccount:[self username]];
 	[NSApp endSheet:loginPanel];
@@ -769,8 +791,12 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 #pragma mark Logout 
 -(void)logoutDidComplete:(SMEResponse *)resp {
 	[[self growlDelegate] notifyLougout:[self selectedAccount]];
+	[self setAlbums:[NSArray array]];
 	[self setAccountInfo:nil];
+	[self setIsLoggedIn:NO];
+	[self setLoginAttempted:NO];
 	[[self postLogoutInvocation] invokeWithTarget:self];
+	[self setPostLogoutInvocation:nil];
 }
 
 #pragma mark Preferences
@@ -1365,7 +1391,11 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 #pragma mark Get and Set properties
 
 -(BOOL)isLoggedIn {
-	return accountInfo != nil; 
+	return isLoggedIn;
+}
+
+-(void)setIsLoggedIn:(BOOL)v {
+	isLoggedIn = v;
 }
 
 -(BOOL)isLoggingIn {
@@ -1806,9 +1836,7 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 }
 
 -(void)viewWillBeDeactivated {
-	loginAttempted = NO;
-	if([self isLoggedIn])
-		[[self session] logoutWithTarget:self callback:@selector(logoutDidComplete:)];
+	loginAttempted = NO;	
 }
 
 -(void)viewWillBeActivated {

@@ -58,6 +58,7 @@
 	BOOL isUploading;
 	BOOL isBusy;
 	BOOL loginAttempted;
+	BOOL isLoggedIn;
 	BOOL isLoginSheetDismissed;
 	BOOL uploadCancelled;
 	BOOL errorAlertSheetIsVisisble;
@@ -80,6 +81,7 @@
 -(IBAction)cancelLoginSheet:(id)sender;
 -(IBAction)showLoginSheet:(id)sender;
 -(IBAction)performLoginFromSheet:(id)sender;
+-(IBAction)toggleLoginLogout:(id)sender;
 
 #pragma mark Misc
 -(IBAction)donate:(id)sender;

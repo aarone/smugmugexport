@@ -40,7 +40,7 @@
 		93DBD81C0F5E1BFA00E1265C /* SMEUserDefaultsAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 93DBD8130F5E1BFA00E1265C /* SMEUserDefaultsAdditions.m */; };
 		93DBD8300F5E1C6700E1265C /* SmugMugExport.nib in Resources */ = {isa = PBXBuildFile; fileRef = 93DBD82D0F5E1C6700E1265C /* SmugMugExport.nib */; };
 		93DBD8310F5E1C6700E1265C /* AlbumEdit.nib in Resources */ = {isa = PBXBuildFile; fileRef = 93DBD82E0F5E1C6700E1265C /* AlbumEdit.nib */; };
-		93DBD8FB0F5E1C9100E1265C /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93DBD8FA0F5E1C9100E1265C /* Growl.framework */; };
+		93DBD8FB0F5E1C9100E1265C /* Growl.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 93DBD8FA0F5E1C9100E1265C /* Growl.framework */; };
 		93DE06B00DE990ED0029F0FA /* JSON.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 93DE06380DE98DD60029F0FA /* JSON.framework */; };
 		93EFC25B0F5F6D5500BAB971 /* SMEKeychainManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EFC25A0F5F6D5500BAB971 /* SMEKeychainManager.m */; };
 		93EFC25E0F5F6D5F00BAB971 /* SMEDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EFC25C0F5F6D5F00BAB971 /* SMEDataAdditions.m */; };
@@ -53,6 +53,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				93DBD8FB0F5E1C9100E1265C /* Growl.framework in Copy Frameworks */,
 				93DE06B00DE990ED0029F0FA /* JSON.framework in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
@@ -152,7 +153,6 @@
 				930DE5F30B4831D2008120ED /* Security.framework in Frameworks */,
 				930961BB0C66A164002B8DAA /* libcrypto.dylib in Frameworks */,
 				9367FD4A0EE3597C004110B1 /* WebKit.framework in Frameworks */,
-				93DBD8FB0F5E1C9100E1265C /* Growl.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -199,9 +199,9 @@
 				93DBD8030F5E1BFA00E1265C /* SMEAlbumEditController.h */,
 				93DBD8040F5E1BFA00E1265C /* SMEAlbumEditController.m */,
 				93DBD8070F5E1BFA00E1265C /* SMEExportBox.h */,
-				93DBD8080F5E1BFA00E1265C /* SMEExportBox.m */,
 				93DBD8090F5E1BFA00E1265C /* SMEExportPlugin.h */,
 				93DBD80A0F5E1BFA00E1265C /* SMEExportPlugin.m */,
+				93DBD8080F5E1BFA00E1265C /* SMEExportBox.m */,
 				93DBD80C0F5E1BFA00E1265C /* SMEGrowlDelegate.h */,
 				93DBD80D0F5E1BFA00E1265C /* SMEGrowlDelegate.m */,
 				93DBD8100F5E1BFA00E1265C /* SMEUserDefaults.h */,
