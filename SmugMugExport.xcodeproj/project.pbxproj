@@ -138,10 +138,10 @@
 		93DBD82E0F5E1C6700E1265C /* AlbumEdit.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = AlbumEdit.nib; path = SmugMugExport/Resources/AlbumEdit.nib; sourceTree = "<group>"; };
 		93DBD8FA0F5E1C9100E1265C /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Growl.framework; path = SmugMugExport/Resources/Frameworks/Growl.framework; sourceTree = "<group>"; };
 		93DE06380DE98DD60029F0FA /* JSON.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JSON.framework; path = SmugMugExport/Resources/Frameworks/JSON.framework; sourceTree = "<group>"; };
-		93EFC2590F5F6D5500BAB971 /* SMEKeychainManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEKeychainManager.h; path = ../common/SMEKeychainManager.h; sourceTree = SOURCE_ROOT; };
-		93EFC25A0F5F6D5500BAB971 /* SMEKeychainManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEKeychainManager.m; path = ../common/SMEKeychainManager.m; sourceTree = SOURCE_ROOT; };
-		93EFC25C0F5F6D5F00BAB971 /* SMEDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEDataAdditions.m; path = ../common/SMEDataAdditions.m; sourceTree = SOURCE_ROOT; };
-		93EFC25D0F5F6D5F00BAB971 /* SMEDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEDataAdditions.h; path = ../common/SMEDataAdditions.h; sourceTree = SOURCE_ROOT; };
+		93EFC2590F5F6D5500BAB971 /* SMEKeychainManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEKeychainManager.h; path = SmugMugCore/SMEKeychainManager.h; sourceTree = "<group>"; };
+		93EFC25A0F5F6D5500BAB971 /* SMEKeychainManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEKeychainManager.m; path = SmugMugCore/SMEKeychainManager.m; sourceTree = "<group>"; };
+		93EFC25C0F5F6D5F00BAB971 /* SMEDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEDataAdditions.m; path = SmugMugCore/SMEDataAdditions.m; sourceTree = "<group>"; };
+		93EFC25D0F5F6D5F00BAB971 /* SMEDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEDataAdditions.h; path = SmugMugCore/SMEDataAdditions.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -497,6 +497,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_VERSION = 4.0;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -544,6 +545,7 @@
 				GCC_MODEL_TUNING = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_VERSION = 4.0;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "SmugMugExport/Resources/SmugMugExport-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
