@@ -134,15 +134,23 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	return result;
 }
 
+/*
+ * This is weird. The SmugMug API says that '\n' should be sent as '\r'; presumably
+ * because many clients/servers don't like '\n' in values (HTTP has line-endings
+ * marked by "\r\n" (CRLF).
+ * 
+ * The problem is that CFHTTP doesn't like either '\r' in values and will disregard
+ * such values.
+ *
+ * The workaround is to change '\n' with <br /> which ends up magically showing up
+ * as an HTML entity on the page. 
+ *
+ * see:
+ *  [1] http://wiki.smugmug.net/display/SmugMug/Uploading
+ *  [2] http://www.opensource.apple.com/source/CFNetwork/CFNetwork-128/HTTP/CFHTTPMessage.c
+ */
 -(NSString *)cleanNewlines:(NSString *)aString {
-	// adding a newline to a header will cause the sent request to be invalid.
-	// use carriage returns instead of newlines.
-	NSMutableString *cleanedString = [NSMutableString stringWithString:aString];
-	[cleanedString replaceOccurrencesOfString:@"\n"
-								   withString:@"\r"
-									  options:0
-										range:NSMakeRange(0, [cleanedString length])];
-	return [NSString stringWithString:cleanedString];
+  return [[aString componentsSeparatedByString:@"\n"] componentsJoinedByString:@"<br />"];
 }
 
 -(NSString *)cleanKeywords:(NSArray *)theKeywords {
@@ -186,9 +194,9 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	
 	if(!IsEmpty([[self image] altitude]))
 		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Altitude"), (CFStringRef)[[[self image] altitude] stringValue]);
-		
+
 	if(!IsEmpty([[self image] caption]))
-		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Caption"), (CFStringRef)[self cleanNewlines:[[self image] caption]]);
+   CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Caption"), (CFStringRef)([self cleanNewlines:[[self image] caption]]));
 	
 	if(!IsEmpty([[self image] keywords]))
 		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Keywords"), (CFStringRef)[self cleanKeywords:[[self image] keywords]]);
@@ -223,7 +231,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	
 	[NSThread detachNewThreadSelector:@selector(beingUploadProgressTracking) toTarget:self withObject:nil];
 	
-	// CFRunLoop is not toll-free bridges to NSRunLoop
+	// CFRunLoop is not toll-free bridge to NSRunLoop
 	while ([self isUploading])
 		CFRunLoopRun();
 	

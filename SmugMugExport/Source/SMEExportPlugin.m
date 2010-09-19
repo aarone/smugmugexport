@@ -159,7 +159,6 @@
 -(void)performUploadCompletionTasks:(BOOL)wasSuccessful;
 
 -(NSData *)sourceDataAtPath:(NSString *)pathToImage shouldScale:(BOOL)shouldScale errorString:(NSString **)err;
--(NSString *)formatCaptionWithTitle:(NSString *)title caption:(NSString *)caption;
 -(SMEImage *)nextImage;
 -(void)uploadNextImage;
 
@@ -1161,8 +1160,8 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 		[[self exportManager] imageCaptionAtIndex:[self imagesUploaded]];
 	NSString *selectedUploadFilenameOption = [[NSUserDefaults smugMugUserDefaults] objectForKey:SMUploadedFilename];
 	NSString *title = [selectedUploadFilenameOption isEqualToString:SMUploadedFilenameOptionTitle] ?
-		iPhotoTitle:[nextFile lastPathComponent];	
-	NSString *caption = [self formatCaptionWithTitle:title caption:[[self exportManager] imageCommentsAtIndex:[self imagesUploaded]]];
+		iPhotoTitle:[nextFile lastPathComponent];
+	NSString *caption = [[self exportManager] imageCommentsAtIndex:[self imagesUploaded]];
 	
 	SMEImage *img = [SMEImage imageWithTitle:title
 									 caption:caption
@@ -1175,8 +1174,15 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 		struct IPPhotoInfo *photoInfo = [[self exportManager] photoAtIndex:[self imagesUploaded]];
 		Class _LocationCommon = NSClassFromString(@"LocationCommon");
 		NSDictionary *location = [_LocationCommon locationDictFromPhoto:photoInfo];
-		[img setLatitude:[location objectForKey:@"latitude"]];
-		[img setLongitude:[location objectForKey:@"longitude"]];
+    
+    if([[location objectForKey:@"latitude"] floatValue] <= 90.0 &&
+       [[location objectForKey:@"latitude"] floatValue] >= -90.0)
+      [img setLatitude:[location objectForKey:@"latitude"]];
+    
+    if([[location objectForKey:@"longitude"] floatValue] <= 180.0 &&
+       [[location objectForKey:@"longitude"] floatValue] >= -180.0)
+      [img setLongitude:[location objectForKey:@"longitude"]];
+
 	} else if([self iPhotoMajorVersion] < 8) {
 		// we get the gps data for older versions from the photo
 		CGImageSourceRef source = CGImageSourceCreateWithData( (CFDataRef) srcData, NULL);
@@ -1264,27 +1270,6 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 	
 	// no scale
 	return imgData;
-}
-
--(NSString *)formatCaptionWithTitle:(NSString *)title caption:(NSString *)caption {
-	NSString *captionFormat = [[NSUserDefaults smugMugUserDefaults] objectForKey:@"SMECaptionFormatString"];
-	if(captionFormat == nil)
-		captionFormat = SMEDefaultCaptionFormat;
-	
-	
-	NSMutableString *result = [NSMutableString stringWithString:captionFormat];
-	if(title != nil)
-		[result replaceOccurrencesOfString:@"%title"
-								withString:title 
-								   options:0 
-									 range:NSMakeRange(0, [result length])];
-	if(caption != nil)
-		[result replaceOccurrencesOfString:@"%caption"
-								withString:caption
-								   options:0 
-									 range:NSMakeRange(0, [result length])];
-	return [NSString stringWithString:result];
-	
 }
 
 
