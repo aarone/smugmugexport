@@ -207,6 +207,7 @@ NSString *SMShowAlbumDeleteAlert = @"SMShowAlbumDeleteAlert";
 NSString *SMEnableNetworkTracing = @"SMEnableNetworkTracing";
 NSString *SMEnableAlbumFetchDelay = @"SMEnableAlbumFetchDelay";
 NSString *SMJpegQualityFactor = @"SMJpegQualityFactor";
+NSString *SMEIncludeLocation = @"SMEIncludeLocation";
 NSString *SMRemoteInfoURL = @"SMRemoteInfoURL";
 NSString *SMCheckForUpdates = @"SMCheckForUpdates";
 NSString *SMUserHasSeenUpdatePolicy = @"SMUserHasSeenUpdatePolicy";
@@ -308,6 +309,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	[defaultsDict setObject:no forKey:SMEnableNetworkTracing];
 	[defaultsDict setObject:yes forKey:SMEnableAlbumFetchDelay];
 	[defaultsDict setObject:[NSNumber numberWithFloat:[NSBitmapImageRep defaultJpegScalingFactor]] forKey:SMJpegQualityFactor];
+  [defaultsDict setObject:no forKey:SMEIncludeLocation];
 	[defaultsDict setObject:[NSNumber numberWithBool:NO] forKey:SMSelectedScalingTag];
 	[defaultsDict setObject:[NSNumber numberWithInt: SMDefaultScaledWidth] forKey:SMImageScaleWidth];
 	[defaultsDict setObject:[NSNumber numberWithInt: SMDefaultScaledHeight] forKey:SMImageScaleHeight];
@@ -1168,9 +1170,12 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 									keywords:[[self exportManager] imageKeywordsAtIndex:[self	imagesUploaded]]
 								   imageData:srcData
 							   thumbnailPath:[[self exportManager] thumbnailPathAtIndex:[self imagesUploaded]]];
-	
-	// iPhoto 8 knows about locations
-	if([self iPhotoMajorVersion] >= 8) {
+
+	// disabled by default
+  BOOL includeLocations = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEIncludeLocation] boolValue];
+
+  // iPhoto 8 knows about locations
+	if(includeLocations && [self iPhotoMajorVersion] >= 8) {
 		struct IPPhotoInfo *photoInfo = [[self exportManager] photoAtIndex:[self imagesUploaded]];
 		Class _LocationCommon = NSClassFromString(@"LocationCommon");
 		NSDictionary *location = [_LocationCommon locationDictFromPhoto:photoInfo];
@@ -1183,7 +1188,7 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
        [[location objectForKey:@"longitude"] floatValue] >= -180.0)
       [img setLongitude:[location objectForKey:@"longitude"]];
 
-	} else if([self iPhotoMajorVersion] < 8) {
+	} else if(includeLocations && [self iPhotoMajorVersion] < 8) {
 		// we get the gps data for older versions from the photo
 		CGImageSourceRef source = CGImageSourceCreateWithData( (CFDataRef) srcData, NULL);
 		NSDictionary* metadata = (NSDictionary *)CGImageSourceCopyPropertiesAtIndex(source,0,NULL);

@@ -201,9 +201,8 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	if(!IsEmpty([[self image] keywords]))
 		CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Keywords"), (CFStringRef)[self cleanKeywords:[[self image] keywords]]);
 	
-	if([self isTracingEnabled]) {
+	if([self isTracingEnabled])
 		NSLog(@"Image headers: %@", [self imageHeadersForRequest:&myRequest]);
-	}
 	
 	CFHTTPMessageSetBody(myRequest, (CFDataRef)[[self image] imageData]);
 	

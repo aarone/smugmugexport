@@ -32,5 +32,5 @@ extern NSString *SMUploadedFilename;
 extern NSString *SMUploadedFilenameOptionFilename;
 extern NSString *SMUploadedFilenameOptionTitle;
 
-
+extern NSString *SMEIncludeLocation;
 
