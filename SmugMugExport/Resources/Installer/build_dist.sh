@@ -1,12 +1,18 @@
 #!/bin/sh
 
-PROJ_ROOT=../../
+PROJ_ROOT=../../../
 PKG=SmugMugExport.pkg
 DST=${PROJ_ROOT}/build/
 DOC=SmugMugExport.pmdoc
 PROJ=${PROJ_ROOT}/SmugMugExport.xcodeproj
 PKG_MAKER=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
-INFO_PLIST=${PROJ_ROOT}/Resources/SmugMugExport-Info.plist
+INFO_PLIST=${PROJ_ROOT}/SmugMugExport/Resources/SmugMugExport-Info.plist
+
+if [ ! -f $INFO_PLIST ]; then
+	echo "Cannot find plist at '${INFO_PLIST}'"
+	exit
+fi;
+
 VERSION=`/usr/libexec/PlistBuddy ${INFO_PLIST} -c "Print CFBundleShortVersionString"`
 SM_ID=`/usr/libexec/PlistBuddy ${INFO_PLIST} -c "Print :CFBundleIdentifier"`
 DISPLAY_NAME=`/usr/libexec/PlistBuddy ${INFO_PLIST} -c "Print :CFBundleDisplayName"`
