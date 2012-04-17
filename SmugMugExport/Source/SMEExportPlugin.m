@@ -576,9 +576,9 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 
 -(NSString *)loginLogoutToggleButtonText {
 	return [self isLoggedIn] ?
-		NSLocalizedString(@"Logout", @"Text to display in login/logout toggle button when logged in")
+		NSLocalizedString(@"Log Out", @"Text to display in login/logout toggle button when logged in")
 	:
-		NSLocalizedString(@"Login", @"Text to display in login/logout toggle button when logged out");
+		NSLocalizedString(@"Log In", @"Text to display in login/logout toggle button when logged out");
 }
 
 -(IBAction)toggleLoginLogout:(id)sender {
