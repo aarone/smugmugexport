@@ -21,10 +21,9 @@
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="19"/>
-			<integer value="62"/>
-			<integer value="343"/>
+			<integer value="18"/>
 			<integer value="7"/>
+			<integer value="62"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -215,7 +214,7 @@
 										<object class="NSTextField" id="230055765">
 											<reference key="NSNextResponder" ref="384455956"/>
 											<int key="NSvFlags">292</int>
-											<string key="NSFrame">{{36, 21}, {153, 17}}</string>
+											<string key="NSFrame">{{36, 21}, {245, 17}}</string>
 											<reference key="NSSuperview" ref="384455956"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="589615522">
@@ -881,26 +880,6 @@
 				<bool key="NSAutomaticallyPreparesContent">YES</bool>
 				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
 			</object>
-			<object class="NSObjectController" id="269448181">
-				<object class="NSMutableArray" key="NSDeclaredKeys">
-					<bool key="EncodedWithXMLCoder">YES</bool>
-					<string>IsPublic</string>
-					<string>ShowFilenames</string>
-					<string>EnableEasySharing</string>
-					<string>DisplayEXIFInfo</string>
-					<string>AllowOriginalsToBeViewed</string>
-					<string>AllowPurchasing</string>
-					<string>AllowFriendsToEdit</string>
-					<string>AlbumTitle</string>
-					<string>AlbumDescription</string>
-					<string>AlbumKeywords</string>
-					<string>AllowComments</string>
-					<string>AllowExternalLinking</string>
-					<string>AlbumCategory</string>
-				</object>
-				<bool key="NSEditable">YES</bool>
-				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
-			</object>
 			<object class="NSObjectController" id="255417457">
 				<object class="NSMutableArray" key="NSDeclaredKeys">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -918,6 +897,7 @@
 					<string>vaultLinkText</string>
 					<string>isScalingUIEnabled</string>
 					<string>loginLogoutToggleButtonText</string>
+					<string>isBusy</string>
 				</object>
 				<string key="NSObjectClassName">SMEExportPlugin</string>
 				<bool key="NSEditable">YES</bool>
@@ -940,7 +920,7 @@
 				</object>
 				<string key="NSWindowContentMaxSize">{1.79769e+308, 1.79769e+308}</string>
 				<object class="NSView" key="NSWindowView" id="677123581">
-					<reference key="NSNextResponder"/>
+					<nil key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<object class="NSMutableArray" key="NSSubviews">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1444,7 +1424,6 @@ AABDb3B5cmlnaHQgQXBwbGUgQ29tcHV0ZXIsIEluYy4sIDIwMDUAAAAAA</bytes>
 						</object>
 					</object>
 					<string key="NSFrameSize">{432, 242}</string>
-					<reference key="NSSuperview"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1680, 1028}}</string>
 				<string key="NSMaxSize">{1.79769e+308, 1.79769e+308}</string>
@@ -2002,22 +1981,6 @@ AABDb3B5cmlnaHQgQXBwbGUgQ29tcHV0ZXIsIEluYy4sIDIwMDUAAAAAA</bytes>
 					<int key="connectionID">502</int>
 				</object>
 				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">contentObject: selection.newAlbumPreferences</string>
-						<reference key="source" ref="269448181"/>
-						<reference key="destination" ref="255417457"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="269448181"/>
-							<reference key="NSDestination" ref="255417457"/>
-							<string key="NSLabel">contentObject: selection.newAlbumPreferences</string>
-							<string key="NSBinding">contentObject</string>
-							<string key="NSKeyPath">selection.newAlbumPreferences</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">545</int>
-				</object>
-				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">exporter</string>
 						<reference key="source" ref="384681572"/>
@@ -2288,26 +2251,6 @@ AABDb3B5cmlnaHQgQXBwbGUgQ29tcHV0ZXIsIEluYy4sIDIwMDUAAAAAA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled: selection.isLoggingIn</string>
-						<reference key="source" ref="225990443"/>
-						<reference key="destination" ref="255417457"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="225990443"/>
-							<reference key="NSDestination" ref="255417457"/>
-							<string key="NSLabel">enabled: selection.isLoggingIn</string>
-							<string key="NSBinding">enabled</string>
-							<string key="NSKeyPath">selection.isLoggingIn</string>
-							<object class="NSDictionary" key="NSOptions">
-								<string key="NS.key.0">NSValueTransformerName</string>
-								<string key="NS.object.0">NSNegateBoolean</string>
-							</object>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">1181</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
 						<string key="label">enabled2: selection.isLoggingIn</string>
 						<reference key="source" ref="1010885393"/>
 						<reference key="destination" ref="255417457"/>
@@ -2341,26 +2284,6 @@ AABDb3B5cmlnaHQgQXBwbGUgQ29tcHV0ZXIsIEluYy4sIDIwMDUAAAAAA</bytes>
 						</object>
 					</object>
 					<int key="connectionID">1182</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled: selection.isLoggingIn</string>
-						<reference key="source" ref="222224465"/>
-						<reference key="destination" ref="255417457"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="222224465"/>
-							<reference key="NSDestination" ref="255417457"/>
-							<string key="NSLabel">enabled: selection.isLoggingIn</string>
-							<string key="NSBinding">enabled</string>
-							<string key="NSKeyPath">selection.isLoggingIn</string>
-							<object class="NSDictionary" key="NSOptions">
-								<string key="NS.key.0">NSValueTransformerName</string>
-								<string key="NS.object.0">NSNegateBoolean</string>
-							</object>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">1183</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -2549,6 +2472,46 @@ AABDb3B5cmlnaHQgQXBwbGUgQ29tcHV0ZXIsIEluYy4sIDIwMDUAAAAAA</bytes>
 						<reference key="destination" ref="384681572"/>
 					</object>
 					<int key="connectionID">1741</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.isBusy</string>
+						<reference key="source" ref="222224465"/>
+						<reference key="destination" ref="255417457"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="222224465"/>
+							<reference key="NSDestination" ref="255417457"/>
+							<string key="NSLabel">enabled: selection.isBusy</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.isBusy</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">1748</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: selection.isBusy</string>
+						<reference key="source" ref="225990443"/>
+						<reference key="destination" ref="255417457"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="225990443"/>
+							<reference key="NSDestination" ref="255417457"/>
+							<string key="NSLabel">enabled: selection.isBusy</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">selection.isBusy</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">1749</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -2796,12 +2759,6 @@ AABDb3B5cmlnaHQgQXBwbGUgQ29tcHV0ZXIsIEluYy4sIDIwMDUAAAAAA</bytes>
 						<reference key="object" ref="419300526"/>
 						<reference key="parent" ref="0"/>
 						<string key="objectName">smSession</string>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">258</int>
-						<reference key="object" ref="269448181"/>
-						<reference key="parent" ref="0"/>
-						<string key="objectName">NewAlbumPrefs</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">298</int>
@@ -3462,8 +3419,6 @@ AABDb3B5cmlnaHQgQXBwbGUgQ29tcHV0ZXIsIEluYy4sIDIwMDUAAAAAA</bytes>
 					<string>24.ImportedFromIB2</string>
 					<string>25.IBPluginDependency</string>
 					<string>25.ImportedFromIB2</string>
-					<string>258.IBPluginDependency</string>
-					<string>258.ImportedFromIB2</string>
 					<string>27.IBPluginDependency</string>
 					<string>27.IBViewBoundsToFrameTransform</string>
 					<string>27.ImportedFromIB2</string>
@@ -3713,8 +3668,6 @@ AABDb3B5cmlnaHQgQXBwbGUgQ29tcHV0ZXIsIEluYy4sIDIwMDUAAAAAA</bytes>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<boolean value="YES"/>
-					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<object class="NSAffineTransform">
 						<bytes key="NSTransformStruct">P4AAAL+AAABDl4AAwpQAAA</bytes>
 					</object>
@@ -3899,7 +3852,7 @@ AABDb3B5cmlnaHQgQXBwbGUgQ29tcHV0ZXIsIEluYy4sIDIwMDUAAAAAA</bytes>
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">1747</int>
+			<int key="maxID">1749</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">

@@ -10,6 +10,7 @@
 #import "SMEAlbumRef.h"
 #import "SMESubCategory.h"
 #import "SMECategory.h"
+#import "SMEAlbumTemplate.h"
 
 
 @implementation NSMutableDictionary (SMEDictionaryAdditions)
@@ -79,6 +80,7 @@
 }
 
 -(void)dealloc {
+	[albumTemplate release];
 	[super dealloc];
 }
 
@@ -177,6 +179,30 @@
 
 -(void)setAllowsFamilyToEdit:(BOOL)v {
 	[[self albumData] setBool:v	forKey:@"FamilyEdit"];
+}
+
+-(void)setAlbumTemplate:(SMEAlbumTemplate *)t {
+	if(t != albumTemplate) {
+		[albumTemplate release];
+		albumTemplate = [t retain];
+		if (albumTemplate == nil)
+			return;
+		[[self albumData] setObject:[t albumId] forKey:@"AlbumTemplateID"];
+		[self setIsPublic:[t isPublic]];
+		[self setIsSharingEnabled:[t isSharingEnabled]];
+		[self setIsPrintable:[t isPrintable]];
+		[self setShowsFilenames:[t showsFilenames]];
+		[self setAllowsComments:[t allowsComments]];
+		[self setAllowsExternalLinking:[t allowsExternalLinking]];
+		[self setShowsOriginals:[t showsOriginals]];
+		[self setAllowsFriendsToEdit:[t allowsFriendsToEdit]];
+		[self setDisplaysEXIFInfo:[t displaysEXIFInfo]];
+		[self setAllowsFamilyToEdit:[t allowsFamilyToEdit]];
+	}
+}
+
+-(SMEAlbumTemplate *)albumTemplate {
+	return albumTemplate;
 }
 
 -(NSString *)emptyIfNil:(NSString *)aString {

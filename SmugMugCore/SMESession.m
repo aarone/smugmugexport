@@ -292,6 +292,33 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	return resp;
 }
 
+#pragma mark Fetch Album Templates
+-(void)fetchAlbumTemplatesWithTarget:(id)target
+							callback:(SEL)callback {
+	[self validateSessionId];
+	[self invokeMethodAndTransform:[self baseRequestUrl]
+					   requestDict:[NSDictionary dictionaryWithObjectsAndKeys:
+									@"smugmug.albumtemplates.get", @"method",
+									[self sessionID], @"SessionID", nil]
+						  callback:callback
+							target:target
+					   transformer:self
+					  transformSel:@selector(transformAlbumTemplatesRequest:)];
+}
+
+- (SMEResponse *)transformAlbumTemplatesRequest:(SMEMethodRequest *)req {
+	SMEResponse *resp = [SMEResponse responseWithCompletedRequest:req decoder:[self decoder]];
+	
+	NSMutableArray *result = [NSMutableArray array];
+	NSEnumerator *albumTemplateEnum = [[[resp decodedResponse] objectForKey:@"AlbumTemplates"] objectEnumerator];
+	NSDictionary *albumTemplateDict = nil;
+	while(albumTemplateDict = [albumTemplateEnum nextObject])
+		[result addObject:[SMEAlbumTemplate albumWithDictionary:[NSMutableDictionary dictionaryWithDictionary:albumTemplateDict]]];
+	
+	[resp setSMData:[NSArray arrayWithArray:result]];
+	return resp;
+}
+
 #pragma mark Fetch Categories
 -(void)fetchCategoriesWithTarget:(id)target callback:(SEL)callback {
 	[self validateSessionId];

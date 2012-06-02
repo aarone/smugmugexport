@@ -49,6 +49,7 @@
 	NSArray *albums;
 	NSArray *categories;
 	NSArray *subcategories;
+	NSArray *albumTemplates;
 	SMEAccountInfo *accountInfo;
 	
 	NSInvocation *postLogoutInvocation; // do this after a logout is complete

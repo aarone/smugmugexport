@@ -28,6 +28,9 @@ extern NSString *SMEnableAlbumFetchDelay;
 // jpeg quality factor v to use when scaling images v : 0 <= v <= 1 
 extern NSString *SMJpegQualityFactor;
 
+// the last selected album template ID ("quick setting")
+extern NSString *SMEAlbumTemplateID;
+
 extern NSString *SMUploadedFilename;
 extern NSString *SMUploadedFilenameOptionFilename;
 extern NSString *SMUploadedFilenameOptionTitle;
