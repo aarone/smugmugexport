@@ -782,11 +782,18 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 -(void)albumFetchComplete:(SMEResponse *)resp {
 	if(![self commonPostAlbumFetchTasks:resp])
 		return;
-	
-	// typically, after we fetch a list of albums, we select the top-most albums;
-	// if we don't want to do that, we use the callback albumFetchFromEditDidComplete: when
-	// fetching albums
-	[albumsArrayController setSelectionIndex:0]; 
+
+	if (albumToSelect != nil) {
+		// default to selecting the new album
+		[albumsArrayController setSelectedObjects:[NSArray arrayWithObject:albumToSelect]];
+		[albumToSelect release];
+		albumToSelect = nil;
+	} else {
+		// typically, after we fetch a list of albums, we select the top-most albums;
+		// if we don't want to do that, we use the callback albumFetchFromEditDidComplete: when
+		// fetching albums
+		[albumsArrayController setSelectionIndex:0];
+	}
 }
 
 #pragma mark Logout 
@@ -889,8 +896,9 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 	[[self albumEditController] setIsBusy:NO];
 
 	if([resp wasSuccessful]) {
+		[albumToSelect release];
+		albumToSelect = [[SMEConciseAlbum alloc] initWithDictionary:[[resp decodedResponse] objectForKey:@"Album"]];
 		[albumEditController closeSheet];
-		[albumsArrayController setSelectionIndex:0]; // default to selecting the new album which should be album 0
 
 		// refresh list of albums
 		[[self session] fetchAlbumsWithTarget:self callback:@selector(albumFetchComplete:)];
