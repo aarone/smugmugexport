@@ -100,7 +100,6 @@
 
 -(NSURL *)baseRequestUrl;
 -(void)setBaseRequestURL:(NSURL *)aURL;
--(NSDictionary *)defaultNewAlbumPreferences;
 -(void)newAlbumCreationDidComplete:(SMEMethodRequest *)req;
 -(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey;
 -(SMEMethodRequest *)createRequest;

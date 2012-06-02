@@ -41,7 +41,6 @@
 	NSImage *currentThumbnail;
 	NSString *imageUploadProgressText; // below the thumbnail..
 	NSURL *uploadSiteUrl;
-	NSMutableDictionary *newAlbumPreferences;
 	
 	SMEGrowlDelegate *growlDelegate;
 	SMESession *session;
