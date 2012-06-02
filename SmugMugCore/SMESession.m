@@ -283,7 +283,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	SMEResponse *resp = [SMEResponse responseWithCompletedRequest:req decoder:[self decoder]];
 
 	NSMutableArray *result = [NSMutableArray array];
-	NSEnumerator *albumEnum = [[[resp decodedResponse] objectForKey:@"Albums"] objectEnumerator];
+	// albums are (approximately) sorted oldest first; reverse this so the latest album is at the top of the list
+	NSEnumerator *albumEnum = [[[resp decodedResponse] objectForKey:@"Albums"] reverseObjectEnumerator];
 	NSDictionary *albumDict = nil;
 	while(albumDict = [albumEnum nextObject])
 		[result addObject:[SMEConciseAlbum albumWithDictionary:[NSMutableDictionary dictionaryWithDictionary:albumDict]]];
