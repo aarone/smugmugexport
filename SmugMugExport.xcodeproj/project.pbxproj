@@ -377,7 +377,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB913E08733D840010E9CD /* Build configuration list for PBXProject "SmugMugExport" */;
 			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 089C166AFE841209C02AAC07 /* smugmugExport */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -415,7 +422,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/bash\n\nDST=/Applications/iPhoto.app/Contents/PlugIns\nPREV_EXPORTER=$DST/SmugMugExport.iPhotoExporter\nNEW_EXPORTER=$TARGET_BUILD_DIR/SmugMugExport.iPhotoExporter\n\nmkdir -p \"${DST}\"\n\necho \"rm -Rf $PREV_EXPORTER && cp -R $NEW_EXPORTER $DST\"\nrm -Rf \"$PREV_EXPORTER\" && cp -R $NEW_EXPORTER \"$DST\"\n";
+			shellScript = "#!/bin/bash\n\n/usr/local/bin/appswitch -qi com.apple.iPhoto\n\nDST=\"$HOME/Library/Application Support/iPhoto/Plugins\"\nPREV_EXPORTER=\"$DST/SmugMugExport.iPhotoExporter\"\nNEW_EXPORTER=\"$TARGET_BUILD_DIR/SmugMugExport.iPhotoExporter\"\n\nmkdir -p \"$DST\"\nrm -Rf \"$PREV_EXPORTER\" && cp -R \"$NEW_EXPORTER\" \"$DST\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
