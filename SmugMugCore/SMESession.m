@@ -125,8 +125,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	return [[aDict objectForKey:@"id"] intValue] - [[self objectForKey:@"id"] intValue];
 }
 
--(NSComparisonResult)compareByTitle:(NSDictionary *)aDict {
-	return [[self objectForKey:@"Title"] caseInsensitiveCompare:[aDict objectForKey:@"Title"]];
+-(NSComparisonResult)compareByName:(NSDictionary *)aDict {
+	return [[self objectForKey:@"Name"] caseInsensitiveCompare:[aDict objectForKey:@"Name"]];
 }
 @end
 
@@ -344,7 +344,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	
 	NSMutableArray *returnedCategories = [NSMutableArray arrayWithArray:[[resp decodedResponse] objectForKey:categoryKey]];
 	
-	[returnedCategories sortUsingSelector:@selector(compareByTitle:)];
+	[returnedCategories sortUsingSelector:@selector(compareByName:)];
 	NSEnumerator *e = [returnedCategories objectEnumerator];
 	NSDictionary *dict = nil;
 	NSMutableArray *result = [NSMutableArray array];

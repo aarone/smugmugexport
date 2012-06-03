@@ -14,7 +14,7 @@
 +(SMECategory *)nullCategory {
 	return [[[[self class] alloc] initWithSourceData:[NSDictionary dictionaryWithObjectsAndKeys:
 			 [NSNumber numberWithInt:0], @"id",
-				NSLocalizedString(@"No Value", @"Null category title"), @"Title",nil]] autorelease];
+				NSLocalizedString(@"(no category)", @"Null category name"), @"Name", nil]] autorelease];
 }
 
 -(void)dealloc {
@@ -23,15 +23,15 @@
 }
 
 -(NSString *)description {
-	return [self title];
+	return [self name];
 }
 
 -(unsigned int)identifier  {
 	return [[[self sourceData] objectForKey:@"id"] intValue];
 }
 
--(NSString *)title {
-	return [[self sourceData] objectForKey:@"Title"];
+-(NSString *)name {
+	return [[self sourceData] objectForKey:@"Name"];
 }
 
 -(NSDictionary *)toDict {

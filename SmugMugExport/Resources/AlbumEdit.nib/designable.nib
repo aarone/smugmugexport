@@ -818,6 +818,7 @@
 					<string>id</string>
 					<string>childSubCategories</string>
 					<string>childSubCategories.title</string>
+					<string>name</string>
 				</object>
 				<bool key="NSEditable">YES</bool>
 				<object class="_NSManagedProxy" key="_NSManagedProxy"/>
@@ -866,6 +867,7 @@
 					<string>hasChanges</string>
 					<string>albumTemplates</string>
 					<string>subcategories.count</string>
+					<string>subcategories.name</string>
 				</object>
 				<string key="NSObjectClassName">SMEAlbumEditController</string>
 				<bool key="NSEditable">YES</bool>
@@ -1501,40 +1503,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">contentValues: arrangedObjects.title</string>
-						<reference key="source" ref="146330009"/>
-						<reference key="destination" ref="437780869"/>
-						<object class="NSNibBindingConnector" key="connector" id="155363669">
-							<reference key="NSSource" ref="146330009"/>
-							<reference key="NSDestination" ref="437780869"/>
-							<string key="NSLabel">contentValues: arrangedObjects.title</string>
-							<string key="NSBinding">contentValues</string>
-							<string key="NSKeyPath">arrangedObjects.title</string>
-							<reference key="NSPreviousConnector" ref="152751599"/>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">422</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">selectedObject: selection.category</string>
-						<reference key="source" ref="146330009"/>
-						<reference key="destination" ref="301160889"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="146330009"/>
-							<reference key="NSDestination" ref="301160889"/>
-							<string key="NSLabel">selectedObject: selection.category</string>
-							<string key="NSBinding">selectedObject</string>
-							<string key="NSKeyPath">selection.category</string>
-							<reference key="NSPreviousConnector" ref="155363669"/>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">423</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
 						<string key="label">content: selection.subcategories</string>
 						<reference key="source" ref="36640410"/>
 						<reference key="destination" ref="350046097"/>
@@ -1548,40 +1516,6 @@
 						</object>
 					</object>
 					<int key="connectionID">442</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">contentValues: selection.subcategories.title</string>
-						<reference key="source" ref="36640410"/>
-						<reference key="destination" ref="350046097"/>
-						<object class="NSNibBindingConnector" key="connector" id="1059344346">
-							<reference key="NSSource" ref="36640410"/>
-							<reference key="NSDestination" ref="350046097"/>
-							<string key="NSLabel">contentValues: selection.subcategories.title</string>
-							<string key="NSBinding">contentValues</string>
-							<string key="NSKeyPath">selection.subcategories.title</string>
-							<reference key="NSPreviousConnector" ref="1011068976"/>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">443</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">selectedObject: selection.subCategory</string>
-						<reference key="source" ref="36640410"/>
-						<reference key="destination" ref="301160889"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="36640410"/>
-							<reference key="NSDestination" ref="301160889"/>
-							<string key="NSLabel">selectedObject: selection.subCategory</string>
-							<string key="NSBinding">selectedObject</string>
-							<string key="NSKeyPath">selection.subCategory</string>
-							<reference key="NSPreviousConnector" ref="1059344346"/>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">444</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -1619,6 +1553,74 @@
 						</object>
 					</object>
 					<int key="connectionID">457</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">contentValues: arrangedObjects.name</string>
+						<reference key="source" ref="146330009"/>
+						<reference key="destination" ref="437780869"/>
+						<object class="NSNibBindingConnector" key="connector" id="1004640245">
+							<reference key="NSSource" ref="146330009"/>
+							<reference key="NSDestination" ref="437780869"/>
+							<string key="NSLabel">contentValues: arrangedObjects.name</string>
+							<string key="NSBinding">contentValues</string>
+							<string key="NSKeyPath">arrangedObjects.name</string>
+							<reference key="NSPreviousConnector" ref="152751599"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">458</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">selectedObject: selection.category</string>
+						<reference key="source" ref="146330009"/>
+						<reference key="destination" ref="301160889"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="146330009"/>
+							<reference key="NSDestination" ref="301160889"/>
+							<string key="NSLabel">selectedObject: selection.category</string>
+							<string key="NSBinding">selectedObject</string>
+							<string key="NSKeyPath">selection.category</string>
+							<reference key="NSPreviousConnector" ref="1004640245"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">459</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">contentValues: selection.subcategories.name</string>
+						<reference key="source" ref="36640410"/>
+						<reference key="destination" ref="350046097"/>
+						<object class="NSNibBindingConnector" key="connector" id="125134950">
+							<reference key="NSSource" ref="36640410"/>
+							<reference key="NSDestination" ref="350046097"/>
+							<string key="NSLabel">contentValues: selection.subcategories.name</string>
+							<string key="NSBinding">contentValues</string>
+							<string key="NSKeyPath">selection.subcategories.name</string>
+							<reference key="NSPreviousConnector" ref="1011068976"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">460</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">selectedObject: selection.subCategory</string>
+						<reference key="source" ref="36640410"/>
+						<reference key="destination" ref="301160889"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="36640410"/>
+							<reference key="NSDestination" ref="301160889"/>
+							<string key="NSLabel">selectedObject: selection.subCategory</string>
+							<string key="NSBinding">selectedObject</string>
+							<string key="NSKeyPath">selection.subCategory</string>
+							<reference key="NSPreviousConnector" ref="125134950"/>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">461</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -2489,7 +2491,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">457</int>
+			<int key="maxID">461</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
