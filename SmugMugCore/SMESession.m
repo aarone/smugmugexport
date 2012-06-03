@@ -142,7 +142,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 +(SMESession *)session {
-	NSURL *defaultBaseUrl = [NSURL URLWithString:@"https://api.smugmug.com/hack/json/1.2.0/"];
+	NSURL *defaultBaseUrl = [NSURL URLWithString:@"https://api.smugmug.com/services/api/json/1.2.2/"];
 	return [[[[self class] alloc] initWithAPIBaseURL:defaultBaseUrl] autorelease];
 }
 
@@ -271,6 +271,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	[self invokeMethodAndTransform:[self baseRequestUrl]
 					   requestDict:[NSDictionary dictionaryWithObjectsAndKeys:
 									@"smugmug.albums.get", @"method",
+									@"LastUpdated", @"Extras",
 									[self sessionID], @"SessionID", nil]
 						  callback:callback
 							target:target
@@ -282,11 +283,11 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	SMEResponse *resp = [SMEResponse responseWithCompletedRequest:req decoder:[self decoder]];
 
 	NSMutableArray *result = [NSMutableArray array];
-	// albums are (approximately) sorted oldest first; reverse this so the latest album is at the top of the list
-	NSEnumerator *albumEnum = [[[resp decodedResponse] objectForKey:@"Albums"] reverseObjectEnumerator];
+	NSEnumerator *albumEnum = [[[resp decodedResponse] objectForKey:@"Albums"] objectEnumerator];
 	NSDictionary *albumDict = nil;
 	while(albumDict = [albumEnum nextObject])
 		[result addObject:[SMEConciseAlbum albumWithDictionary:[NSMutableDictionary dictionaryWithDictionary:albumDict]]];
+	[result sortUsingSelector:@selector(compareLastUpdated:)];
 	
 	[resp setSMData:[NSArray arrayWithArray:result]];
 	return resp;

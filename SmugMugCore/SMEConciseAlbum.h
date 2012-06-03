@@ -25,6 +25,7 @@
 
 -(NSString *)albumKey;
 -(NSString *)albumId;
+-(NSString *)lastUpdated;
 -(NSString *)title;
 -(void)setTitle:(NSString *)title;
 -(SMEAlbumRef *)ref;
@@ -40,5 +41,7 @@
 
 -(NSDictionary *)categoryDict;
 -(NSDictionary *)subCategoryDict;
+
+-(NSComparisonResult)compareLastUpdated:(SMEConciseAlbum *)other;
 
 @end
