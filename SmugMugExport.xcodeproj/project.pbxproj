@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 42;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -67,7 +67,7 @@
 		1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		930961BA0C66A164002B8DAA /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
 		930DE5BE0B4831D2008120ED /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
-		93188D970DE9D5C600DBC3FC /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		93188D970DE9D5C600DBC3FC /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = /System/Library/Frameworks/SenTestingKit.framework; sourceTree = "<absolute>"; };
 		9353D6030F62CA7D008EA255 /* iPhoto.6.classdump */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = iPhoto.6.classdump; sourceTree = "<group>"; };
 		9353D6040F62CA7D008EA255 /* iPhoto.7.classdump */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = iPhoto.7.classdump; sourceTree = "<group>"; };
 		9353D6050F62CA7D008EA255 /* iPhoto.8.classdump */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = iPhoto.8.classdump; sourceTree = "<group>"; };
@@ -370,16 +370,9 @@
 /* Begin PBXProject section */
 		089C1669FE841209C02AAC07 /* Project object */ = {
 			isa = PBXProject;
-			attributes = {
-				LastUpgradeCheck = 0420;
-			};
 			buildConfigurationList = 1DEB913E08733D840010E9CD /* Build configuration list for PBXProject "SmugMugExport" */;
-			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
-			knownRegions = (
-				en,
-			);
 			mainGroup = 089C166AFE841209C02AAC07 /* smugmugExport */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -417,8 +410,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/bash\n\nPLUGINS_DIR=/Applications/iPhoto.app/Contents/PlugIns\nDEST_EXPORTER=$PLUGINS_DIR/SmugMugExport.iPhotoExporter\nBUILT_EXPORTER=$TARGET_BUILD_DIR/SmugMugExport.iPhotoExporter\n\necho \"cp -R $BUILT_EXPORTER $PLUGINS_DIR/\"\nrm -Rf $DEST_EXPORTER && cp -R $BUILT_EXPORTER \"$PLUGINS_DIR/\"";
-			showEnvVarsInLog = 0;
+			shellScript = "#!/bin/bash\n\nDST=/Applications/iPhoto.app/Contents/PlugIns\nPREV_EXPORTER=$DST/SmugMugExport.iPhotoExporter\nNEW_EXPORTER=$TARGET_BUILD_DIR/SmugMugExport.iPhotoExporter\n\nmkdir -p \"${DST}\"\n\necho \"rm -Rf $PREV_EXPORTER && cp -R $NEW_EXPORTER $DST\"\nrm -Rf \"$PREV_EXPORTER\" && cp -R $NEW_EXPORTER \"$DST\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -465,9 +457,8 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				SDKROOT = macosx10.6;
-				VALID_ARCHS = i386;
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Debug;
 		};
@@ -477,9 +468,8 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				SDKROOT = macosx10.6;
-				VALID_ARCHS = i386;
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Release;
 		};
@@ -489,13 +479,25 @@
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 17;
-				FRAMEWORK_SEARCH_PATHS = "\"$(SRCROOT)/SmugMugExport/Resources/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_3)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_4)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/Resources/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/Resources/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_3 = "\"$(DEVELOPER_FRAMEWORKS_DIR)\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_4 = "\"$(SRCROOT)/SmugMugExport/Resources/Frameworks\"";
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_VERSION = 4.0;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
@@ -508,11 +510,12 @@
 					"-weak_framework",
 					Growl,
 				);
+				PREBINDING = NO;
 				PRODUCT_NAME = SmugMugExport;
-				USER_HEADER_SEARCH_PATHS = "\"$SRCROOT/SmugMugExport/Resources/Frameworks\"";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = SME;
 				WRAPPER_EXTENSION = iPhotoExporter;
+				ZERO_LINK = YES;
 			};
 			name = Debug;
 		};
@@ -526,11 +529,23 @@
 				);
 				COPY_PHASE_STRIP = YES;
 				CURRENT_PROJECT_VERSION = 17;
-				FRAMEWORK_SEARCH_PATHS = "\"$(SRCROOT)/SmugMugExport/Resources/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_3)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_4)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/Resources/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/Resources/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_3 = "\"$(DEVELOPER_FRAMEWORKS_DIR)\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_4 = "\"$(SRCROOT)/SmugMugExport/Resources/Frameworks\"";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_VERSION = 4.0;
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "SmugMugExport/Resources/SmugMugExport-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
@@ -540,11 +555,12 @@
 					"-weak_framework",
 					Growl,
 				);
+				PREBINDING = NO;
 				PRODUCT_NAME = SmugMugExport;
-				USER_HEADER_SEARCH_PATHS = "\"$SRCROOT/SmugMugExport/Resources/Frameworks\"";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = SME;
 				WRAPPER_EXTENSION = iPhotoExporter;
+				ZERO_LINK = NO;
 			};
 			name = Release;
 		};

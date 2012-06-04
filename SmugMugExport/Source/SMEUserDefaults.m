@@ -43,7 +43,7 @@ static SMEUserDefaults *sharedSMUserDefaults = nil;
     return UINT_MAX;  //denotes an object that cannot be released
 }
 
-- (oneway void)release {
+- (void)release {
     //do nothing
 }
 
