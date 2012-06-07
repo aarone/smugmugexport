@@ -14,7 +14,7 @@
 #import "ExportPluginProtocol.h"
 #import "SMESession.h"
 
-@class SMESession, ExportMgr, SMEAccountManager, SMEAlbumEditController, SMEAccountInfo, SMEGrowlDelegate, SMEAccountInfo;
+@class SMESession, ExportMgr, SMEAccountManager, SMEAlbumEditController, SMEAccountInfo, SMEGrowlDelegate, SMEAccountInfo, SMEConciseAlbum;
 @protocol ExportPluginProtocol, SMESessionDelegate;
 
 @interface SMEExportPlugin : NSObject <ExportPluginProtocol, SMEUploadObserver> {
@@ -41,7 +41,6 @@
 	NSImage *currentThumbnail;
 	NSString *imageUploadProgressText; // below the thumbnail..
 	NSURL *uploadSiteUrl;
-	NSMutableDictionary *newAlbumPreferences;
 	
 	SMEGrowlDelegate *growlDelegate;
 	SMESession *session;
@@ -50,6 +49,7 @@
 	NSArray *albums;
 	NSArray *categories;
 	NSArray *subcategories;
+	NSArray *albumTemplates;
 	SMEAccountInfo *accountInfo;
 	
 	NSInvocation *postLogoutInvocation; // do this after a logout is complete
@@ -68,6 +68,7 @@
 	BOOL isUpdateInProgress;
 	int imagesUploaded;
 	int albumUrlFetchAttemptCount;
+	SMEConciseAlbum *albumToSelect; // when album fetch completes
 	
 	ExportMgr *exportManager;
 	SMEAccountManager *accountManager;

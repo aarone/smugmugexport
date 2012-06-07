@@ -12,6 +12,7 @@
 #import "SMEAlbum.h"
 #import "SMECategory.h"
 #import "SMESubCategory.h"
+#import "SMEUserDefaultsAdditions.h"
 
 @interface SMEAlbumEditController (Private) 
 -(NSArray *)categories;
@@ -52,7 +53,8 @@
 }
 
 -(void)awakeFromNib {
-	[self addObserver:self forKeyPath:@"album.category" options:NSKeyValueObservingOptionNew context:NULL];	
+	[self addObserver:self forKeyPath:@"album.category" options:NSKeyValueObservingOptionNew context:NULL];
+	[self addObserver:self forKeyPath:@"album.albumTemplate" options:NSKeyValueObservingOptionNew context:NULL];
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
@@ -62,7 +64,13 @@
 		}
 		[self willChangeValueForKey:@"subcategories"];
 		[self didChangeValueForKey:@"subcategories"];
-
+	} else if([keyPath isEqualToString:@"album.albumTemplate"]) {
+		if(album == nil)
+			return;
+		NSString *albumTemplateId = [[album albumTemplate] albumId];
+		if(albumTemplateId == nil)
+			return;
+		[[NSUserDefaults smugMugUserDefaults] setObject:[[album albumTemplate] albumId] forKey:SMEAlbumTemplateID];
 	}
 }
 
@@ -217,7 +225,7 @@
 		return [[[self album] category] childSubCategories];
 	}
 
- 	// otherwise, add a placehold subcategory for 'No Value'
+ 	// otherwise, add a placeholder subcategory
 	NSMutableArray *result = [NSMutableArray arrayWithArray:[[[self album] category] childSubCategories]];
 	SMESubCategory *nullSubCategory = [SMESubCategory nullSubCategory];
 	if([result containsObject:nullSubCategory])
@@ -225,6 +233,10 @@
 
 	[result addObject:nullSubCategory];
 	return [NSArray arrayWithArray:result];	
+}
+
+-(NSArray *)albumTemplates {
+	return [[self delegate] albumTemplates];
 }
 
 -(NSString *)statusText {

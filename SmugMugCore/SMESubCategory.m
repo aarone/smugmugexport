@@ -14,7 +14,7 @@
 +(SMESubCategory *)nullSubCategory {
 	return [[[[self class] alloc] initWithSourceData:[NSDictionary dictionaryWithObjectsAndKeys:
 										 [NSNumber numberWithInt:0], @"id",
-										 NSLocalizedString(@"No Value", @"null subcategory name"), @"Title",
+										 NSLocalizedString(@"(no subcategory)", @"null subcategory name"), @"Name",
 										 [SMECategory nullCategory], @"Category",
 													 nil]] autorelease];
 }

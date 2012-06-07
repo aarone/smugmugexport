@@ -62,6 +62,9 @@
 /* response has an array of SMESubCategory */
 -(void)fetchSubCategoriesWithTarget:(id)target callback:(SEL)callback;
 
+/* response has an array of SMEAlbumTemplate */
+-(void)fetchAlbumTemplatesWithTarget:(id)target callback:(SEL)callback;
+
 /* response has no domain specific representation */
 -(void)deleteAlbum:(SMEAlbumRef *)ref withTarget:(id)target callback:(SEL)callback;
 

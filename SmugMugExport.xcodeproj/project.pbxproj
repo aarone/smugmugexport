@@ -44,6 +44,7 @@
 		93DE06B00DE990ED0029F0FA /* JSON.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 93DE06380DE98DD60029F0FA /* JSON.framework */; };
 		93EFC25B0F5F6D5500BAB971 /* SMEKeychainManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EFC25A0F5F6D5500BAB971 /* SMEKeychainManager.m */; };
 		93EFC25E0F5F6D5F00BAB971 /* SMEDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 93EFC25C0F5F6D5F00BAB971 /* SMEDataAdditions.m */; };
+		E1DF1436157A8F0F002F9A9E /* SMEAlbumTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = E1DF1435157A8F0F002F9A9E /* SMEAlbumTemplate.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -142,6 +143,8 @@
 		93EFC25A0F5F6D5500BAB971 /* SMEKeychainManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEKeychainManager.m; path = SmugMugCore/SMEKeychainManager.m; sourceTree = "<group>"; };
 		93EFC25C0F5F6D5F00BAB971 /* SMEDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMEDataAdditions.m; path = SmugMugCore/SMEDataAdditions.m; sourceTree = "<group>"; };
 		93EFC25D0F5F6D5F00BAB971 /* SMEDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMEDataAdditions.h; path = SmugMugCore/SMEDataAdditions.h; sourceTree = "<group>"; };
+		E1DF1434157A8F0F002F9A9E /* SMEAlbumTemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMEAlbumTemplate.h; sourceTree = "<group>"; };
+		E1DF1435157A8F0F002F9A9E /* SMEAlbumTemplate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMEAlbumTemplate.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -311,6 +314,8 @@
 				93DBD7D30F5E1BB000E1265C /* SMEAlbum.m */,
 				93DBD7D40F5E1BB000E1265C /* SMEAlbumRef.h */,
 				93DBD7D50F5E1BB000E1265C /* SMEAlbumRef.m */,
+				E1DF1434157A8F0F002F9A9E /* SMEAlbumTemplate.h */,
+				E1DF1435157A8F0F002F9A9E /* SMEAlbumTemplate.m */,
 				93DBD7D60F5E1BB000E1265C /* SMECategory.h */,
 				93DBD7D70F5E1BB000E1265C /* SMECategory.m */,
 				93DBD7D80F5E1BB000E1265C /* SMEConciseAlbum.h */,
@@ -372,7 +377,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB913E08733D840010E9CD /* Build configuration list for PBXProject "SmugMugExport" */;
 			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 089C166AFE841209C02AAC07 /* smugmugExport */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -410,7 +422,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/bash\n\nDST=/Applications/iPhoto.app/Contents/PlugIns\nPREV_EXPORTER=$DST/SmugMugExport.iPhotoExporter\nNEW_EXPORTER=$TARGET_BUILD_DIR/SmugMugExport.iPhotoExporter\n\nmkdir -p \"${DST}\"\n\necho \"rm -Rf $PREV_EXPORTER && cp -R $NEW_EXPORTER $DST\"\nrm -Rf \"$PREV_EXPORTER\" && cp -R $NEW_EXPORTER \"$DST\"\n";
+			shellScript = "#!/bin/bash\n\n/usr/local/bin/appswitch -qi com.apple.iPhoto\n\nDST=\"$HOME/Library/Application Support/iPhoto/Plugins\"\nPREV_EXPORTER=\"$DST/SmugMugExport.iPhotoExporter\"\nNEW_EXPORTER=\"$TARGET_BUILD_DIR/SmugMugExport.iPhotoExporter\"\n\nmkdir -p \"$DST\"\nrm -Rf \"$PREV_EXPORTER\" && cp -R \"$NEW_EXPORTER\" \"$DST\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -445,6 +457,7 @@
 				93DBD81C0F5E1BFA00E1265C /* SMEUserDefaultsAdditions.m in Sources */,
 				93EFC25B0F5F6D5500BAB971 /* SMEKeychainManager.m in Sources */,
 				93EFC25E0F5F6D5F00BAB971 /* SMEDataAdditions.m in Sources */,
+				E1DF1436157A8F0F002F9A9E /* SMEAlbumTemplate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
