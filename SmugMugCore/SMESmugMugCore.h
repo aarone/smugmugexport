@@ -5,6 +5,7 @@
 #import "SMEAccountInfo.h"
 #import "SMEAlbum.h"
 #import "SMEAlbumRef.h"
+#import "SMEAlbumTemplate.h"
 #import "SMECategory.h"
 #import "SMEConciseAlbum.h"
 #import "SMEData.h"

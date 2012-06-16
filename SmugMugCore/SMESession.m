@@ -100,7 +100,6 @@
 
 -(NSURL *)baseRequestUrl;
 -(void)setBaseRequestURL:(NSURL *)aURL;
--(NSDictionary *)defaultNewAlbumPreferences;
 -(void)newAlbumCreationDidComplete:(SMEMethodRequest *)req;
 -(NSString *)smugMugNewAlbumKeyForPref:(NSString *)preferenceKey;
 -(SMEMethodRequest *)createRequest;
@@ -126,8 +125,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	return [[aDict objectForKey:@"id"] intValue] - [[self objectForKey:@"id"] intValue];
 }
 
--(NSComparisonResult)compareByTitle:(NSDictionary *)aDict {
-	return [[self objectForKey:@"Title"] caseInsensitiveCompare:[aDict objectForKey:@"Title"]];
+-(NSComparisonResult)compareByName:(NSDictionary *)aDict {
+	return [[self objectForKey:@"Name"] caseInsensitiveCompare:[aDict objectForKey:@"Name"]];
 }
 @end
 
@@ -143,7 +142,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 +(SMESession *)session {
-	NSURL *defaultBaseUrl = [NSURL URLWithString:@"https://api.smugmug.com/hack/json/1.2.0/"];
+	NSURL *defaultBaseUrl = [NSURL URLWithString:@"https://api.smugmug.com/services/api/json/1.2.2/"];
 	return [[[[self class] alloc] initWithAPIBaseURL:defaultBaseUrl] autorelease];
 }
 
@@ -272,6 +271,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	[self invokeMethodAndTransform:[self baseRequestUrl]
 					   requestDict:[NSDictionary dictionaryWithObjectsAndKeys:
 									@"smugmug.albums.get", @"method",
+									@"LastUpdated", @"Extras",
 									[self sessionID], @"SessionID", nil]
 						  callback:callback
 							target:target
@@ -287,6 +287,34 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	NSDictionary *albumDict = nil;
 	while(albumDict = [albumEnum nextObject])
 		[result addObject:[SMEConciseAlbum albumWithDictionary:[NSMutableDictionary dictionaryWithDictionary:albumDict]]];
+	[result sortUsingSelector:@selector(compareLastUpdated:)];
+	
+	[resp setSMData:[NSArray arrayWithArray:result]];
+	return resp;
+}
+
+#pragma mark Fetch Album Templates
+-(void)fetchAlbumTemplatesWithTarget:(id)target
+							callback:(SEL)callback {
+	[self validateSessionId];
+	[self invokeMethodAndTransform:[self baseRequestUrl]
+					   requestDict:[NSDictionary dictionaryWithObjectsAndKeys:
+									@"smugmug.albumtemplates.get", @"method",
+									[self sessionID], @"SessionID", nil]
+						  callback:callback
+							target:target
+					   transformer:self
+					  transformSel:@selector(transformAlbumTemplatesRequest:)];
+}
+
+- (SMEResponse *)transformAlbumTemplatesRequest:(SMEMethodRequest *)req {
+	SMEResponse *resp = [SMEResponse responseWithCompletedRequest:req decoder:[self decoder]];
+	
+	NSMutableArray *result = [NSMutableArray array];
+	NSEnumerator *albumTemplateEnum = [[[resp decodedResponse] objectForKey:@"AlbumTemplates"] objectEnumerator];
+	NSDictionary *albumTemplateDict = nil;
+	while(albumTemplateDict = [albumTemplateEnum nextObject])
+		[result addObject:[SMEAlbumTemplate albumWithDictionary:[NSMutableDictionary dictionaryWithDictionary:albumTemplateDict]]];
 	
 	[resp setSMData:[NSArray arrayWithArray:result]];
 	return resp;
@@ -316,7 +344,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	
 	NSMutableArray *returnedCategories = [NSMutableArray arrayWithArray:[[resp decodedResponse] objectForKey:categoryKey]];
 	
-	[returnedCategories sortUsingSelector:@selector(compareByTitle:)];
+	[returnedCategories sortUsingSelector:@selector(compareByName:)];
 	NSEnumerator *e = [returnedCategories objectEnumerator];
 	NSDictionary *dict = nil;
 	NSMutableArray *result = [NSMutableArray array];

@@ -15,9 +15,10 @@
 @end
 
 
-@class SMEAlbumRef, SMESubCategory, SMECategory;
+@class SMEAlbumRef, SMEAlbumTemplate, SMESubCategory, SMECategory;
 
 @interface SMEAlbum : SMEConciseAlbum {
+	SMEAlbumTemplate *albumTemplate;
 }
 
 -(id)initWithDictionary:(NSMutableDictionary *)dict;
@@ -49,6 +50,9 @@
 -(void)setDisplaysEXIFInfo:(BOOL)v;
 -(BOOL)allowsFamilyToEdit;
 -(void)setAllowsFamilyToEdit:(BOOL)v;
+
+-(SMEAlbumTemplate *)albumTemplate;
+-(void)setAlbumTemplate:(SMEAlbumTemplate *)t;
 
 // album representations are not equivalent for GET and PUTs
 -(NSDictionary *)toEditDictionary;

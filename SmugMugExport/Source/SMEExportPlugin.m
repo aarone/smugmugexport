@@ -37,7 +37,10 @@
 -(void)setCategories:(NSArray *)v;
 
 -(NSArray *)subcategories;
--(void)setSubcategories:(NSArray *)v;	
+-(void)setSubcategories:(NSArray *)v;
+
+-(NSArray *)albumTemplates;
+-(void)setAlbumTemplates:(NSArray *)t;
 
 -(SMESession *)session;
 -(void)setSession:(SMESession *)m;
@@ -218,6 +221,7 @@ NSString *SMUpdateCheckInterval = @"SMUpdateCheckInterval";
 NSString *SMContinueUploadOnFileIOError = @"SMContinueUploadOnFileIOError";
 NSString *SMECaptionFormatString = @"SMECaptionFormatString";
 NSString *SMEUploadToVault = @"SMEUploadToVault";
+NSString *SMEAlbumTemplateID = @"SMEAlbumTemplateID";
 
 static const int AlbumUrlFetchRetryCount = 5;
 static const int SMDefaultScaledHeight = 2592;
@@ -576,9 +580,9 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 
 -(NSString *)loginLogoutToggleButtonText {
 	return [self isLoggedIn] ?
-		NSLocalizedString(@"Logout", @"Text to display in login/logout toggle button when logged in")
+		NSLocalizedString(@"Log Out", @"Text to display in login/logout toggle button when logged in")
 	:
-		NSLocalizedString(@"Login", @"Text to display in login/logout toggle button when logged out");
+		NSLocalizedString(@"Log In", @"Text to display in login/logout toggle button when logged out");
 }
 
 -(IBAction)toggleLoginLogout:(id)sender {
@@ -710,8 +714,8 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 }
 
 -(BOOL)commonPostLoginTasks:(SMEResponse *)response {
-	[self setIsBusy:NO];
 	[self setStatusText:@""];
+	[self setIsBusy:NO];
 	[self setIsLoggingIn:NO];
 	[self setLoginSheetStatusMessage:@""];
 
@@ -733,13 +737,25 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 		return NO;
 	}
 	[self setIsLoggedIn:YES];
+	
+	[self setBusyWithStatus:NSLocalizedString(@"Retrieving gallery information...", @"Status text for album/category/template retrieval")];
+
 	[self setAccountInfo:(SMEAccountInfo *)[response smData]];
 	[self setCategories:nil];
 	[self setSubcategories:nil];
+	[self setAlbumTemplates:nil];
 	[[self session] fetchAlbumsWithTarget:self callback:@selector(albumFetchComplete:)];
 	[[self session] fetchCategoriesWithTarget:self callback:@selector(categoryFetchComplete:)];
 	[[self session] fetchSubCategoriesWithTarget:self callback:@selector(subcategoryFetchDidComplete:)];
+	[[self session] fetchAlbumTemplatesWithTarget:self callback:@selector(albumTemplateFetchDidComplete:)];
 	return YES;
+}
+
+-(void)checkPostLoginTasksComplete {
+	if (!albums || !categories || !subcategories || !albumTemplates)
+		return;
+	[self setStatusText:@""];
+	[self setIsBusy:NO];
 }
 
 -(void)autoLoginComplete:(SMEResponse *)response {
@@ -782,11 +798,19 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 -(void)albumFetchComplete:(SMEResponse *)resp {
 	if(![self commonPostAlbumFetchTasks:resp])
 		return;
-	
-	// typically, after we fetch a list of albums, we select the top-most albums;
-	// if we don't want to do that, we use the callback albumFetchFromEditDidComplete: when
-	// fetching albums
-	[albumsArrayController setSelectionIndex:0]; 
+
+	if (albumToSelect != nil) {
+		// default to selecting the new album
+		[albumsArrayController setSelectedObjects:[NSArray arrayWithObject:albumToSelect]];
+		[albumToSelect release];
+		albumToSelect = nil;
+	} else {
+		// typically, after we fetch a list of albums, we select the top-most albums;
+		// if we don't want to do that, we use the callback albumFetchFromEditDidComplete: when
+		// fetching albums
+		[albumsArrayController setSelectionIndex:0];
+	}
+	[self checkPostLoginTasksComplete];
 }
 
 #pragma mark Logout 
@@ -871,7 +895,19 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 		return;
 	}
 	
-	[albumEditController showAlbumCreateSheet:[SMEAlbum album] delegate:self forWindow:[[self exportManager] window]];
+	SMEAlbum *newAlbum = [SMEAlbum album];
+	NSString *albumTemplateId = [[NSUserDefaults smugMugUserDefaults] objectForKey:SMEAlbumTemplateID];
+	if(albumTemplateId != nil) {
+		NSEnumerator *albumTemplateEnumerator = [albumTemplates objectEnumerator];
+		SMEAlbumTemplate *albumTemplate;
+		while(albumTemplate = [albumTemplateEnumerator nextObject]) {
+			if ([albumTemplateId isEqualToString:[albumTemplate albumId]]) {
+				[newAlbum setAlbumTemplate:albumTemplate];
+				break;
+			}
+		}
+	}
+	[albumEditController showAlbumCreateSheet:newAlbum delegate:self forWindow:[[self exportManager] window]];
 }
 
 -(void)createAlbum:(SMEAlbum *)album {
@@ -889,8 +925,9 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 	[[self albumEditController] setIsBusy:NO];
 
 	if([resp wasSuccessful]) {
+		[albumToSelect release];
+		albumToSelect = [[SMEConciseAlbum alloc] initWithDictionary:[[resp decodedResponse] objectForKey:@"Album"]];
 		[albumEditController closeSheet];
-		[albumsArrayController setSelectionIndex:0]; // default to selecting the new album which should be album 0
 
 		// refresh list of albums
 		[[self session] fetchAlbumsWithTarget:self callback:@selector(albumFetchComplete:)];
@@ -1098,6 +1135,7 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 		if([self subcategories] != nil)
 			[self populateCategorySubCategories];
 	}
+	[self checkPostLoginTasksComplete];
 }
 
 -(void)subcategoryFetchDidComplete:(SMEResponse *)resp {
@@ -1114,6 +1152,18 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 		if([self categories] != nil)
 			[self populateCategorySubCategories];
 	}	
+	[self checkPostLoginTasksComplete];
+}
+
+#pragma mark Album Template Get
+
+-(void)albumTemplateFetchDidComplete:(SMEResponse *)resp {
+	if(! [resp wasSuccessful]) {
+		[self presentError:[resp error]];
+		return;
+	}
+	[self setAlbumTemplates:[resp smData]];
+	[self checkPostLoginTasksComplete];
 }
 
 #pragma mark Upload Methods
@@ -1733,6 +1783,17 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 	if(v != subcategories) {
 		[subcategories release];
 		subcategories = [v retain];
+	}
+}
+
+-(NSArray *)albumTemplates {
+	return albumTemplates;
+}
+
+-(void)setAlbumTemplates:(NSArray *)t {
+	if(albumTemplates != t) {
+		[albumTemplates release];
+		albumTemplates = [t retain];
 	}
 }
 

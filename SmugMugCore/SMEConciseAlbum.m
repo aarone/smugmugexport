@@ -76,6 +76,10 @@
 	return [[[self albumData] objectForKey:@"id"] stringValue];
 }
 
+-(NSString *)lastUpdated {
+	return [[self albumData] objectForKey:@"LastUpdated"];
+}
+
 -(NSDictionary *)categoryDict {
 	return [[self albumData] objectForKey:@"Category"];
 }
@@ -128,6 +132,10 @@
 	
 	return [[self albumId] isEqual:[anotherObject albumId]] &&
 	[[self albumKey] isEqual:[anotherObject albumKey]];
+}
+
+-(NSComparisonResult)compareLastUpdated:(SMEConciseAlbum *)other {
+	return [[other lastUpdated] compare:[self lastUpdated]];
 }
 
 -(SMEAlbumRef *)ref {

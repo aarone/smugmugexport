@@ -14,6 +14,7 @@
 	IBOutlet NSWindow *newAlbumSheet;
 	IBOutlet NSArrayController *categoriesArrayController;
 	IBOutlet NSArrayController *subCategoriesArrayController;
+	IBOutlet NSArrayController *albumTemplatesArrayController;
 	IBOutlet NSObjectController *albumInfoController;
 	
 	SMEAlbum *album;
