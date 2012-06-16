@@ -142,7 +142,7 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 +(SMESession *)session {
-	NSURL *defaultBaseUrl = [NSURL URLWithString:@"https://api.smugmug.com/services/api/json/1.2.2/"];
+	NSURL *defaultBaseUrl = [NSURL URLWithString:@"https://api.smugmug.com/services/api/json/1.2.0/"];
 	return [[[[self class] alloc] initWithAPIBaseURL:defaultBaseUrl] autorelease];
 }
 
