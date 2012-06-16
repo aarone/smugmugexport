@@ -80,6 +80,10 @@
 	return [[self albumData] objectForKey:@"LastUpdated"];
 }
 
+-(NSURL *)url {
+    return [NSURL URLWithString:[[self albumData] objectForKey:@"URL"]];
+}
+
 -(NSDictionary *)categoryDict {
 	return [[self albumData] objectForKey:@"Category"];
 }

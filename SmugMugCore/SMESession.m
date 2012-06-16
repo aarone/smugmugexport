@@ -268,10 +268,11 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 	// this allows smugmug data to be up to date for the next read wrt the last right 
 	[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:AlbumRefreshDelay]];
 		
+    NSArray *extras = [NSArray arrayWithObjects: @"LastUpdated", @"URL", nil];
 	[self invokeMethodAndTransform:[self baseRequestUrl]
 					   requestDict:[NSDictionary dictionaryWithObjectsAndKeys:
 									@"smugmug.albums.get", @"method",
-									@"LastUpdated", @"Extras",
+									[extras componentsJoinedByString:@","], @"Extras",
 									[self sessionID], @"SessionID", nil]
 						  callback:callback
 							target:target

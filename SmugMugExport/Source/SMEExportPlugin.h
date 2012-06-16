@@ -40,7 +40,6 @@
 	NSString *loginSheetStatusMessage;
 	NSImage *currentThumbnail;
 	NSString *imageUploadProgressText; // below the thumbnail..
-	NSURL *uploadSiteUrl;
 	
 	SMEGrowlDelegate *growlDelegate;
 	SMESession *session;
@@ -62,8 +61,6 @@
 	BOOL isLoginSheetDismissed;
 	BOOL uploadCancelled;
 	BOOL errorAlertSheetIsVisisble;
-	BOOL siteUrlHasBeenFetched;
-	BOOL browserOpenedInGallery;
 	BOOL isDeletingAlbum;
 	BOOL isUpdateInProgress;
 	int imagesUploaded;

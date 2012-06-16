@@ -7,7 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "SMERequest.h";
+#import "SMERequest.h"
 
 @class SMEUploadRequest, SMEAlbumRef, SMEImage, SMESession;
 

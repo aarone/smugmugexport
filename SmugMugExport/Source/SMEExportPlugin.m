@@ -101,12 +101,6 @@
 -(NSString *)loginSheetStatusMessage;
 -(void)setLoginSheetStatusMessage:(NSString *)m;
 
--(BOOL)siteUrlHasBeenFetched;
--(void)setSiteUrlHasBeenFetched:(BOOL)v;
-
--(NSURL *)uploadSiteUrl;
--(void)setUploadSiteUrl:(NSURL *)url;
-
 -(SMEGrowlDelegate *)growlDelegate;
 -(void)setGrowlDelegate:(SMEGrowlDelegate *)aDelegate;
 
@@ -121,9 +115,6 @@
 -(void)setIsUploading:(BOOL)v;
 
 -(void)beginAlbumDelete;
-
--(BOOL)browserOpenedInGallery;
--(void)setBrowserOpenedInGallery:(BOOL)v;	
 
 -(NSString *)imageUploadProgressText;
 -(void)setImageUploadProgressText:(NSString *)text;
@@ -251,7 +242,6 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	[self setAlbumEditController:[SMEAlbumEditController controller]];
 	[albumEditController setDelegate:self];
 	[self setLoginAttempted:NO];
-	[self setSiteUrlHasBeenFetched:NO];
 	[self setImagesUploaded:0];
 	[self setIsUploading:NO];
 	[self resetAlbumUrlFetchAttemptCount];
@@ -275,7 +265,6 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	[[self albums] release];
 	[[self albumEditController] release];
 	[[self postLogoutInvocation] release];
-	[[self uploadSiteUrl] release];
 	[[self session] release];
 	[[self username] release];
 	[[self password] release];
@@ -1061,45 +1050,8 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 
 #pragma mark Image Url Fetching
 
--(void)imageUrlFetchDidCompleteForImageRef:(SMEResponse *)resp {
- 
-	SMEImageURLs *urls = [resp smData];
-	
-	if(![resp wasSuccessful] && [self albumUrlFetchAttemptCount] < AlbumUrlFetchRetryCount) {
-		[self incrementAlbumUrlFetchAttemptCount];
-	
-		// try again
-//		[[self session] performSelector:@selector(fetchImageUrls:) 
-//							  withObject:ref
-//							  afterDelay:2.0
-//								 inModes:[NSArray arrayWithObjects: NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];		
-		return;
-	}
-	
-	NSString *siteUrlString = [urls albumURL];
-	if(siteUrlString != nil) {
-		[self setUploadSiteUrl:[NSURL URLWithString:siteUrlString]];
-		[self setSiteUrlHasBeenFetched:YES];
-	} else {
-		[self setSiteUrlHasBeenFetched:NO];
-	}
-	
-	/* it's possible that we're done uploading the images for an album and *then* we
-		receive this callback notifying us of the url for the album.  In that case,
-	   we open the gallery in the browser. Otherwise, this happens when the upload
-		completes
-		*/
-	if(![self isUploading] && 
-	   [self uploadSiteUrl] != nil &&
-	   ![self browserOpenedInGallery] &&
-	   [[[NSUserDefaults smugMugUserDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue]) {
-		[self openLastGalleryInBrowser];
-	}
-}
-
 -(void)openLastGalleryInBrowser {
-	[[NSWorkspace sharedWorkspace] openURL:[self uploadSiteUrl]];
-	[self setBrowserOpenedInGallery:YES];
+	[[NSWorkspace sharedWorkspace] openURL:[[self selectedAlbum] url]];
 }
 
 #pragma mark Category Get
@@ -1259,7 +1211,6 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 		return;
 	}
 	
-	[self setBrowserOpenedInGallery:NO];
 	[self setImagesUploaded:0];
 	[self setFileUploadProgress:[NSNumber numberWithInt:0]];
 	[self setSessionUploadProgress:[NSNumber numberWithInt:0]];
@@ -1283,8 +1234,6 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 	
 	[img setScalesWhenResized:YES];
 	[self setCurrentThumbnail:img];
-	[self setUploadSiteUrl:nil];
-	[self setSiteUrlHasBeenFetched:NO];
 	
 	SMEImage *imgToUpload = [self nextImage];
 	[[self session] uploadImage:imgToUpload
@@ -1343,16 +1292,14 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 	
 	// if this really bothers you you can set your preferences to not open the page in the browser
 	if(wasSuccessful &&
-		[[[NSUserDefaults smugMugUserDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue] &&
-			[self uploadSiteUrl] != nil &&  ![self browserOpenedInGallery]) {
+		[[[NSUserDefaults smugMugUserDefaults] valueForKey:SMOpenInBrowserAfterUploadCompletion] boolValue])
 		[self openLastGalleryInBrowser];
-	}
-	
+
 	if(wasSuccessful && [[[NSUserDefaults smugMugUserDefaults] valueForKey:SMCloseExportWindowAfterUploadCompletion] boolValue])
 		[[self exportManager] cancelExportBeforeBeginning];
 	
 	if(wasSuccessful)
-		[[self growlDelegate] notifyUploadCompleted:[self imagesUploaded] uploadSiteUrl:[[self uploadSiteUrl] description]];
+		[[self growlDelegate] notifyUploadCompleted:[self imagesUploaded] uploadSiteUrl:[[[self selectedAlbum] url] description]];
 }
 
 -(void)uploadDidFail:(SMEResponse *)resp {
@@ -1407,13 +1354,6 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 		[self performUploadCompletionTasks:NO];
 		[self presentError:[resp error]];
 		return;
-	}
-	
-	SMEImageRef *ref = [resp smData];
-	if(![self siteUrlHasBeenFetched]) {
-		[self resetAlbumUrlFetchAttemptCount];
-		[self setSiteUrlHasBeenFetched:NO];
-		[[self session] fetchImageURLs:ref withTarget:self callback:@selector(imageUrlFetchDidCompleteForImageRef:)];
 	}
 
 	[[self growlDelegate] notifyImageUploaded:theImage];
@@ -1519,25 +1459,6 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 	}
 }
 
--(BOOL)siteUrlHasBeenFetched {
-	return siteUrlHasBeenFetched;
-}
-
--(void)setSiteUrlHasBeenFetched:(BOOL)v {
-	siteUrlHasBeenFetched = v;
-}
-
--(NSURL *)uploadSiteUrl {
-	return uploadSiteUrl;
-}
-
--(void)setUploadSiteUrl:(NSURL *)url {
-	if(uploadSiteUrl != url) {
-		[uploadSiteUrl release];	
-		uploadSiteUrl = [url retain];
-	}
-}
-
 -(SMEGrowlDelegate *)growlDelegate {
 	if(![self isGrowlLoaded])
 		return nil;
@@ -1574,14 +1495,6 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 
 -(void)setLoginAttempted:(BOOL)v {
 	loginAttempted = v;
-}
-
--(BOOL)browserOpenedInGallery {
-	return browserOpenedInGallery;
-}
-
--(void)setBrowserOpenedInGallery:(BOOL)v {
-	browserOpenedInGallery = v;
 }
 
 -(BOOL)isUploading {

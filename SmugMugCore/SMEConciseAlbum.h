@@ -33,6 +33,7 @@
 -(void)setCategory:(SMECategory *)cat;
 -(SMECategory *)category;
 -(void)setSubCategory:(SMESubCategory *)cat;
+-(NSURL *)url;
 
 -(NSDictionary *)toDictionary;
 

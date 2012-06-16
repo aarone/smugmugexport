@@ -8,7 +8,7 @@
 
 #import "SMEUploadRequest.h"
 #import "SMESmugMugCore.h"
-
+#include <netdb.h>
 
 @interface SMEUploadRequest (Private)
 
