@@ -8,13 +8,12 @@
 
 
 #import <Cocoa/Cocoa.h>
-#import <Growl/Growl.h>
 #import <WebKit/WebKit.h>
 
 #import "ExportPluginProtocol.h"
 #import "SMESession.h"
 
-@class SMESession, ExportMgr, SMEAccountManager, SMEAlbumEditController, SMEAccountInfo, SMEGrowlDelegate, SMEAccountInfo, SMEConciseAlbum;
+@class SMESession, ExportMgr, SMEAccountManager, SMEAlbumEditController, SMEAccountInfo, SMEAccountInfo, SMEConciseAlbum;
 @protocol ExportPluginProtocol, SMESessionDelegate;
 
 @interface SMEExportPlugin : NSObject <ExportPluginProtocol, SMEUploadObserver> {
@@ -41,7 +40,6 @@
 	NSImage *currentThumbnail;
 	NSString *imageUploadProgressText; // below the thumbnail..
 	
-	SMEGrowlDelegate *growlDelegate;
 	SMESession *session;
 	
 	// smugmug state

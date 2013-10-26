@@ -18,7 +18,6 @@
 #import "SMEUserDefaultsAdditions.h"
 #import "SMEDataAdditions.h"
 
-#import "SMEGrowlDelegate.h"
 #import "SMESmugMugCore.h"
 
 
@@ -101,9 +100,6 @@
 -(NSString *)loginSheetStatusMessage;
 -(void)setLoginSheetStatusMessage:(NSString *)m;
 
--(SMEGrowlDelegate *)growlDelegate;
--(void)setGrowlDelegate:(SMEGrowlDelegate *)aDelegate;
-
 -(void)setSelectedAccount:(NSString *)account;
 -(NSString *)selectedAccount;
 -(SMEAlbum *)selectedAlbum;
@@ -159,15 +155,7 @@
 
 -(NSError *)smugmugError:(NSString *)error code:(int)code;
 
--(NSString *)GrowlFrameworkPath;
--(BOOL)isGrowlLoaded;
--(void)loadGrowl;
--(void)unloadGrowl;
 -(BOOL)isFrameworkLoaded:(NSString *)fwPath;
--(NSString *)JSONFrameworkPath;
--(BOOL)isJSONLoaded;
--(void)loadJSON;
--(void)unloadJSON;
 -(void)unloadFramework:(NSString *)fwPath;
 
 -(BOOL)pluginPaneIsVisible;
@@ -231,10 +219,7 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 		return nil; // fail!
 	
 	exportManager = exportMgr;
-	[self loadJSON];
 	[self setIsLoginSheetDismissed:NO];
-	[self setGrowlDelegate:[SMEGrowlDelegate growlDelegate]];
-	[self loadGrowl];
 
 	[NSBundle loadNibNamed: @"SmugMugExport" owner:self];
 	[self setAccountManager:[SMEAccountManager accountManager]];
@@ -257,9 +242,6 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 }
 
 -(void)dealloc {
-	[self unloadGrowl];
-	[self unloadJSON];
-	[[self growlDelegate] release];
 	[[self subcategories] release];
 	[[self categories] release];
 	[[self albums] release];
@@ -759,7 +741,6 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	[[self accountManager] addAccount:[self username] withPassword:[self password]];
 	[self setSelectedAccount:[self username]];
 	[NSApp endSheet:loginPanel];
-	[[self growlDelegate] notifyLogin:[self selectedAccount]];
 }
 
 
@@ -804,7 +785,6 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 
 #pragma mark Logout 
 -(void)logoutDidComplete:(SMEResponse *)resp {
-	[[self growlDelegate] notifyLougout:[self selectedAccount]];
 	[self setAlbums:[NSArray array]];
 	[self setAccountInfo:nil];
 	[self setIsLoggedIn:NO];
@@ -1298,12 +1278,9 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 	if(wasSuccessful && [[[NSUserDefaults smugMugUserDefaults] valueForKey:SMCloseExportWindowAfterUploadCompletion] boolValue])
 		[[self exportManager] cancelExportBeforeBeginning];
 	
-	if(wasSuccessful)
-		[[self growlDelegate] notifyUploadCompleted:[self imagesUploaded] uploadSiteUrl:[[[self selectedAlbum] url] description]];
 }
 
 -(void)uploadDidFail:(SMEResponse *)resp {
-	[[self growlDelegate] notifyUploadError:[[resp error] localizedDescription]];
 	[self performUploadCompletionTasks:NO];
 //	NSString *errorString = NSLocalizedString(@"Image upload failed (%@).", @"Error message to display when upload fails.");
 	[self presentError:[resp error]];
@@ -1356,7 +1333,6 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 		return;
 	}
 
-	[[self growlDelegate] notifyImageUploaded:theImage];
 	[self uploadNextImage];
 }
 
@@ -1456,20 +1432,6 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 	if(currentThumbnail != d) {
 		[currentThumbnail release];
 		currentThumbnail = [d retain];
-	}
-}
-
--(SMEGrowlDelegate *)growlDelegate {
-	if(![self isGrowlLoaded])
-		return nil;
-	
-	return growlDelegate;
-}
-
--(void)setGrowlDelegate:(SMEGrowlDelegate *)aDelegate {
-	if(aDelegate != growlDelegate) {
-		[growlDelegate release];
-		growlDelegate = [aDelegate retain];
 	}
 }
 
@@ -1835,49 +1797,11 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 	return NO;
 }
 
--(NSString *)JSONFrameworkPath {
-	return [[[NSBundle bundleForClass:[self class]] privateFrameworksPath] stringByAppendingPathComponent:@"JSON.framework"];
-}
-
 -(BOOL)isFrameworkLoaded:(NSString *)fwPath {
 	NSBundle *frameworkBundle = [NSBundle bundleWithPath:fwPath];
 	return frameworkBundle != nil && [frameworkBundle isLoaded];
 }
 
--(BOOL)isGrowlLoaded {
-	return [self isFrameworkLoaded:[self GrowlFrameworkPath]];
-}
-
--(BOOL)isJSONLoaded {
-	return [self isFrameworkLoaded:[self JSONFrameworkPath]];
-}
-
--(void)loadJSON {
-	if([self isJSONLoaded]) {
-		return;
-	}
-	
-	NSBundle *jsonBundle = [NSBundle bundleWithPath:[self JSONFrameworkPath]];
-	if(jsonBundle)
-		[jsonBundle load];
-}
-
--(NSString *)GrowlFrameworkPath {
-	return [[[NSBundle bundleForClass:[self class]] privateFrameworksPath] stringByAppendingPathComponent:@"Growl.framework"];
-}
-
--(void)loadGrowl {
-	if([self isGrowlLoaded])
-		return;
-		
-	NSBundle *growlBundle = [NSBundle bundleWithPath:[self GrowlFrameworkPath]];
-	if (growlBundle && [growlBundle load]) {
-		// Register ourselves as a Growl delegate
-		[GrowlApplicationBridge setGrowlDelegate:[self growlDelegate]];
-	} else {
-		NSLog(@"Could not load Growl.framework");
-	}
-}
 
 -(void)unloadFramework:(NSString *)fwPath {
 //	if(![self isFrameworkLoaded:fwPath])
@@ -1889,9 +1813,5 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 //		[bundle unload];
 }
 
-
--(void)unloadJSON {
-	[self unloadFramework:[self JSONFrameworkPath]];
-}
 
 @end
