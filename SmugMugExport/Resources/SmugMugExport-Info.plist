@@ -14,16 +14,16 @@
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.12</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>17</string>
+	<string>18</string>
 	<key>CSResourcesFileMapped</key>
 	<string>yes</string>
 	<key>NSMainNibFile</key>
 	<string>SmugMugExport</string>
-	<key>CFBundleShortVersionString</key>
-	<string>1.0.11</string>
 	<key>NSPrincipalClass</key>
 	<string>SMEExportPlugin</string>
 </dict>
