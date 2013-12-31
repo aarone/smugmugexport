@@ -1,3 +1,3 @@
 #!/bin/bash
 
-agvtool next-version -all
+cd ../../ && agvtool next-version -all

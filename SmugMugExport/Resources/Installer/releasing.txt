@@ -1,0 +1,17 @@
+
+this is a mess
+
+* increment version property 'Bundle versions string, short' in SmugMugExport-Info.plist
+* cd SmugMugExport/Resources && ./bump-version.sh
+* cd $PROJECT_HOME 
+* xcodebuild
+** should build the plugin in $PROJECT_HOME/build/Release
+* open SmugMugExport/Resources/Installer/SmugMugExport.pkgproj
+** use this to create an installer and open that file http://s.sudre.free.fr/Software/Packages/about.html
+* 'build' in Packages
+** creates an .mpkg artifact in SmugMugExport/Resources/Installer/build
+* compress (right-click) the .mpkg file
+* rename to match form SmugMugExport-1.0.13.zip replacing the version as necessary
+* upload to S3
+* update versionInfo.plist on S3 to point to the new version so that the in-app update mechanism will see that a new version is available for download.
+
