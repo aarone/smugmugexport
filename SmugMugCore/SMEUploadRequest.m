@@ -154,7 +154,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 }
 
 -(NSString *)cleanKeywords:(NSArray *)theKeywords {
-	return [NSString stringWithFormat:@"\"%@\"", [theKeywords componentsJoinedByString:@"\" \""]];
+	return [NSString stringWithFormat:@"%@", [theKeywords componentsJoinedByString:@", "]];
 }
 
 -(void)beginUpload {
