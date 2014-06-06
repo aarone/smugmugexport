@@ -184,6 +184,7 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Version"), (CFStringRef)[self uploadApiVersion]);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-ResponseType"), (CFStringRef)[self uploadResponseType]);	
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-FileName"), (CFStringRef)[self cleanNewlines:[[self image] title]]);
+	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-Title"), (CFStringRef)[self cleanNewlines:[[self image] title]]);
 	CFHTTPMessageSetHeaderFieldValue(myRequest, CFSTR("X-Smug-AlbumID"), (CFStringRef)[[self albumRef] albumId]);
 	
 	if(!IsEmpty([[self image] latitude]))
