@@ -226,13 +226,19 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 	}
 	[self setResponse:[NSMutableData data]];
 	
-	CFReadStreamOpen(readStream);
+    if(!CFReadStreamOpen(readStream)) {
+        CFStreamError myErr = CFReadStreamGetError(readStream);
+        CFRelease(readStream);
+        readStream = NULL;
+        NSLog(@"Error opening stream: %d", myErr.error);
+        [pool release];
+        return;
+    }
 	
 	[NSThread detachNewThreadSelector:@selector(beingUploadProgressTracking) toTarget:self withObject:nil];
 	
 	// CFRunLoop is not toll-free bridge to NSRunLoop
-	while ([self isUploading])
-		CFRunLoopRun();
+	CFRunLoopRun();
 	
 	[pool release];
 }
@@ -248,11 +254,6 @@ static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType t
 		CFReadStreamClose(readStream);
 		CFRelease(readStream);
 		readStream = NULL;
-	}
-	
-	if(uploadRunLoop != NULL) {
-		CFRunLoopStop(uploadRunLoop);
-		uploadRunLoop = NULL;
 	}
 	
 	[self setResponse:nil];
