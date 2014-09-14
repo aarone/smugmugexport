@@ -28,7 +28,7 @@
 	return [[[self class] alloc] initWithId:anId key:aKey];
 }
 
--(unsigned int)hash {
+-(NSUInteger)hash {
 	return 31 * [[self albumId] hash] + [[self albumKey] hash];
 }
 

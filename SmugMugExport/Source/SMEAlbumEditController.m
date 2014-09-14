@@ -43,10 +43,9 @@
 	[super dealloc];
 }
 
-+(void)initialize {
-	[self setKeys:[NSArray arrayWithObject:@"isEditing"] triggerChangeNotificationsForDependentKey:@"albumActionButtonText"];
++(NSSet *)keyPathsForValuesAffectingAlbumActionButtonText {
+    return [NSSet setWithObject: @"isEditing"];
 }
-
 	
 -(void)setDelegate:(id)aDelegate {
 	delegate = aDelegate;

@@ -16,7 +16,6 @@
 }
 
 -(NSDictionary *)decodedResponse:(NSData *)smResponse {
-	NSString *responseString = [[[NSString alloc] initWithData:smResponse encoding:NSUTF8StringEncoding] autorelease];
     return [[JSONDecoder decoder] objectWithData:smResponse];
 }
 

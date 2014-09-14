@@ -15,7 +15,7 @@
 	return [[self albumData] objectForKey:@"AlbumTemplateName"];
 }
 
--(unsigned int)hash {
+-(NSUInteger)hash {
 	return [[self albumId] hash];
 }
 

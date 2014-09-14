@@ -126,7 +126,7 @@
 	return albumData;
 }
 
--(unsigned int)hash {
+-(NSUInteger)hash {
 	return 31 * [[self albumId] hash] + [[self albumKey] hash];
 }
 

@@ -36,7 +36,7 @@
 	return [[[[self class] alloc] initWithDictionary:aDict] autorelease];
 }
 
--(unsigned int)hash {
+-(NSUInteger)hash {
 	return 31 * [[self imageId] hash] + [[self imageKey] hash];
 }
 

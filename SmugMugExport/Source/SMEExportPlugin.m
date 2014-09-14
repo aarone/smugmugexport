@@ -202,7 +202,6 @@ NSString *SMECaptionFormatString = @"SMECaptionFormatString";
 NSString *SMEUploadToVault = @"SMEUploadToVault";
 NSString *SMEAlbumTemplateID = @"SMEAlbumTemplateID";
 
-static const int AlbumUrlFetchRetryCount = 5;
 static const int SMDefaultScaledHeight = 2592;
 static const int SMDefaultScaledWidth = 2592;
 static const int SMDefaultScaledMaxDimension = 2592;
@@ -317,11 +316,18 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	[defaultsDict setObject:no forKey:SMEUploadToVault];
 	
 	[[NSUserDefaults smugMugUserDefaults] registerDefaults:defaultsDict];
-	
-	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.accounts"] triggerChangeNotificationsForDependentKey:@"accounts"];
-	[[self class] setKeys:[NSArray arrayWithObject:@"accountManager.selectedAccount"] triggerChangeNotificationsForDependentKey:@"selectedAccount"];
-	[[self class] setKeys:[NSArray arrayWithObject:@"isLoggedIn"]
-		triggerChangeNotificationsForDependentKey:@"loginLogoutToggleButtonText"];
+}
+
++(NSSet *)keyPathsForValuesAffectingAccounts {
+    return [NSSet setWithObject: @"accountManager.accounts"];
+}
+
++(NSSet *)keyPathsForValuesAffectingSelectedAccount {
+    return [NSSet setWithObject: @"accountManager.selectedAccount"];
+}
+
++(NSSet *)keyPathsForValuesAffectingLoginLogoutToggleButtonText {
+    return [NSSet setWithObject: @"isLoggedIn"];
 }
 
 -(void)awakeFromNib {
@@ -1212,7 +1218,6 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 		return;
 	}
 	
-	[img setScalesWhenResized:YES];
 	[self setCurrentThumbnail:img];
 	
 	SMEImage *imgToUpload = [self nextImage];
@@ -1317,7 +1322,6 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 		[self setSessionUploadStatusText:[NSString stringWithFormat:NSLocalizedString(@"Uploading image %d of %d", @"Image upload progress text"), [self imagesUploaded] + 1, [[self exportManager] imageCount]]];
 		NSString *thumbnailPath = [exportManager thumbnailPathAtIndex:[self imagesUploaded]];
 		NSImage *img = [[[NSImage alloc] initWithData:[NSData dataWithContentsOfFile: thumbnailPath]] autorelease];
-		[img setScalesWhenResized:YES];
 		[self setCurrentThumbnail:img];
 		
 		[[self session] uploadImage:[self nextImage]
@@ -1795,22 +1799,6 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 		return YES;
 	
 	return NO;
-}
-
--(BOOL)isFrameworkLoaded:(NSString *)fwPath {
-	NSBundle *frameworkBundle = [NSBundle bundleWithPath:fwPath];
-	return frameworkBundle != nil && [frameworkBundle isLoaded];
-}
-
-
--(void)unloadFramework:(NSString *)fwPath {
-//	if(![self isFrameworkLoaded:fwPath])
-//		return;
-
-//	// NSBundle unload is strictly >= 10.5
-//	NSBundle *bundle = [NSBundle bundleWithPath:fwPath];
-//	if (bundle)
-//		[bundle unload];
 }
 
 

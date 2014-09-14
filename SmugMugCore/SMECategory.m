@@ -38,8 +38,8 @@
 	return [self sourceData];
 }
 
--(unsigned int)hash {
-	return 31 * [[[self sourceData] objectForKey:@"id"] hash];
+-(NSUInteger)hash {
+	return (NSUInteger)(31 * [[[self sourceData] objectForKey:@"id"] hash]);
 }
 
 -(BOOL)isEqual:(id)anotherObject {
