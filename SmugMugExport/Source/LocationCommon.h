@@ -31,15 +31,6 @@
 + (void)assignLocationForiegnKeyDict:(id)fp8 toPhoto:(struct IPPhotoInfo *)fp12;
 + (void)recomputeLocationBoundsForEvent:(struct IPRoll *)fp8;
 + (void)determineLocationForEventIfNecessary:(struct IPRoll *)fp8;
-+ (void)determineLocationForEvent:(struct IPRoll *)fp8 photos:(struct IPPhotoList *)fp12;
-+ (int)predominantCountryForPhotos:(struct IPPhotoList *)fp8;
-+ (int)predominantProvinceForPhotos:(struct IPPhotoList *)fp8;
-+ (int)predominantCountyForPhotos:(struct IPPhotoList *)fp8;
-+ (int)predominantCityForPhotos:(struct IPPhotoList *)fp8;
-+ (int)predominantNeighborhoodForPhotos:(struct IPPhotoList *)fp8;
-+ (int)predominantAOIForPhotos:(struct IPPhotoList *)fp8;
-+ (int)predominantPOIForPhotos:(struct IPPhotoList *)fp8;
-+ (BOOL)gpsDataExistsForPhotos:(struct IPPhotoList *)fp8;
 + (id)queryStringByParsingString:(id)fp8;
 + (id)userDefaultCity;
 

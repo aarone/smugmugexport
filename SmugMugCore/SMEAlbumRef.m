@@ -15,17 +15,18 @@
 	if((self = [super init]) == nil)
 		return nil;
 	
-	albumId = [anId retain];
-	albumKey = [key retain];
 	return self;
 }
 
 +(SMEAlbumRef *)refWithRef:(SMEAlbumRef *)ref {
-	return [SMEAlbumRef refWithId:[ref albumId] key:[ref albumKey]];
+    return [SMEAlbumRef refWithId:[ref albumId] key:[ref albumKey]];
 }
 
 +(SMEAlbumRef *)refWithId:(NSString *)anId key:(NSString *)aKey {
-	return [[[self class] alloc] initWithId:anId key:aKey];
+    SMEAlbumRef *ref = [[[[self class] alloc] init] autorelease];
+    [ref setAlbumId:anId];
+    [ref setAlbumKey:aKey];
+    return ref;
 }
 
 -(NSUInteger)hash {
@@ -55,8 +56,22 @@
 	return albumId;
 }
 
+-(void)setAlbumId: (NSString *)v {
+    if (v != albumId) {
+        [albumId release];
+        albumId = [v retain];
+    }
+}
+
 -(NSString *)albumKey {
 	return albumKey;
+}
+
+-(void)setAlbumKey:(NSString *)v {
+    if (v != albumKey) {
+        [albumKey release];
+        albumKey = [v retain];
+    }
 }
 
 @end

@@ -12,12 +12,14 @@ static SMEUserDefaults *sharedSMUserDefaults = nil;
 
 @implementation SMEUserDefaults
 
++(void)initialize {
+    if (self != [SMEUserDefaults class])
+        return;
+        
+    sharedSMUserDefaults = [[self alloc] init];
+}
+
 +(SMEUserDefaults *)smugMugDefaults {
-	@synchronized(self) {
-		if(sharedSMUserDefaults == nil) {
-			[[self alloc] init];
-		}
-	}
 	return sharedSMUserDefaults;
 }
 

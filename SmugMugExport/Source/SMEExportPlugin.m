@@ -7,8 +7,6 @@
 //
 
 #import "SMEExportPlugin.h"
-#import "iPhotoCommon.h"
-#import "LocationCommon.h"
 #import "ExportPluginProtocol.h"
 #import "ExportMgr.h"
 #import "SMEAlbumEditController.h"
@@ -211,6 +209,7 @@ static const NSTimeInterval SMDefaultUpdateCheckInterval = 24.0*60.0*60.0;
 NSString *defaultRemoteVersionInfo = @"http://s3.amazonaws.com/smugmugexport/versionInfo.plist";
 NSString *SMEDefaultCaptionFormat = @"%caption";
 
+
 @implementation SMEExportPlugin
 
 -(id)initWithExportImageObj:(id)exportMgr {
@@ -397,6 +396,8 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 	[alert release];
 }
 
+
+
 #pragma mark Software Update
 -(NSDictionary *)remoteVersionInfo {
 	NSURL *versionInfoLocation = [NSURL URLWithString:[[self defaults] objectForKey:SMRemoteInfoURL]];
@@ -404,13 +405,22 @@ NSString *SMEDefaultCaptionFormat = @"%caption";
 		NSLog(@"Cannot find a url for remote version.");
 		return nil;
 	}
-	
-	NSData *remoteData = [NSData dataFromModGzUrl:versionInfoLocation];
-	NSDictionary *remoteInfo = [NSPropertyListSerialization propertyListFromData:remoteData
-																mutabilityOption:NSPropertyListImmutable
-																		  format:NULL
-																errorDescription:nil];
-	return remoteInfo;
+    NSURLRequest *request = [NSURLRequest requestWithURL:versionInfoLocation];
+    NSURLResponse *response = nil;
+    NSError *error = nil;
+    
+    NSData *remoteData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+
+    if (!error) {
+        NSDictionary *remoteInfo = [NSPropertyListSerialization propertyListFromData:remoteData
+                                                                    mutabilityOption:NSPropertyListImmutable
+                                                                              format:NULL
+                                                                    errorDescription:nil];
+        return remoteInfo;
+    } else {
+        NSLog(@"Error fetching remote version info %@", error);
+        return nil;
+    }
 }
 
 -(void)displayUserUpdatePolicy {
@@ -1158,32 +1168,6 @@ decisionListener:(id<WebPolicyDecisionListener>)listener {
 									keywords:[[self exportManager] imageKeywordsAtIndex:[self	imagesUploaded]]
 								   imageData:srcData
 							   thumbnailPath:[[self exportManager] thumbnailPathAtIndex:[self imagesUploaded]]];
-
-	// disabled by default
-  BOOL includeLocations = [[[NSUserDefaults smugMugUserDefaults] objectForKey:SMEIncludeLocation] boolValue];
-
-  // iPhoto 8 knows about locations
-	if(includeLocations && [self iPhotoMajorVersion] >= 8) {
-		struct IPPhotoInfo *photoInfo = [[self exportManager] photoAtIndex:[self imagesUploaded]];
-		Class _LocationCommon = NSClassFromString(@"LocationCommon");
-		NSDictionary *location = [_LocationCommon locationDictFromPhoto:photoInfo];
-    
-    if([[location objectForKey:@"latitude"] floatValue] <= 90.0 &&
-       [[location objectForKey:@"latitude"] floatValue] >= -90.0)
-      [img setLatitude:[location objectForKey:@"latitude"]];
-    
-    if([[location objectForKey:@"longitude"] floatValue] <= 180.0 &&
-       [[location objectForKey:@"longitude"] floatValue] >= -180.0)
-      [img setLongitude:[location objectForKey:@"longitude"]];
-
-	} else if(includeLocations && [self iPhotoMajorVersion] < 8) {
-		// we get the gps data for older versions from the photo
-		CGImageSourceRef source = CGImageSourceCreateWithData( (CFDataRef) srcData, NULL);
-		NSDictionary* metadata = (NSDictionary *)CGImageSourceCopyPropertiesAtIndex(source,0,NULL);
-		NSDictionary *gpsInfo = [metadata objectForKey:@"{GPS}"];
-		[img setLatitude:[gpsInfo objectForKey:@"Latitude"]];
-		[img setLongitude:[gpsInfo objectForKey:@"Longitude"]];		
-	}
 	
 	return img;
 }

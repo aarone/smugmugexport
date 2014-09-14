@@ -151,8 +151,8 @@ static const NSTimeInterval AlbumRefreshDelay = 1.0;
 }
 
 -(void)dealloc {
-	[[self sessionID] release];
-	[[self lastUploadRequest] release];
+	[sessionID release];
+	[lastUploadRequest release];
 	
 	[super dealloc];
 }

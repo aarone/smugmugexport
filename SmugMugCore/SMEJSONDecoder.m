@@ -15,8 +15,8 @@
 	return [[[[self class] alloc] init] autorelease];
 }
 
--(NSDictionary *)decodedResponse:(NSData *)smResponse {
-    return [[JSONDecoder decoder] objectWithData:smResponse];
+-(NSMutableDictionary *)decodedResponse:(NSData *)smResponse {
+    return [[JSONDecoder decoder] mutableObjectWithData: smResponse];
 }
 
 @end

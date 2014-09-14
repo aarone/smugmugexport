@@ -124,13 +124,13 @@
 }
 
 -(void)dealloc {
-	[[self httpResponse] release];
-	[[self connection] release];
-	[[self error] release];
-	[[self mutableResponseData] release];
-	[[self requestUrl] release];
-	[[self requestDict] release];
-	[[self target] release];
+	[httpResponse release];
+	[connection release];
+	[error release];
+	[mutableResponseData release];
+	[requestUrl release];
+	[requestDict release];
+	[target release];
 	
 	[super dealloc];
 }

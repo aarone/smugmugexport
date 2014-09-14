@@ -61,9 +61,9 @@
 }
 
 -(void)dealloc {
-	[[self albumData] release];
-	[[self category] release];
-	[[self subCategory] release];
+	[albumData release];
+	[category release];
+	[subCategory release];
 	
 	[super dealloc];
 }

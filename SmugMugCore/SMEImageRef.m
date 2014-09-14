@@ -25,7 +25,7 @@
 }
 
 +(SMEImageRef *)refWithId:(NSString *)anId key:(NSString *)key {
-	return [[[self class] alloc] initWithId:anId key:key];
+	return [[[[self class] alloc] initWithId:anId key:key] autorelease];
 }
 
 -(id)initWithDictionary:(NSDictionary *)aDict {

@@ -12,6 +12,6 @@
 @protocol SMEDecoder
 
 +(NSObject<SMEDecoder> *)decoder;
--(NSDictionary *)decodedResponse:(NSData *)smResponse;
+-(NSMutableDictionary *)decodedResponse:(NSData *)smResponse;
 
 @end
